@@ -1,5 +1,18 @@
 # MonkeyGL
 
-## install cuda                                                                                      │Added pm2/current to PATH
-### linux (tested in Ubuntu)                                                                         │Added openjdk/current to PATH
-> ./install/cuda_install_ubuntu.sh
+## install cuda
+### linux (tested in Ubuntu)
+>./install/cuda_install_ubuntu.sh
+
+## build project
+### linux (tested in Ubuntu)
+>mkdir build  
+>cd build  
+>cmake ../  
+>make --> c++ shared library: libMonkeyGL.so  
+
+>cd ./pybind11_interface  
+>mkdir build  
+>cd build  
+>cmake ../  
+>make --> pybind11 shared library: pyMonkeyGL.so

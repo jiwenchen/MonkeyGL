@@ -31,5 +31,6 @@
 *.out
 *.app
 
+.vscode/
 build/
 pybind11/

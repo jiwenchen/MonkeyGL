@@ -18,8 +18,6 @@ endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# set_source_files_properties(add_kernel.cu PROPERTIES LANGUAGE CUDA)
-
 include_directories(
   ${PROJECT_SOURCE_DIR}/cuda_common
   ${CUDA_TOOLKIT_PATH}/include
@@ -29,11 +27,22 @@ link_directories(
   ${CUDA_TOOLKIT_PATH}/lib64
 )
 
-set(SRC_LIST ./core/DeviceInfo.cpp ./core/Defines.cpp ./core/Point.cpp ./core/Direction.cpp)
-# list(APPEND SRC_LIST ./core/PybindInterface.cpp)
-
-# add_subdirectory(pybind11)
-# pybind11_add_module(MonkeyGL ${SRC_LIST})
+set(SRC_LIST
+  ./core/BatchInfo.cpp
+  ./core/DataManager.cpp
+  ./core/DeviceInfo.cpp
+  ./core/Defines.cpp
+  ./core/Direction.cpp
+  ./core/IRender.cpp
+  ./core/Methods.cpp
+  ./core/PlaneDefines.cpp
+  ./core/PlaneInfo.cpp
+  ./core/Point.cpp
+  ./core/Render.cpp
+  ./core/TransferFunction.cpp
+  ./core/VolumeInfo.cpp
+  ./core/render.cu
+)
 
 add_Library(MonkeyGL SHARED ${SRC_LIST})
 
@@ -44,8 +53,6 @@ if(NOT WIN32)
     find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
     find_library(CUBLASLT_LIBRARY cublasLt ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 endif()
-
-message(${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 
 target_link_libraries(${PROJECT_NAME}
     ${CUDART_LIBRARY}
