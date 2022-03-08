@@ -48,7 +48,7 @@ namespace MonkeyGL{
 
         virtual double GetPixelSpacing(ePlaneType planeType);
 
-        virtual bool GetVRData(unsigned char* pBmpData, int nWidth, int nHeight) = 0;
+        virtual bool GetVRData(unsigned char* pVR, int nWidth, int nHeight) = 0;
 
         virtual bool GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInfo ) = 0;
 

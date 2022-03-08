@@ -7,7 +7,7 @@ using namespace MonkeyGL;
 extern "C"
 void cu_InitCommon(float fxSample, float fySample, float fzSample);
 extern "C"
-void cu_copyVolumeData( short* h_volumeData, cudaExtent volumeSize, ORIENTATION orientation);
+void cu_copyVolumeData( short* h_volumeData, cudaExtent volumeSize, Orientation orientation);
 extern "C"
 void cu_copyTransferFunc( float* pTransferFunc, int nLenTransferFunc);
 extern "C"
@@ -20,7 +20,7 @@ extern "C"
 void cu_copyAxialInfo( float *pPlaneAxial);
 
 extern "C"
-void cu_render(unsigned char* pPixelData, int nWidth, int nHeight, float fWW, float fWL, float fxTranslate, float fyTranslate, float fScale);
+void cu_render(unsigned char* pVR, int nWidth, int nHeight, float fWW, float fWL, float fxTranslate, float fyTranslate, float fScale);
 
 extern "C"
 void cu_renderAxial(short* pData, int nWidth, int nHeight, float fDepth);
@@ -354,7 +354,7 @@ void Render::PanCrossHair( int nx, int ny, ePlaneType planeType )
 	}
 }
 
-bool Render::GetVRData( unsigned char* pPixelData, int nWidth, int nHeight )
+bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 {
 #ifdef _DEBUG
 	return false;
@@ -368,7 +368,7 @@ bool Render::GetVRData( unsigned char* pPixelData, int nWidth, int nHeight )
 	NormalizeVOI();
 	cu_setVOI(m_voi_Normalize);
 
-	cu_render(pPixelData, nWidth, nHeight, m_fWW, m_fWL, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale);
+	cu_render(pVR, nWidth, nHeight, m_fWW, m_fWL, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale);
 
 	return true;
 }

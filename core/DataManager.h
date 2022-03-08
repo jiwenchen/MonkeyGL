@@ -22,7 +22,7 @@ namespace MonkeyGL {
         bool GetTransferFunction(RGBA*& pBuffer, int& nLen);
 
 
-        ORIENTATION& GetOrientation(){
+        Orientation& GetOrientation(){
             return m_orientation;
         }
 
@@ -109,7 +109,7 @@ namespace MonkeyGL {
     private:
         TransferFunction m_tf;
         VolumeInfo m_volInfo;
-        ORIENTATION m_orientation;
+        Orientation m_orientation;
         Point3d m_ptCrossHair;
         Point3d m_ptCenter;
 

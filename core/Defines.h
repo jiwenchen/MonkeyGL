@@ -52,7 +52,7 @@ namespace MonkeyGL{
         }
     };
 
-    struct ORIENTATION{
+    struct Orientation{
         bool bIsFF;
         float rx;
         float ry;
@@ -62,7 +62,7 @@ namespace MonkeyGL{
         float cz;
     } ;
 
-    struct LIGHTPARAMS{
+    struct Lightparams{
         float ka;
         float ks;
         float kd;

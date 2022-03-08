@@ -33,6 +33,7 @@ set(SRC_LIST
   ./core/DeviceInfo.cpp
   ./core/Defines.cpp
   ./core/Direction.cpp
+  ./core/Hi.cpp
   ./core/IRender.cpp
   ./core/Methods.cpp
   ./core/PlaneDefines.cpp

@@ -1,5 +1,6 @@
 #include "DeviceInfo.h"
 #include "Defines.h"
+#include "Hi.h"
 
 using namespace MonkeyGL;
 
@@ -15,6 +16,13 @@ int* get_data(){
 }
 
 PYBIND11_MODULE(pyMonkeyGL, m) {
+
+    pybind11::class_<Hi>(m, "Hi")
+        .def(pybind11::init<>())
+        .def("SetVolumeFile", &Hi::SetVolumeFile)
+        .def("SetAnisotropy", &Hi::SetAnisotropy)
+        .def("SetDirection", &Hi::SetDirection);
+
     pybind11::class_<DeviceInfo>(m, "DeviceInfo")
         .def(pybind11::init<>())
         .def("GetCount", &DeviceInfo::GetCount);
@@ -26,5 +34,4 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("Print", &RGBA::Print);
 
     m.def("get_data", &get_data, pybind11::return_value_policy::reference);
-
 }

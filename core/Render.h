@@ -28,7 +28,7 @@ namespace MonkeyGL {
         virtual bool GetCrossHairPoint(double& x, double& y, const ePlaneType& planeType);
         virtual void PanCrossHair(int nx, int ny, ePlaneType planeType);
 
-        virtual bool GetVRData(unsigned char* pPixelData, int nWidth, int nHeight);
+        virtual bool GetVRData(unsigned char* pVR, int nWidth, int nHeight);
 
         virtual bool GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInfo );
 
