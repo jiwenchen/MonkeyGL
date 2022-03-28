@@ -33,16 +33,18 @@ set(SRC_LIST
   ./core/DeviceInfo.cpp
   ./core/Defines.cpp
   ./core/Direction.cpp
-  ./core/Hi.cpp
+  ./core/HelloMonkey.cpp
   ./core/IRender.cpp
   ./core/Methods.cpp
   ./core/PlaneDefines.cpp
   ./core/PlaneInfo.cpp
   ./core/Point.cpp
   ./core/Render.cpp
+  ./core/StopWatch.cpp
   ./core/TransferFunction.cpp
   ./core/VolumeInfo.cpp
   ./core/render.cu
+  ./core/test.cu
 )
 
 add_Library(MonkeyGL SHARED ${SRC_LIST})

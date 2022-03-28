@@ -1,6 +1,8 @@
 #include "Render.h"
 #include <driver_types.h>
 #include "vector_types.h"
+#include "StopWatch.h"
+#include "TransferFunction.h"
 
 using namespace MonkeyGL;
 
@@ -38,6 +40,13 @@ void cu_renderPlane_Average(short* pData, int nWidth, int nHeight, float3 dirH, 
 
 extern "C"
 void ReleaseCuda();
+
+extern "C" 
+void cu_test_3d( short* h_volumeData, cudaExtent volumeSize );
+extern "C" 
+void cu_test_1d( float* h_volumeData, int nLen );
+extern "C"
+void cu_init_test_1d();
 
 cudaExtent m_VolumeSize;
 
@@ -356,9 +365,6 @@ void Render::PanCrossHair( int nx, int ny, ePlaneType planeType )
 
 bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 {
-#ifdef _DEBUG
-	return false;
-#endif
 	m_fVOI_xStart = 0;
 	m_fVOI_xEnd = m_VolumeSize.width - 1;
 	m_fVOI_yStart = 0;
@@ -371,6 +377,67 @@ bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 	cu_render(pVR, nWidth, nHeight, m_fWW, m_fWL, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale);
 
 	return true;
+}
+
+void Render::testcuda()
+{
+#if 0
+	int nWidth = 512;
+	int nHeight = 512;
+	int nDepth = 200;
+	short* pData = new short[nWidth*nHeight*nDepth];
+	for(int i=0; i<nWidth*nHeight*nDepth; i++){
+		pData[i] = i;
+	}
+	m_VolumeSize.width = nWidth;
+	m_VolumeSize.height = nHeight;
+	m_VolumeSize.depth = nDepth;
+
+	cu_test_3d(pData, m_VolumeSize);
+
+	delete [] pData;
+#else
+	int nLen = 100;
+	float* pData = new float[nLen*4];
+	for(int i=0; i<nLen; i++){
+		pData[4*i] = i;
+		pData[4*i+1] = i;
+		pData[4*i+2] = i;
+		pData[4*i+3] = i+1;
+	}
+
+	cu_init_test_1d();
+	cu_test_1d(pData, nLen);
+
+	for(int i=0; i<nLen; i++){
+		pData[4*i] = i+20;
+		pData[4*i+1] = i+20;
+		pData[4*i+2] = i+20;
+		pData[4*i+3] = i+20+1;
+	}
+	cu_test_1d(pData, nLen);
+
+	delete [] pData;
+#endif
+}
+
+void Render::SaveVR2BMP(const char* szFile, int nWidth, int nHeight)
+{
+	// testcuda();
+	StopWatch sw("Render::SaveVR2BMP");
+	unsigned char* pVR = new unsigned char[nWidth*nHeight*3];
+
+	{
+		StopWatch sw1("GetVRData");
+		GetVRData(pVR, nWidth, nHeight);
+	}
+
+	FILE* fp = fopen(szFile, "wb");
+	if (NULL == fp)
+		return;
+	fwrite(pVR, 1, nWidth*nHeight*3, fp);
+	fclose(fp);
+	delete [] pVR;
 }
 
 bool Render::GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInfo )

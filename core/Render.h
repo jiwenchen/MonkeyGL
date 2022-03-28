@@ -29,6 +29,7 @@ namespace MonkeyGL {
         virtual void PanCrossHair(int nx, int ny, ePlaneType planeType);
 
         virtual bool GetVRData(unsigned char* pVR, int nWidth, int nHeight);
+        virtual void SaveVR2BMP(const char* szFile, int nWidth, int nHeight);
 
         virtual bool GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInfo );
 
@@ -50,6 +51,8 @@ namespace MonkeyGL {
     private:
         void CopyTransferFunc2Device();
         void NormalizeVOI();
+
+        void testcuda();
 
     private:
         float m_fVOI_xStart;

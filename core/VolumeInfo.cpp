@@ -2,6 +2,7 @@
 #include "Defines.h"
 #include "DataManager.h"
 #include <cstring>
+#include "StopWatch.h"
 
 using namespace MonkeyGL;
 
@@ -165,6 +166,8 @@ void VolumeInfo::NormVolumeData()
 
 bool VolumeInfo::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
 {
+	StopWatch sw("VolumeInfo::LoadVolumeFile");
+
 	if (nWidth<=0 || nHeight<=0 || nDepth<=0)
 		return false;
 	FILE* fp = fopen(szFile, "rb");

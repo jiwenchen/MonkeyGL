@@ -36,6 +36,7 @@ namespace MonkeyGL{
         virtual void SetMPRType(MPRType type);
 
     // output
+        virtual short* GetVolumeData();
         virtual bool GetPlaneMaxSize(int& nWidth, int& nHeight, const ePlaneType& planeType);
         virtual bool GetPlaneData(short* pData, int& nWidth, int& nHeight, const ePlaneType& planeType);
 
@@ -49,6 +50,7 @@ namespace MonkeyGL{
         virtual double GetPixelSpacing(ePlaneType planeType);
 
         virtual bool GetVRData(unsigned char* pVR, int nWidth, int nHeight) = 0;
+        virtual void SaveVR2BMP(const char* szFile, int nWidth, int nHeight) = 0;
 
         virtual bool GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInfo ) = 0;
 

@@ -41,6 +41,11 @@ void IRender::SetTransferFunc( const std::map<int, RGBA>& rgbPoints, const std::
 	m_dataMan.SetControlPoints_TF(rgbPoints, alphaPoints);
 }
 
+short* IRender::GetVolumeData()
+{
+	return m_dataMan.GetVolumeData();
+}
+
 bool IRender::GetPlaneMaxSize( int& nWidth, int& nHeight, const ePlaneType& planeType )
 {
 	return m_dataMan.GetPlaneMaxSize(nWidth, nHeight, planeType);

@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <cstring>
 
 using namespace std;
 
@@ -53,7 +54,6 @@ namespace MonkeyGL{
     };
 
     struct Orientation{
-        bool bIsFF;
         float rx;
         float ry;
         float rz;
@@ -69,5 +69,4 @@ namespace MonkeyGL{
         float lightColor[4];
         float globalAmbient[4];
     };
-
 }
