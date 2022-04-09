@@ -203,7 +203,6 @@ bool HelloMonkey::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 std::vector<uint8_t> HelloMonkey::GetVRData_png(int nWidth, int nHeight)
 {
 	StopWatch sw("GetVRData_png");
-
 	std::vector<uint8_t> out_buf;
 	if (NULL == _pRender)
 		return out_buf;
@@ -215,36 +214,6 @@ std::vector<uint8_t> HelloMonkey::GetVRData_png(int nWidth, int nHeight)
 		if (!_pRender->GetVRData(pVR.get(), nWidth, nHeight))
 			return out_buf;
 	}
-
-	{
-		StopWatch sw("fpng");
-		fpng::fpng_encode_image_to_memory(
-			(void*)pVR.get(),
-			nWidth,
-			nHeight,
-			3,
-			out_buf
-		);
-	}
-
-	return out_buf;
-}
-
-std::string HelloMonkey::GetVRData_pngString(int nWidth, int nHeight)
-{
-	StopWatch sw("GetVRData_pngString");
-	if (NULL == _pRender)
-		return "";
-	
- 	std::shared_ptr<unsigned char> pVR (new unsigned char[nWidth*nHeight*3]);
-
-	{
-		StopWatch sw("GetVRData");
-		if (!_pRender->GetVRData(pVR.get(), nWidth, nHeight))
-			return "";
-	}
-
-	std::vector<uint8_t> out_buf;
 	{
 		StopWatch sw("fpng");
 		fpng::fpng_encode_image_to_memory(
@@ -264,6 +233,38 @@ std::string HelloMonkey::GetVRData_pngString(int nWidth, int nHeight)
 			)
 		);
 	}
+
+	return out_buf;
+}
+
+void HelloMonkey::SaveVR2Png(const char* szFile, int nWidth, int nHeight)
+{
+	std::vector<uint8_t> out_buf = GetVRData_png(nWidth, nHeight);
+
+	FILE* fp = fopen(szFile, "wb");
+	if (NULL == fp)
+	{
+		Logger::Error(
+			Logger::FormatMsg(
+				"failed to save png file [%s]",
+				szFile
+			)
+		);
+	}
+	fwrite(out_buf.data(), 1, nWidth*nHeight*3, fp);
+	fclose(fp);
+	Logger::Info(
+		Logger::FormatMsg(
+			"saved png file [%s]",
+			szFile
+		)
+	);
+}
+
+std::string HelloMonkey::GetVRData_pngString(int nWidth, int nHeight)
+{
+	StopWatch sw("GetVRData_pngString");
+	std::vector<uint8_t> out_buf = GetVRData_png(nWidth, nHeight);
 
 	std::string strBase64 = "";
 	{

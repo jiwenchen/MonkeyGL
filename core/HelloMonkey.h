@@ -63,6 +63,7 @@ namespace MonkeyGL {
         virtual bool GetVRData(unsigned char* pVR, int nWidth, int nHeight);
         virtual std::string GetVRData_pngString(int nWidth, int nHeight);
         virtual std::vector<uint8_t> GetVRData_png(int nWidth, int nHeight);
+        virtual void SaveVR2Png(const char* szFile, int nWidth, int nHeight);
 
         virtual bool GetBatchData(std::vector<short*>& vecBatchData, const BatchInfo& batchInfo);
 

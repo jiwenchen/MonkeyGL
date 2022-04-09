@@ -62,7 +62,7 @@ build_webp() {
     fi
 }
 
-build_log() {
+build_log_lib() {
     makesure_folder ${build_path}
     cd ${build_path}
     if [ ${build_type} == "Clean" ]; then
@@ -83,7 +83,7 @@ build_log() {
     fi
 }
 
-build_cpp() {
+build_cpp_lib() {
     makesure_folder ${build_path}
     cd ${build_path}
     if [ ${build_type} == "Clean" ]; then
@@ -93,6 +93,11 @@ build_cpp() {
       cmake ../ -DCMAKE_BUILD_TYPE=${build_type} -DSSE=1
       make
     fi
+}
+
+build_cpp() {
+    build_log_lib
+    build_cpp_lib
 }
 
 build_pybind() {
@@ -114,7 +119,6 @@ elif [ $1 == "log" ]; then
 elif [ $1 == "pybind" ]; then
     build_pybind
 elif [ $1 == "all" ]; then
-    build_log
     build_cpp
     build_pybind
 else

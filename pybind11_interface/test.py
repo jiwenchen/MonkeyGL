@@ -20,9 +20,9 @@ d3 = mk.Direction3d(1.0, 1.0, 1.0)
 
 hm = mk.HelloMonkey()
 # hm.SetLogLevel(mk.LogLevelWarn)
-hm.SetVolumeFile(f'{sys.path[0]}/../data/512x512x361_0.3510x0.3510x0.3_int16.raw', 512, 512, 361)
+hm.SetVolumeFile(f'{sys.path[0]}/../data/cardiac.raw', 512, 512, 361)
 hm.SetAnisotropy(0.351, 0.351, 0.3)
-# hm.SetVolumeFile(f'{sys.path[0]}/../data/512x512x1559_0.7422x0.7422x1.0_1x0x0x0x1x0x0x0x-1_int16_Ob.raw', 512, 512, 559)
+# hm.SetVolumeFile(f'{sys.path[0]}/../data/body.raw', 512, 512, 1559)
 # hm.SetAnisotropy(0.7422, 0.7422, 1.0)
 hm.SetVRWWWL(4096, 0)
 tf = {}

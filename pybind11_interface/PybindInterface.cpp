@@ -131,5 +131,6 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("GetVRArray", &HelloMonkeyInterface::GetVRArray)
         .def("GetVRData_pngString", &HelloMonkeyInterface::GetVRData_pngString)
         .def("GetVRData_png", &HelloMonkeyInterface::GetVRData_png)
+        .def("SaveVR2Png", &HelloMonkeyInterface::SaveVR2Png)
         .def("GetPlaneData_pngString", &HelloMonkeyInterface::GetPlaneData_pngString);
 }
