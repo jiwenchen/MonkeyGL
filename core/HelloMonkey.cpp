@@ -1,5 +1,32 @@
+// MIT License
+
+// Copyright (c) 2022 jiwenchen(cjwbeyond@hotmail.com)
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "HelloMonkey.h"
 #include "Render.h"
+#include <memory>
+#include "Base64.hpp"
+#include "StopWatch.h"
+#include "fpng/fpng.h"
+#include "Logger.h"
 
 using namespace MonkeyGL;
 
@@ -14,6 +41,18 @@ HelloMonkey::HelloMonkey()
 	}
 
 	_pRender = new Render();
+
+	Logger::Init();
+
+	Logger::Info("MonkeyGL has started....");
+
+	fpng::fpng_init();
+	if (fpng::fpng_cpu_supports_sse41()){
+		Logger::Info("fpng cpu supports sse41");
+	}
+	else {
+		Logger::Error("fpng cpu not supports sse41");
+	}
 }
 
 HelloMonkey::~HelloMonkey(void)
@@ -23,6 +62,10 @@ HelloMonkey::~HelloMonkey(void)
 		delete _pRender;
 		_pRender = NULL;
 	}
+}
+
+void HelloMonkey::SetLogLevel(LogLevel level){
+	Logger::SetLevel(level);
 }
 
 void HelloMonkey::SetTransferFunc( const std::map<int, RGBA>& ctrlPoints )
@@ -77,32 +120,167 @@ short* HelloMonkey::GetVolumeData()
 	return _pRender->GetVolumeData();
 }
 
-bool HelloMonkey::GetPlaneMaxSize( int& nWidth, int& nHeight, const ePlaneType& planeType )
+bool HelloMonkey::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& planeType )
 {
 	if (NULL == _pRender)
 		return false;
 	return _pRender->GetPlaneMaxSize(nWidth, nHeight, planeType);
 }
 
-bool HelloMonkey::GetPlaneData(short* pData, int& nWidth, int& nHeight, const ePlaneType& planeType)
+bool HelloMonkey::GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType)
 {
 	if (NULL == _pRender)
 		return NULL;
 	return _pRender->GetPlaneData(pData, nWidth, nHeight, planeType);
 }
 
+std::string HelloMonkey::GetPlaneData_pngString(const PlaneType& planeType)
+{
+	if (NULL == _pRender)
+		return "";
+
+	StopWatch sw("GetPlaneData_pngString");
+
+	int nWidth = 0, nHeight = 0;
+	GetPlaneMaxSize(nWidth, nHeight, planeType);
+	
+ 	std::shared_ptr<short> pData (new short[nWidth*nHeight]);
+	{
+		StopWatch sw("GetPlaneData");
+		if (!_pRender->GetPlaneData(pData.get(), nWidth, nHeight, planeType))
+			return "";
+	}
+
+	std::vector<uint8_t> out_buf;
+	{
+		StopWatch sw("fpng");
+		fpng::fpng_encode_image_to_memory(
+			(void*)pData.get(),
+			nWidth/2,
+			nHeight,
+			4,
+			out_buf
+		);
+		Logger::Info(
+			Logger::FormatMsg(
+				"plane encode, from %d to %d, ratio %.4f",
+				nWidth*nHeight*sizeof(short),
+				out_buf.size(),
+				1.0*out_buf.size()/(nWidth*nHeight*sizeof(short))
+			)
+		);
+	}
+
+	std::string strBase64 = "";
+	{
+		StopWatch sw("Base64 Encode");
+		strBase64 = Base64::Encode(out_buf.data(), out_buf.size());
+
+		Logger::Info(
+			Logger::FormatMsg(
+				"plane base64, from %d to %d, ratio %.4f",
+				out_buf.size(),
+				strBase64.length(),
+				1.0*strBase64.length()/out_buf.size()
+			)
+		);
+	}
+
+	return strBase64;
+}
+
 bool HelloMonkey::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 {
 	if (NULL == _pRender)
 		return false;
-	return _pRender->GetVRData(pVR, nWidth, nHeight);
+	if (!_pRender->GetVRData(pVR, nWidth, nHeight))
+		return false;
+
+	return true;	
 }
 
-void HelloMonkey::SaveVR2BMP(const char* szFile, int nWidth, int nHeight)
+
+std::vector<uint8_t> HelloMonkey::GetVRData_png(int nWidth, int nHeight)
 {
+	StopWatch sw("GetVRData_png");
+
+	std::vector<uint8_t> out_buf;
 	if (NULL == _pRender)
-		return;
-	return _pRender->SaveVR2BMP(szFile, nWidth, nHeight);
+		return out_buf;
+	
+ 	std::shared_ptr<unsigned char> pVR (new unsigned char[nWidth*nHeight*3]);
+
+	{
+		StopWatch sw("GetVRData");
+		if (!_pRender->GetVRData(pVR.get(), nWidth, nHeight))
+			return out_buf;
+	}
+
+	{
+		StopWatch sw("fpng");
+		fpng::fpng_encode_image_to_memory(
+			(void*)pVR.get(),
+			nWidth,
+			nHeight,
+			3,
+			out_buf
+		);
+	}
+
+	return out_buf;
+}
+
+std::string HelloMonkey::GetVRData_pngString(int nWidth, int nHeight)
+{
+	StopWatch sw("GetVRData_pngString");
+	if (NULL == _pRender)
+		return "";
+	
+ 	std::shared_ptr<unsigned char> pVR (new unsigned char[nWidth*nHeight*3]);
+
+	{
+		StopWatch sw("GetVRData");
+		if (!_pRender->GetVRData(pVR.get(), nWidth, nHeight))
+			return "";
+	}
+
+	std::vector<uint8_t> out_buf;
+	{
+		StopWatch sw("fpng");
+		fpng::fpng_encode_image_to_memory(
+			(void*)pVR.get(),
+			nWidth,
+			nHeight,
+			3,
+			out_buf
+		);
+
+		Logger::Info(
+			Logger::FormatMsg(
+				"vr encode, from %d to %d, ratio %.4f",
+				nWidth*nHeight*3,
+				out_buf.size(),
+				1.0*out_buf.size()/(nWidth*nHeight*3)
+			)
+		);
+	}
+
+	std::string strBase64 = "";
+	{
+		StopWatch sw("Base64 Encode");
+		strBase64 = Base64::Encode(out_buf.data(), out_buf.size());
+
+		Logger::Info(
+			Logger::FormatMsg(
+				"vr base64, from %d to %d, ratio %.4f",
+				out_buf.size(),
+				strBase64.length(),
+				1.0*strBase64.length()/out_buf.size()
+			)
+		);
+	}
+
+	return strBase64;
 }
 
 bool HelloMonkey::GetBatchData( std::vector<short*>& vecBatchData, const BatchInfo& batchInfo )
@@ -112,21 +290,21 @@ bool HelloMonkey::GetBatchData( std::vector<short*>& vecBatchData, const BatchIn
 	return _pRender->GetBatchData(vecBatchData, batchInfo);
 }
 
-bool HelloMonkey::GetPlaneIndex( int& index, ePlaneType planeType )
+bool HelloMonkey::GetPlaneIndex( int& index, PlaneType planeType )
 {
 	if (NULL == _pRender)
 		return NULL;
 	return _pRender->GetPlaneIndex(index, planeType);
 }
 
-bool HelloMonkey::GetPlaneNumber( int& nTotalNum, ePlaneType planeType )
+bool HelloMonkey::GetPlaneNumber( int& nTotalNum, PlaneType planeType )
 {
 	if (NULL == _pRender)
 		return NULL;
 	return _pRender->GetPlaneNumber(nTotalNum, planeType);
 }
 
-bool HelloMonkey::GetPlaneRotateMatrix( float* pMatrix, ePlaneType planeType )
+bool HelloMonkey::GetPlaneRotateMatrix( float* pMatrix, PlaneType planeType )
 {
 	if (NULL == _pRender)
 		return NULL;
@@ -196,77 +374,77 @@ void HelloMonkey::Pan( float fxShift, float fyShift )
 	_pRender->Pan(fxShift, fyShift);
 }
 
-void HelloMonkey::SetWL(float fWW, float fWL)
+void HelloMonkey::SetVRWWWL(float fWW, float fWL)
 {
 	if (NULL == _pRender)
 		return;
-	_pRender->SetWL(fWW, fWL);
+	_pRender->SetVRWWWL(fWW, fWL);
 }
 
-void HelloMonkey::Browse( float fDelta, ePlaneType planeType )
+void HelloMonkey::Browse( float fDelta, PlaneType planeType )
 {
 	if (NULL == _pRender)
 		return;
 	_pRender->Browse(fDelta, planeType);
 }
 
-void HelloMonkey::PanCrossHair( int nx, int ny, ePlaneType planeType )
+void HelloMonkey::PanCrossHair( int nx, int ny, PlaneType planeType )
 {
 	if (NULL == _pRender)
 		return;
 	_pRender->PanCrossHair(nx, ny, planeType);
 }
 
-bool HelloMonkey::GetCrossHairPoint( double& x, double& y, const ePlaneType& planeType )
+bool HelloMonkey::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType )
 {
 	if (NULL == _pRender)
 		return false;
 	return _pRender->GetCrossHairPoint(x, y, planeType);
 }
 
-bool HelloMonkey::GetDirection( Direction2d& dirH, Direction2d& dirV, const ePlaneType& planeType )
+bool HelloMonkey::GetDirection( Direction2d& dirH, Direction2d& dirV, const PlaneType& planeType )
 {
 	if (NULL == _pRender)
 		return false;
 	return _pRender->GetDirection(dirH, dirV, planeType);
 }
 
-bool HelloMonkey::GetDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, const ePlaneType& planeType )
+bool HelloMonkey::GetDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, const PlaneType& planeType )
 {
 	if (NULL == _pRender)
 		return false;
 	return _pRender->GetDirection3D(dir3dH, dir3dV, planeType);
 }
 
-bool HelloMonkey::GetBatchDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, double fAngle, const ePlaneType& planeType )
+bool HelloMonkey::GetBatchDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, double fAngle, const PlaneType& planeType )
 {
 	if (NULL == _pRender)
 		return false;
 	return _pRender->GetBatchDirection3D(dir3dH, dir3dV, fAngle, planeType);
 }
 
-void HelloMonkey::RotateCrossHair( float fAngle, ePlaneType planeType )
+void HelloMonkey::RotateCrossHair( float fAngle, PlaneType planeType )
 {
 	if (NULL == _pRender)
 		return;
 	_pRender->RotateCrossHair(fAngle, planeType);
 }
 
-void HelloMonkey::SetPlaneIndex( int index, ePlaneType planeType )
+void HelloMonkey::SetPlaneIndex( int index, PlaneType planeType )
 {
 	if (NULL == _pRender)
 		return;
 	_pRender->SetPlaneIndex(index, planeType);
 }
 
-double HelloMonkey::GetPixelSpacing( ePlaneType planeType )
+double HelloMonkey::GetPixelSpacing( PlaneType planeType )
 {
 	if (NULL == _pRender)
 		return 1.0;
 	return _pRender->GetPixelSpacing(planeType);
 }
 
-bool HelloMonkey::TransferImage2Object( double& x, double& y, double& z, double xImage, double yImage, ePlaneType planeType )
+bool HelloMonkey::TransferImage2Object( double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType )
 {
 	if (NULL == _pRender)
 		return false;
@@ -287,14 +465,14 @@ void HelloMonkey::UpdateThickness( double val )
 	return _pRender->UpdateThickness( val );
 }
 
-void HelloMonkey::SetThickness(double val, ePlaneType planeType)
+void HelloMonkey::SetThickness(double val, PlaneType planeType)
 {
 	if (NULL == _pRender)
 		return;
 	return _pRender->SetThickness(val, planeType);
 }
 
-bool HelloMonkey::GetThickness(double& val, ePlaneType planeType)
+bool HelloMonkey::GetThickness(double& val, PlaneType planeType)
 {
 	if (NULL == _pRender)
 		return false;

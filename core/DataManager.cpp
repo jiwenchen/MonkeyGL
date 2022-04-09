@@ -1,3 +1,25 @@
+// MIT License
+
+// Copyright (c) 2022 jiwenchen(cjwbeyond@hotmail.com)
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "DataManager.h"
 #include <vector>
 
@@ -80,9 +102,9 @@ void DataManager::ResetPlaneInfos()
 							0.5*m_volInfo.GetDim(2)*m_volInfo.GetAnisotropy(2));
 
 	m_mapPlaneType2Info.clear();
-	for (int i = (int)ePlaneType_Axial; i<=(int)ePlaneType_Coronal_Oblique; i++)
+	for (int i = (int)PlaneAxial; i<=(int)PlaneCoronalOblique; i++)
 	{
-		ePlaneType pt = (ePlaneType)i;
+		PlaneType pt = (PlaneType)i;
 		PlaneInfo info;
 		info.m_PlaneType = pt;
 		m_volInfo.GetPlaneInitSize(info.m_nWidth, info.m_nHeight, info.m_nNumber, pt);
@@ -90,34 +112,33 @@ void DataManager::ResetPlaneInfos()
 		Direction3d& dirV = info.m_dirV;
 		switch (pt)
 		{
-		case ePlaneType_Axial:
+		case PlaneAxial:
 			{
 				dirH = Direction3d(1, 0, 0);
 				dirV = Direction3d(0, 1, 0);
 			}
 			break;
-		case ePlaneType_Axial_Oblique:
+		case PlaneAxialOblique:
 			{
 				dirH = Direction3d(1, 0, 0);
 				dirV = Direction3d(0, 1, 0);
 			}
 			break;
-		case ePlaneType_Sagittal:
-		case ePlaneType_Sagittal_Oblique:
+		case PlaneSagittal:
+		case PlaneSagittalOblique:
 			{
 				dirH = Direction3d(0, 1, 0);
 				dirV = Direction3d(0, 0, -1);
 			}
 			break;
-		case ePlaneType_Coronal:
-		case ePlaneType_Coronal_Oblique:
+		case PlaneCoronal:
+		case PlaneCoronalOblique:
 			{
 				dirH = Direction3d(1, 0, 0);
 				dirV = Direction3d(0, 0, -1);
 			}
 			break;
-		case ePlaneType_NULL:
-		case ePlaneType_Count:
+		case PlaneNotDefined:
 			break;
 		default:
 			break;
@@ -202,7 +223,7 @@ int GetLengthofCrossLineInBox(Direction3d dir, double ans, double xMin, double x
 	return nUpPart + nDownPart;
 }
 
-void DataManager::UpdatePlaneSize(ePlaneType planeType)
+void DataManager::UpdatePlaneSize(PlaneType planeType)
 {
 	PlaneInfo info;
 	if (!GetPlaneInfo(planeType, info))
@@ -288,7 +309,7 @@ std::vector<Point3d> DataManager::GetVertexes()
 	return ptVertexes;
 }
 
-bool DataManager::GetPlaneSize( int& nWidth, int& nHeight, const ePlaneType& planeType )
+bool DataManager::GetPlaneSize( int& nWidth, int& nHeight, const PlaneType& planeType )
 {
 	PlaneInfo info;
 	if (!GetPlaneInfo(planeType, info))
@@ -299,7 +320,7 @@ bool DataManager::GetPlaneSize( int& nWidth, int& nHeight, const ePlaneType& pla
 	return true;
 }
 
-bool DataManager::GetPlaneNumber( int& nNumber, const ePlaneType& planeType )
+bool DataManager::GetPlaneNumber( int& nNumber, const PlaneType& planeType )
 {
 	PlaneInfo info;
 	if (!GetPlaneInfo(planeType, info))
@@ -309,7 +330,7 @@ bool DataManager::GetPlaneNumber( int& nNumber, const ePlaneType& planeType )
 	return true;
 }
 
-bool DataManager::GetPlaneIndex( int& index, const ePlaneType& planeType )
+bool DataManager::GetPlaneIndex( int& index, const PlaneType& planeType )
 {
 	PlaneInfo info;
 	if (!GetPlaneInfo(planeType, info))
@@ -322,7 +343,7 @@ bool DataManager::GetPlaneIndex( int& index, const ePlaneType& planeType )
 	return true;
 }
 
-bool DataManager::GetPlaneRotateMatrix( float* pMatirx, ePlaneType planeType )
+bool DataManager::GetPlaneRotateMatrix( float* pMatirx, PlaneType planeType )
 {
 	PlaneInfo info;
 	if (!GetPlaneInfo(planeType, info))
@@ -340,9 +361,9 @@ bool DataManager::GetPlaneRotateMatrix( float* pMatirx, ePlaneType planeType )
 	return true;
 }
 
-bool DataManager::GetPlaneMaxSize( int& nWidth, int& nHeight, const ePlaneType& planeType )
+bool DataManager::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& planeType )
 {
-	if (planeType == ePlaneType_VolumeRender)
+	if (planeType == PlaneVR)
 	{
 		nWidth = 512;
 		nHeight = 512;
@@ -363,7 +384,7 @@ bool DataManager::GetPlaneMaxSize( int& nWidth, int& nHeight, const ePlaneType& 
 	}
 }
 
-void DataManager::Browse( float fDelta, ePlaneType planeType )
+void DataManager::Browse( float fDelta, PlaneType planeType )
 {
 	if (m_mapPlaneType2Info.find(planeType) == m_mapPlaneType2Info.end())
 		return;
@@ -372,7 +393,7 @@ void DataManager::Browse( float fDelta, ePlaneType planeType )
 	m_ptCrossHair = m_ptCrossHair + dirN*fDelta;
 }
 
-void DataManager::SetPlaneIndex( int index, ePlaneType planeType )
+void DataManager::SetPlaneIndex( int index, PlaneType planeType )
 {
 	if (m_mapPlaneType2Info.find(planeType) == m_mapPlaneType2Info.end())
 		return;
@@ -385,7 +406,7 @@ void DataManager::SetPlaneIndex( int index, ePlaneType planeType )
 	m_ptCrossHair = ptProj + dirN*dist2Center;
 }
 
-void DataManager::PanCrossHair(int nx, int ny, ePlaneType planeType)
+void DataManager::PanCrossHair(int nx, int ny, PlaneType planeType)
 {
 	Point3d ptObject;
 	if (!TransferImage2Object(ptObject, nx, ny, planeType))
@@ -394,7 +415,7 @@ void DataManager::PanCrossHair(int nx, int ny, ePlaneType planeType)
 	m_ptCrossHair = ptObject;
 }
 
-void  DataManager::RotateCrossHair( float fAngle, ePlaneType planeType )
+void  DataManager::RotateCrossHair( float fAngle, PlaneType planeType )
 {
 	Direction3d dirA = m_mapPlaneType2Info[planeType].GetNormDirection();
 
@@ -419,10 +440,10 @@ void  DataManager::RotateCrossHair( float fAngle, ePlaneType planeType )
 	m[2][0] = x*z*cosVT - y*sinV;
 	m[2][1] = y*z*cosVT + x*sinV;
 
-	std::vector<ePlaneType> vecCrossPlaneTypes = GetCrossPlaneType(planeType);
+	std::vector<PlaneType> vecCrossPlaneTypes = GetCrossPlaneType(planeType);
 	for (size_t i=0; i<vecCrossPlaneTypes.size(); i++)
 	{
-		ePlaneType crossPlaneType = vecCrossPlaneTypes[i];
+		PlaneType crossPlaneType = vecCrossPlaneTypes[i];
 		
 		Direction3d& dirH = m_mapPlaneType2Info[crossPlaneType].m_dirH;
 		Direction3d& dirV = m_mapPlaneType2Info[crossPlaneType].m_dirV;
@@ -469,7 +490,7 @@ Point3d DataManager::GetTransferPoint(double m[3][3], Point3d pt)
 	return Point3d(r[0], r[1], r[2]);
 }
 
-bool DataManager::GetCrossHairPoint( double& x, double& y, const ePlaneType& planeType )
+bool DataManager::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType )
 {
 	if (m_mapPlaneType2Info.find(planeType) == m_mapPlaneType2Info.end())
 		return false;
@@ -485,7 +506,7 @@ bool DataManager::GetCrossHairPoint( double& x, double& y, const ePlaneType& pla
 	return true;
 }
 
-bool DataManager::TransferImage2Object(double& x, double& y, double& z, double xImage, double yImage, ePlaneType planeType)
+bool DataManager::TransferImage2Object(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType)
 {
 	Point3d ptObject;
 	if (!TransferImage2Object(ptObject, xImage, yImage, planeType))
@@ -497,7 +518,7 @@ bool DataManager::TransferImage2Object(double& x, double& y, double& z, double x
 	return true;
 }
 
-bool DataManager::TransferImage2Object(Point3d& ptObject, double xImage, double yImage, ePlaneType planeType)
+bool DataManager::TransferImage2Object(Point3d& ptObject, double xImage, double yImage, PlaneType planeType)
 {
 	if (m_mapPlaneType2Info.find(planeType) == m_mapPlaneType2Info.end())
 		return false;
@@ -511,28 +532,28 @@ bool DataManager::TransferImage2Object(Point3d& ptObject, double xImage, double 
 	return true;
 }
 
-bool DataManager::GetDirection( Direction2d& dirH, Direction2d& dirV, const ePlaneType& planeType )
+bool DataManager::GetDirection( Direction2d& dirH, Direction2d& dirV, const PlaneType& planeType )
 {
 	if (!IsExistGroupPlaneInfos(planeType))
 		return false;
 
 	switch (planeType)
 	{
-	case ePlaneType_Axial:
-	case ePlaneType_Sagittal:
-	case ePlaneType_Coronal:
+	case PlaneAxial:
+	case PlaneSagittal:
+	case PlaneCoronal:
 		{
 			dirH = Direction2d(1,0);
 			dirV = Direction2d(0,1);
 		}
 		break;
-	case ePlaneType_Axial_Oblique:
+	case PlaneAxialOblique:
 		{
 			Direction3d dir3HSelf = m_mapPlaneType2Info[planeType].m_dirH;
 			Direction3d dir3VSelf = m_mapPlaneType2Info[planeType].m_dirV;
 
-			Direction3d dir3H = m_mapPlaneType2Info[ePlaneType_Sagittal_Oblique].GetNormDirection();
-			Direction3d dir3V = m_mapPlaneType2Info[ePlaneType_Coronal_Oblique].GetNormDirection();
+			Direction3d dir3H = m_mapPlaneType2Info[PlaneSagittalOblique].GetNormDirection();
+			Direction3d dir3V = m_mapPlaneType2Info[PlaneCoronalOblique].GetNormDirection();
 
 			double lenH = dir3H.x()*dir3HSelf.x() + dir3H.y()*dir3HSelf.y() + dir3H.z()*dir3HSelf.z();
 			double lenV = dir3H.x()*dir3VSelf.x() + dir3H.y()*dir3VSelf.y() + dir3H.z()*dir3VSelf.z();
@@ -543,13 +564,13 @@ bool DataManager::GetDirection( Direction2d& dirH, Direction2d& dirV, const ePla
 			dirV = Direction2d(lenH, lenV);
 		}
 		break;
-	case ePlaneType_Sagittal_Oblique:
+	case PlaneSagittalOblique:
 		{
 			Direction3d dir3HSelf = m_mapPlaneType2Info[planeType].m_dirH;
 			Direction3d dir3VSelf = m_mapPlaneType2Info[planeType].m_dirV;
 
-			Direction3d dir3H = m_mapPlaneType2Info[ePlaneType_Coronal_Oblique].GetNormDirection();
-			Direction3d dir3V = m_mapPlaneType2Info[ePlaneType_Axial_Oblique].GetNormDirection();
+			Direction3d dir3H = m_mapPlaneType2Info[PlaneCoronalOblique].GetNormDirection();
+			Direction3d dir3V = m_mapPlaneType2Info[PlaneAxialOblique].GetNormDirection();
 
 			double lenH = dir3H.x()*dir3HSelf.x() + dir3H.y()*dir3HSelf.y() + dir3H.z()*dir3HSelf.z();
 			double lenV = dir3H.x()*dir3VSelf.x() + dir3H.y()*dir3VSelf.y() + dir3H.z()*dir3VSelf.z();
@@ -560,13 +581,13 @@ bool DataManager::GetDirection( Direction2d& dirH, Direction2d& dirV, const ePla
 			dirV = Direction2d(lenH, lenV);
 		}
 		break;
-	case ePlaneType_Coronal_Oblique:
+	case PlaneCoronalOblique:
 		{
 			Direction3d dir3HSelf = m_mapPlaneType2Info[planeType].m_dirH;
 			Direction3d dir3VSelf = m_mapPlaneType2Info[planeType].m_dirV;
 
-			Direction3d dir3H = m_mapPlaneType2Info[ePlaneType_Sagittal_Oblique].GetNormDirection();
-			Direction3d dir3V = m_mapPlaneType2Info[ePlaneType_Axial_Oblique].GetNormDirection();
+			Direction3d dir3H = m_mapPlaneType2Info[PlaneSagittalOblique].GetNormDirection();
+			Direction3d dir3V = m_mapPlaneType2Info[PlaneAxialOblique].GetNormDirection();
 
 			double lenH = dir3H.x()*dir3HSelf.x() + dir3H.y()*dir3HSelf.y() + dir3H.z()*dir3HSelf.z();
 			double lenV = dir3H.x()*dir3VSelf.x() + dir3H.y()*dir3VSelf.y() + dir3H.z()*dir3VSelf.z();
@@ -585,7 +606,7 @@ bool DataManager::GetDirection( Direction2d& dirH, Direction2d& dirV, const ePla
 	return true;
 }
 
-bool DataManager::GetDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, const ePlaneType& planeType )
+bool DataManager::GetDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, const PlaneType& planeType )
 {
 	if (m_mapPlaneType2Info.find(planeType) == m_mapPlaneType2Info.end())
 		return false;
@@ -594,7 +615,7 @@ bool DataManager::GetDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, cons
 	return true;
 }
 
-bool DataManager::GetBatchDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, double fAngle, const ePlaneType& planeType )
+bool DataManager::GetBatchDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, double fAngle, const PlaneType& planeType )
 {
 	Direction3d dirH_Plane, dirV_Plane;
 	GetDirection3D(dirH_Plane, dirV_Plane, planeType);
@@ -627,31 +648,30 @@ bool DataManager::GetBatchDirection3D( Direction3d& dir3dH, Direction3d& dir3dV,
 	return true;
 }
 
-bool DataManager::IsExistGroupPlaneInfos( ePlaneType planeType )
+bool DataManager::IsExistGroupPlaneInfos( PlaneType planeType )
 {
 	switch (planeType)
 	{
 		break;
-	case ePlaneType_Axial:
-	case ePlaneType_Sagittal:
-	case ePlaneType_Coronal:
+	case PlaneAxial:
+	case PlaneSagittal:
+	case PlaneCoronal:
 		{
-			return (m_mapPlaneType2Info.find(ePlaneType_Axial) != m_mapPlaneType2Info.end()) &&
-				(m_mapPlaneType2Info.find(ePlaneType_Sagittal) != m_mapPlaneType2Info.end() ) &&
-				(m_mapPlaneType2Info.find(ePlaneType_Coronal) != m_mapPlaneType2Info.end());
+			return (m_mapPlaneType2Info.find(PlaneAxial) != m_mapPlaneType2Info.end()) &&
+				(m_mapPlaneType2Info.find(PlaneSagittal) != m_mapPlaneType2Info.end() ) &&
+				(m_mapPlaneType2Info.find(PlaneCoronal) != m_mapPlaneType2Info.end());
 		}
 		break;
-	case ePlaneType_Axial_Oblique:
-	case ePlaneType_Sagittal_Oblique:
-	case ePlaneType_Coronal_Oblique:
+	case PlaneAxialOblique:
+	case PlaneSagittalOblique:
+	case PlaneCoronalOblique:
 		{
-			return (m_mapPlaneType2Info.find(ePlaneType_Axial_Oblique) != m_mapPlaneType2Info.end()) &&
-				(m_mapPlaneType2Info.find(ePlaneType_Sagittal_Oblique) != m_mapPlaneType2Info.end() ) &&
-				(m_mapPlaneType2Info.find(ePlaneType_Coronal_Oblique) != m_mapPlaneType2Info.end());
+			return (m_mapPlaneType2Info.find(PlaneAxialOblique) != m_mapPlaneType2Info.end()) &&
+				(m_mapPlaneType2Info.find(PlaneSagittalOblique) != m_mapPlaneType2Info.end() ) &&
+				(m_mapPlaneType2Info.find(PlaneCoronalOblique) != m_mapPlaneType2Info.end());
 		}
 		break;
-	case ePlaneType_NULL:
-	case ePlaneType_Count:
+	case PlaneNotDefined:
 		break;
 	default:
 		break;
@@ -659,81 +679,79 @@ bool DataManager::IsExistGroupPlaneInfos( ePlaneType planeType )
 	return false;
 }
 
-ePlaneType DataManager::GetHorizonalPlaneType( ePlaneType planeType )
+PlaneType DataManager::GetHorizonalPlaneType( PlaneType planeType )
 {
 	switch (planeType)
 	{
-	case ePlaneType_Axial:
-		return ePlaneType_Coronal;
+	case PlaneAxial:
+		return PlaneCoronal;
 		break;
-	case ePlaneType_Sagittal:
+	case PlaneSagittal:
 		break;
-	case ePlaneType_Coronal:
+	case PlaneCoronal:
 		break;
-	case ePlaneType_Axial_Oblique:
+	case PlaneAxialOblique:
 		break;
-	case ePlaneType_Sagittal_Oblique:
+	case PlaneSagittalOblique:
 		break;
-	case ePlaneType_Coronal_Oblique:
+	case PlaneCoronalOblique:
 		break;
-	case ePlaneType_NULL:
-	case ePlaneType_Count:
+	case PlaneNotDefined:
 		break;
 	default:
 		break;
 	}
 
-	return ePlaneType_NULL;
+	return PlaneNotDefined;
 }
 
-ePlaneType DataManager::GetVerticalPlaneType( ePlaneType planeType )
+PlaneType DataManager::GetVerticalPlaneType( PlaneType planeType )
 {
-	return ePlaneType_NULL;
+	return PlaneNotDefined;
 }
 
-std::vector<ePlaneType> DataManager::GetCrossPlaneType( ePlaneType planeType )
+std::vector<PlaneType> DataManager::GetCrossPlaneType( PlaneType planeType )
 {
-	std::vector<ePlaneType> vecPlaneTypes;
+	std::vector<PlaneType> vecPlaneTypes;
 	switch (planeType)
 	{
-	case ePlaneType_Axial:
+	case PlaneAxial:
 		{
-			vecPlaneTypes.push_back(ePlaneType_Sagittal);
-			vecPlaneTypes.push_back(ePlaneType_Coronal);
+			vecPlaneTypes.push_back(PlaneSagittal);
+			vecPlaneTypes.push_back(PlaneCoronal);
 		}
 		break;
-	case ePlaneType_Sagittal:
+	case PlaneSagittal:
 		{
-			vecPlaneTypes.push_back(ePlaneType_Axial);
-			vecPlaneTypes.push_back(ePlaneType_Coronal);
+			vecPlaneTypes.push_back(PlaneAxial);
+			vecPlaneTypes.push_back(PlaneCoronal);
 		}
 		break;
-	case ePlaneType_Coronal:
+	case PlaneCoronal:
 		{
-			vecPlaneTypes.push_back(ePlaneType_Axial);
-			vecPlaneTypes.push_back(ePlaneType_Sagittal);
+			vecPlaneTypes.push_back(PlaneAxial);
+			vecPlaneTypes.push_back(PlaneSagittal);
 		}
 		break;
-	case ePlaneType_Axial_Oblique:
+	case PlaneAxialOblique:
 		{
-			vecPlaneTypes.push_back(ePlaneType_Sagittal_Oblique);
-			vecPlaneTypes.push_back(ePlaneType_Coronal_Oblique);
+			vecPlaneTypes.push_back(PlaneSagittalOblique);
+			vecPlaneTypes.push_back(PlaneCoronalOblique);
 		}
 		break;
-	case ePlaneType_Sagittal_Oblique:
+	case PlaneSagittalOblique:
 		{
-			vecPlaneTypes.push_back(ePlaneType_Axial_Oblique);
-			vecPlaneTypes.push_back(ePlaneType_Coronal_Oblique);
+			vecPlaneTypes.push_back(PlaneAxialOblique);
+			vecPlaneTypes.push_back(PlaneCoronalOblique);
 		}
 		break;
-	case ePlaneType_Coronal_Oblique:
+	case PlaneCoronalOblique:
 		{
-			vecPlaneTypes.push_back(ePlaneType_Axial_Oblique);
-			vecPlaneTypes.push_back(ePlaneType_Sagittal_Oblique);
+			vecPlaneTypes.push_back(PlaneAxialOblique);
+			vecPlaneTypes.push_back(PlaneSagittalOblique);
 		}
 		break;
-	case ePlaneType_NULL:
-	case ePlaneType_Count:
+	case PlaneNotDefined:
 		break;
 	default:
 		break;
@@ -748,7 +766,7 @@ Point3d DataManager::GetProjectPoint( Direction3d dirN, Point3d ptPlane, Point3d
 	return (ptNeed2Project + dirN*len);
 }
 
-double DataManager::GetPixelSpacing( ePlaneType planeType )
+double DataManager::GetPixelSpacing( PlaneType planeType )
 {
 	if (m_mapPlaneType2Info.find(planeType) == m_mapPlaneType2Info.end())
 		return 1.0;
@@ -757,21 +775,21 @@ double DataManager::GetPixelSpacing( ePlaneType planeType )
 
 void DataManager::UpdateThickness( double val )
 {
-	for (std::map<ePlaneType, PlaneInfo>::iterator iter = m_mapPlaneType2Info.begin();
+	for (std::map<PlaneType, PlaneInfo>::iterator iter = m_mapPlaneType2Info.begin();
 		iter != m_mapPlaneType2Info.end(); ++iter)
 	{
 		iter->second.m_fSliceThickness = val;
 	}
 }
 
-void DataManager::SetThickness(double val, ePlaneType planeType)
+void DataManager::SetThickness(double val, PlaneType planeType)
 {
 	if (m_mapPlaneType2Info.find(planeType) == m_mapPlaneType2Info.end())
 		return;
 	m_mapPlaneType2Info[planeType].m_fSliceThickness = val;
 }
 
-bool DataManager::GetThickness(double& val, ePlaneType planeType)
+bool DataManager::GetThickness(double& val, PlaneType planeType)
 {
 	if (m_mapPlaneType2Info.find(planeType) == m_mapPlaneType2Info.end())
 		return false;
@@ -781,7 +799,7 @@ bool DataManager::GetThickness(double& val, ePlaneType planeType)
 
 void DataManager::SetMPRType( MPRType type )
 {
-	for (std::map<ePlaneType, PlaneInfo>::iterator iter = m_mapPlaneType2Info.begin();
+	for (std::map<PlaneType, PlaneInfo>::iterator iter = m_mapPlaneType2Info.begin();
 		iter != m_mapPlaneType2Info.end(); ++iter)
 	{
 		iter->second.m_MPRType = type;

@@ -21,38 +21,20 @@
 // SOFTWARE.
 
 #pragma once
-#include "Point.h"
+#include <iostream>
+#include "Defines.h"
 
 namespace MonkeyGL {
 
-    class Methods
+    class Logger
     {
     public:
-        Methods(void);
-        ~Methods(void);
+        static void Init();
+        static void SetLevel(LogLevel level);
+        static void Info(std::string msg);
+        static void Warn(std::string msg);
+        static void Error(std::string msg);
 
-    public:
-        static void SetSeg(float* m, int n);
-
-        static void matrixMul(
-            float *pDst, 
-            float *pSrc1, 
-            float *pSrc2, 
-            int nH1, 
-            int nW1, 
-            int nW2
-        );
-        static Point3d matrixMul(float *fMatrix, Point3d pt);
-
-        static void ComputeTransformMatrix(
-            float* pRotateMatrix,
-            float *pTransposRotateMatrix, 
-            float* pTransformMatrix, 
-            float* pTransposeTransformMatrix, 
-            float fxRotate, 
-            float fzRotate, 
-            float fScale
-        );
+        static std::string FormatMsg(const char * format, ...);
     };
-
 }

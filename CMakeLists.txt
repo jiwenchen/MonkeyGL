@@ -18,16 +18,26 @@ endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+
+set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -DFPNG_NO_SSE=0 -msse4.1 -mpclmul")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DFPNG_NO_SSE=0 -msse4.1 -mpclmul")
+
 include_directories(
   ${PROJECT_SOURCE_DIR}/cuda_common
   ${CUDA_TOOLKIT_PATH}/include
+  ${PROJECT_SOURCE_DIR}/build/log4cplus-2.0.7/build/install/usr/local/include
 )
 
 link_directories(
   ${CUDA_TOOLKIT_PATH}/lib64
+  ${PROJECT_SOURCE_DIR}/build/log4cplus-2.0.7/build/install/usr/local/lib
 )
 
+link_libraries(log4cplus)
+
 set(SRC_LIST
+  ./core/fpng/fpng.cpp
+  ./core/Base64.hpp
   ./core/BatchInfo.cpp
   ./core/DataManager.cpp
   ./core/DeviceInfo.cpp
@@ -35,8 +45,8 @@ set(SRC_LIST
   ./core/Direction.cpp
   ./core/HelloMonkey.cpp
   ./core/IRender.cpp
+  ./core/Logger.cpp
   ./core/Methods.cpp
-  ./core/PlaneDefines.cpp
   ./core/PlaneInfo.cpp
   ./core/Point.cpp
   ./core/Render.cpp

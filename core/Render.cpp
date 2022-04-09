@@ -1,8 +1,31 @@
+// MIT License
+
+// Copyright (c) 2022 jiwenchen(cjwbeyond@hotmail.com)
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "Render.h"
 #include <driver_types.h>
 #include "vector_types.h"
 #include "StopWatch.h"
 #include "TransferFunction.h"
+#include "Logger.h"
 
 using namespace MonkeyGL;
 
@@ -111,6 +134,11 @@ void Render::CopyTransferFunc2Device()
 
 void Render::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
 {
+	Logger::Info(
+		Logger::FormatMsg(
+			"load volume file: %s", szFile
+		)
+	);
 	IRender::SetVolumeFile(szFile, nWidth, nHeight, nDepth);
 
 	m_VolumeSize.width = m_dataMan.GetDim(0);
@@ -166,10 +194,14 @@ void Render::SetAnisotropy( double x, double y, double z )
 	cu_InitCommon(x, y, z);
 }
 
-bool Render::GetPlaneData( short* pData, int& nWidth, int& nHeight, const ePlaneType& planeType)
+bool Render::GetPlaneData( short* pData, int& nWidth, int& nHeight, const PlaneType& planeType)
 {
 	if (!m_dataMan.GetPlaneSize(nWidth, nHeight, planeType))
 		return false;
+
+	if (nWidth % 2){
+		nWidth += 1;
+	}
 
 	if (NULL == pData || nWidth<=0 || nHeight<=0)
 		return false;
@@ -211,19 +243,19 @@ bool Render::GetPlaneData( short* pData, int& nWidth, int& nHeight, const ePlane
 
 	switch (info.m_MPRType)
 	{
-	case eMPRType_Average:
+	case MPRTypeAverage:
 		{
 			cu_renderPlane_Average(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, halfNum);
 			return true;
 		}
 		break;
-	case eMPRType_MIP:
+	case MPRTypeMIP:
 		{
 			cu_renderPlane_MIP(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, halfNum);
 			return true;
 		}
 		break;
-	case eMPRType_MinIP:
+	case MPRTypeMinIP:
 		{
 			cu_renderPlane_MinIP(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, halfNum);
 			return true;
@@ -235,14 +267,14 @@ bool Render::GetPlaneData( short* pData, int& nWidth, int& nHeight, const ePlane
 	return false;
 }
 
-bool Render::GetPlaneMaxSize( int& nWidth, int& nHeight, const ePlaneType& planeType )
+bool Render::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& planeType )
 {
 	return IRender::GetPlaneMaxSize(nWidth, nHeight, planeType);
 }
 
-bool Render::GetCrossHairPoint( double& x, double& y, const ePlaneType& planeType )
+bool Render::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType )
 {
-	if (ePlaneType_VolumeRender == planeType)
+	if (PlaneVR == planeType)
 	{
 		int nWidth = 0;
 		int nHeight = 0;
@@ -269,9 +301,9 @@ bool Render::GetCrossHairPoint( double& x, double& y, const ePlaneType& planeTyp
 	return true;
 }
 
-void Render::PanCrossHair( int nx, int ny, ePlaneType planeType )
+void Render::PanCrossHair( int nx, int ny, PlaneType planeType )
 {
-	if (ePlaneType_VolumeRender == planeType)
+	if (PlaneVR == planeType)
 	{
 		RGBA* ptfBuffer = NULL;
 		int ntfLength = 0;
@@ -421,25 +453,6 @@ void Render::testcuda()
 #endif
 }
 
-void Render::SaveVR2BMP(const char* szFile, int nWidth, int nHeight)
-{
-	// testcuda();
-	StopWatch sw("Render::SaveVR2BMP");
-	unsigned char* pVR = new unsigned char[nWidth*nHeight*3];
-
-	{
-		StopWatch sw1("GetVRData");
-		GetVRData(pVR, nWidth, nHeight);
-	}
-
-	FILE* fp = fopen(szFile, "wb");
-	if (NULL == fp)
-		return;
-	fwrite(pVR, 1, nWidth*nHeight*3, fp);
-	fclose(fp);
-	delete [] pVR;
-}
-
 bool Render::GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInfo )
 {
 	for (int i=0; i<vecBatchData.size(); i++)
@@ -515,7 +528,7 @@ bool Render::GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInf
 		short* pData = new short[nWidth*nHeight];
 		switch (batchInfo.m_MPRType)
 		{
-		case eMPRType_Average:
+		case MPRTypeAverage:
 			{
 				cu_renderPlane_Average(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, batchInfo.m_fPixelSpacing, halfNum);
 			}
@@ -528,9 +541,9 @@ bool Render::GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInf
 	return true;
 }
 
-bool Render::GetPlaneRotateMatrix( float* pMatirx, ePlaneType planeType )
+bool Render::GetPlaneRotateMatrix( float* pMatirx, PlaneType planeType )
 {
-	if (planeType == ePlaneType_VolumeRender)
+	if (planeType == PlaneVR)
 	{
 		memcpy(pMatirx, m_pRotateMatrix, 9*sizeof(float));
 		return true;
@@ -617,7 +630,7 @@ void Render::Pan(float fxShift, float fyShift)
 	m_fTotalYTranslate += fyShift;
 }
 
-void Render::SetWL(float fWW, float fWL)
+void Render::SetVRWWWL(float fWW, float fWL)
 {
 	m_fWW = fWW;
 	m_fWL = fWL;

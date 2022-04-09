@@ -1,3 +1,25 @@
+// MIT License
+
+// Copyright (c) 2022 jiwenchen(cjwbeyond@hotmail.com)
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "VolumeInfo.h"
 #include "Defines.h"
 #include "DataManager.h"
@@ -187,7 +209,7 @@ bool VolumeInfo::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, in
 	return true;
 }
 
-bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, const ePlaneType& planeType )
+bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, const PlaneType& planeType )
 {
 	if (m_Dims[0]<=0 || m_Dims[1]<=0 || m_Dims[2]<=0)
 		return false;
@@ -199,8 +221,8 @@ bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, cons
 
 	switch (planeType)
 	{
-	case ePlaneType_Axial:
-	case ePlaneType_Axial_Oblique:
+	case PlaneAxial:
+	case PlaneAxialOblique:
 		{
 			nWidth = m_Dims[0]*m_Anisotropy[0]/minAnisotropy;
 			nHeight = m_Dims[1]*m_Anisotropy[1]/minAnisotropy;
@@ -208,8 +230,8 @@ bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, cons
 			return true;
 		}
 		break;
-	case ePlaneType_Sagittal:
-	case ePlaneType_Sagittal_Oblique:
+	case PlaneSagittal:
+	case PlaneSagittalOblique:
 		{
 			nWidth = m_Dims[1]*m_Anisotropy[1]/minAnisotropy;
 			nHeight = m_Dims[2]*m_Anisotropy[2]/minAnisotropy;
@@ -217,8 +239,8 @@ bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, cons
 			return true;
 		}
 		break;
-	case ePlaneType_Coronal:
-	case ePlaneType_Coronal_Oblique:
+	case PlaneCoronal:
+	case PlaneCoronalOblique:
 		{
 			nWidth = m_Dims[0]*m_Anisotropy[0]/minAnisotropy;
 			nHeight = m_Dims[2]*m_Anisotropy[2]/minAnisotropy;
@@ -226,7 +248,7 @@ bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, cons
 			return true;
 		}
 		break;
-	case ePlaneType_VolumeRender:
+	case PlaneVR:
 		{
 			nWidth = 512;
 			nHeight = 512;
@@ -234,8 +256,7 @@ bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, cons
 			return true;
 		}
 		break;
-	case ePlaneType_NULL:
-	case ePlaneType_Count:
+	case PlaneNotDefined:
 	default:
 		{
 			nWidth = -1;
