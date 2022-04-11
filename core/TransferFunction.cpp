@@ -26,8 +26,8 @@ using namespace MonkeyGL;
 
 TransferFunction::TransferFunction(void)
 {
-	m_nMinPos = -2048;
-	m_nMaxPos = 2048;
+	m_nMinPos = 0;
+	m_nMaxPos = 99;
 }
 
 

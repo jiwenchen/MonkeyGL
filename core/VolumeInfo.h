@@ -23,6 +23,7 @@
 #pragma once
 #include "Point.h"
 #include "Direction.h"
+#include <memory>
 #include <string>
 #include "Defines.h"
 
@@ -52,7 +53,16 @@ namespace MonkeyGL {
             m_fSliceThickness = sliceTh;
         }
 
-        short* GetVolumeData(){
+        bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
+
+        std::shared_ptr<short> GetVolumeData(){
+            return m_pVolume;
+        }
+
+        std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth){
+            nWidth = m_Dims[0];
+            nHeight = m_Dims[1];
+            nDepth = m_Dims[2];
             return m_pVolume;
         }
 
@@ -75,7 +85,7 @@ namespace MonkeyGL {
         void NormVolumeData();
 
     private:
-        short* m_pVolume;
+        std::shared_ptr<short> m_pVolume;
         double m_fSliceThickness; //mm
         double m_fSlope;
         double m_fIntercept;

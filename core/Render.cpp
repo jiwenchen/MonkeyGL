@@ -45,7 +45,7 @@ extern "C"
 void cu_copyAxialInfo( float *pPlaneAxial);
 
 extern "C"
-void cu_render(unsigned char* pVR, int nWidth, int nHeight, float fWW, float fWL, float fxTranslate, float fyTranslate, float fScale);
+void cu_render(unsigned char* pVR, int nWidth, int nHeight, float fWW, float fWL, float fxTranslate, float fyTranslate, float fScale, float colorBkg[]);
 
 extern "C"
 void cu_renderAxial(short* pData, int nWidth, int nHeight, float fDepth);
@@ -75,9 +75,6 @@ cudaExtent m_VolumeSize;
 
 Render::Render(void)
 {
-	m_dataMan.SetMinPos_TF(-2048);
-	m_dataMan.SetMaxPos_TF(2048);
-
 	m_fTotalXTranslate = 0.0f;
 	m_fTotalYTranslate = 0.0f;
 	m_fTotalScale = 1.0f;
@@ -132,6 +129,33 @@ void Render::CopyTransferFunc2Device()
 		delete [] ptfBuffer;
 }
 
+bool Render::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
+{
+	if (!IRender::SetVolumeData(pData, nWidth, nHeight, nDepth))
+		return false;
+
+	m_VolumeSize.width = m_dataMan.GetDim(0);
+	m_VolumeSize.height = m_dataMan.GetDim(1);
+	m_VolumeSize.depth = m_dataMan.GetDim(2);
+
+	cu_copyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize, m_dataMan.GetOrientation());
+
+	float m[9] = {1,0,0,0,1,0,0,0,1};
+	cu_copyOperatorMatrix(m, m);
+
+	float light[11];
+	light[0] = 0.7f;//ka
+	light[1] = 0.4f;//ks
+	light[2] = 0.6f;//kd
+	//lightColor
+	light[3] = 0.4f; light[4] = 0.0f; light[5] = 0.0f; light[6] = 0.0f;
+	//globalAmbient
+	light[7] = 0.5f; light[8] = 0.0f; light[9] = 0.0f; light[10] = 0.0f;
+	cu_copyLightPara(light, 11);
+
+	return true;
+}
+
 void Render::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
 {
 	Logger::Info(
@@ -145,7 +169,7 @@ void Render::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDe
 	m_VolumeSize.height = m_dataMan.GetDim(1);
 	m_VolumeSize.depth = m_dataMan.GetDim(2);
 
-	cu_copyVolumeData(m_dataMan.GetVolumeData(), m_VolumeSize, m_dataMan.GetOrientation());
+	cu_copyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize, m_dataMan.GetOrientation());
 
 	float m[9] = {1,0,0,0,1,0,0,0,1};
 	cu_copyOperatorMatrix(m, m);
@@ -322,7 +346,7 @@ void Render::PanCrossHair( int nx, int ny, PlaneType planeType )
 		double yPerMax = 1.0/yMaxPer;
 		double zPerMax = 1.0/zMaxPer;
 		double fStep = 1.0/m_dataMan.GetDim(2);
-		short* pVolumeData = m_dataMan.GetVolumeData();
+		short* pVolumeData = m_dataMan.GetVolumeData().get();
 		int nFrameSize = m_dataMan.GetDim(0)*m_dataMan.GetDim(1);
 		int nLineSize = m_dataMan.GetDim(0);
 
@@ -406,7 +430,7 @@ bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 	NormalizeVOI();
 	cu_setVOI(m_voi_Normalize);
 
-	cu_render(pVR, nWidth, nHeight, m_fWW, m_fWL, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale);
+	cu_render(pVR, nWidth, nHeight, m_fWW, m_fWL, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale, m_dataMan.GetColorBackground());
 
 	return true;
 }

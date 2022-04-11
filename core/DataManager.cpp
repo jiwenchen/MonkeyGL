@@ -34,22 +34,14 @@ DataManager::DataManager(void)
 	m_orientation.cy = 1.0f;
 	m_orientation.cz = 0.0f;
 
+	memset(m_colorBkg, 0, 4*sizeof(float));
+
 	m_bHaveVolumeInfo = false;
 	m_bHaveAnisotropy = false;
 }
 
 DataManager::~DataManager(void)
 {
-}
-
-void DataManager::SetMinPos_TF( int pos )
-{
-	m_tf.SetMinPos(pos);
-}
-
-void DataManager::SetMaxPos_TF( int pos )
-{
-	m_tf.SetMaxPos(pos);
 }
 
 void DataManager::SetControlPoints_TF( std::map<int,RGBA> ctrlPts )
@@ -65,6 +57,16 @@ void DataManager::SetControlPoints_TF( std::map<int,RGBA> rgbPts, std::map<int, 
 bool DataManager::GetTransferFunction( RGBA*& pBuffer, int& nLen )
 {
 	return m_tf.GetTransferFunction(pBuffer, nLen);
+}
+
+void DataManager::SetColorBackground(float clrBkg[])
+{
+	memcpy(m_colorBkg, clrBkg, 4*sizeof(float));
+}
+
+float* DataManager::GetColorBackground()
+{
+	return m_colorBkg;
 }
 
 bool DataManager::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
@@ -151,9 +153,19 @@ void DataManager::ResetPlaneInfos()
 	}
 }
 
-short* DataManager::GetVolumeData()
+bool DataManager::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
+{
+	return m_volInfo.SetVolumeData(pData, nWidth, nHeight, nDepth);
+}
+
+std::shared_ptr<short> DataManager::GetVolumeData()
 {
 	return m_volInfo.GetVolumeData();
+}
+
+std::shared_ptr<short> DataManager::GetVolumeData(int& nWidth, int& nHeight, int& nDepth)
+{
+	return m_volInfo.GetVolumeData(nWidth, nHeight, nDepth);
 }
 
 int DataManager::GetDim( int index )

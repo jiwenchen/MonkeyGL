@@ -36,12 +36,12 @@ namespace MonkeyGL {
         ~DataManager(void);
 
     public:
-        void SetMinPos_TF(int pos);
-        void SetMaxPos_TF(int pos);
         void SetControlPoints_TF(std::map<int,RGBA> ctrlPts);
         void SetControlPoints_TF(std::map<int,RGBA> rgbPts, std::map<int, double> alphaPts);
         bool GetTransferFunction(RGBA*& pBuffer, int& nLen);
 
+        void SetColorBackground(float clrBkg[]);
+        float* GetColorBackground();
 
         Orientation& GetOrientation(){
             return m_orientation;
@@ -51,7 +51,9 @@ namespace MonkeyGL {
         void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
         void SetAnisotropy(double x, double y, double z);
         void Reset();
-        short* GetVolumeData();
+        bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
+        std::shared_ptr<short> GetVolumeData();
+        std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
         int GetDim(int index);
         double GetAnisotropy(int index);
         double GetMinAnisotropy();
@@ -133,6 +135,7 @@ namespace MonkeyGL {
         Orientation m_orientation;
         Point3d m_ptCrossHair;
         Point3d m_ptCenter;
+        float m_colorBkg[4];
 
         std::map<PlaneType, PlaneInfo> m_mapPlaneType2Info;
 

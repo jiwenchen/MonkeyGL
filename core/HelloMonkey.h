@@ -23,6 +23,7 @@
 #pragma once
 #include <map>
 #include <vector>
+#include <memory>
 #include "Defines.h"
 #include "Direction.h"
 #include "PlaneInfo.h"
@@ -44,9 +45,11 @@ namespace MonkeyGL {
         virtual void Reset();
         virtual void SetTransferFunc(const std::map<int, RGBA>& ctrlPoints);
         virtual void SetTransferFunc(const std::map<int, RGBA>& rgbPoints, const std::map<int, double>& alphaPoints);
+        virtual void SetColorBackground(float clrBkg[], int count);
 
     // output
-        virtual short* GetVolumeData();
+        virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
+        virtual std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
         virtual bool GetPlaneMaxSize(int& nWidth, int& nHeight, const PlaneType& planeType);
         virtual bool GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType);
         virtual std::string  GetPlaneData_pngString(const PlaneType& planeType);

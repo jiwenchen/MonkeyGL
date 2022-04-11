@@ -84,6 +84,27 @@ void HelloMonkey::SetTransferFunc( const std::map<int, RGBA>& rgbPoints, const s
 	_pRender->SetTransferFunc(rgbPoints, alphaPoints);
 }
 
+void HelloMonkey::SetColorBackground(float clrBkg[], int count)
+{
+	if (NULL == _pRender)
+		return;
+
+	if (NULL == clrBkg || count <= 2 || count > 4){
+		Logger::Warn("failed to set color of bkg, since invalid parameters");
+		return;
+	}
+	float clr[4];
+	if (count == 3){
+		memcpy(clr, clrBkg, 3*sizeof(float));
+		clr[3] = 1.0f;
+	}
+	else if (count == 4){
+		memcpy(clr, clrBkg, 4*sizeof(float));
+	}
+
+	_pRender->SetColorBackground(clr);
+}
+
 void HelloMonkey::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
 {
 	if (NULL == _pRender)
@@ -113,11 +134,18 @@ void HelloMonkey::Reset()
 	_pRender->Reset();
 }
 
-short* HelloMonkey::GetVolumeData()
+bool HelloMonkey::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
+{
+	if (NULL == _pRender)
+		return false;
+	return _pRender->SetVolumeData(pData, nWidth, nHeight, nDepth);
+}
+
+std::shared_ptr<short> HelloMonkey::GetVolumeData(int& nWidth, int& nHeight, int& nDepth)
 {
 	if (NULL == _pRender)
 		return NULL;
-	return _pRender->GetVolumeData();
+	return _pRender->GetVolumeData(nWidth, nHeight, nDepth);
 }
 
 bool HelloMonkey::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& planeType )

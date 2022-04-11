@@ -33,6 +33,11 @@ IRender::~IRender(void)
 {
 }
 
+bool IRender::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
+{
+	return m_dataMan.SetVolumeData(pData, nWidth, nHeight, nDepth);
+}
+
 void IRender::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
 {
 	m_dataMan.LoadVolumeFile(szFile, nWidth, nHeight, nDepth);
@@ -63,9 +68,14 @@ void IRender::SetTransferFunc( const std::map<int, RGBA>& rgbPoints, const std::
 	m_dataMan.SetControlPoints_TF(rgbPoints, alphaPoints);
 }
 
-short* IRender::GetVolumeData()
+void IRender::SetColorBackground(float clrBkg[])
 {
-	return m_dataMan.GetVolumeData();
+	m_dataMan.SetColorBackground(clrBkg);
+}
+
+std::shared_ptr<short> IRender::GetVolumeData(int& nWidth, int& nHeight, int& nDepth)
+{
+	return m_dataMan.GetVolumeData(nWidth, nHeight, nDepth);
 }
 
 bool IRender::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& planeType )

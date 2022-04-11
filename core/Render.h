@@ -37,6 +37,7 @@ namespace MonkeyGL {
 
     public:
     // volume info
+        virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
         virtual void SetVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
         virtual void SetAnisotropy(double x, double y, double z);
 

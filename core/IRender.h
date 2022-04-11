@@ -40,12 +40,14 @@ namespace MonkeyGL{
 
     public:
     // volume info
+        virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
         virtual void SetVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
         virtual void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
         virtual void SetAnisotropy(double x, double y, double z);
         virtual void Reset();
         virtual void SetTransferFunc(const std::map<int, RGBA>& ctrlPoints);
         virtual void SetTransferFunc(const std::map<int, RGBA>& rgbPoints, const std::map<int, double>& alphaPoints);
+        virtual void SetColorBackground(float clrBkg[]);
 
         virtual void Browse(float fDelta, PlaneType planeType);
         virtual void SetPlaneIndex(int index, PlaneType planeType);
@@ -57,7 +59,7 @@ namespace MonkeyGL{
         virtual void SetMPRType(MPRType type);
 
     // output
-        virtual short* GetVolumeData();
+        virtual std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
         virtual bool GetPlaneMaxSize(int& nWidth, int& nHeight, const PlaneType& planeType);
         virtual bool GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType);
 

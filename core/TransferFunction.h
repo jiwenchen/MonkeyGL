@@ -34,20 +34,6 @@ namespace MonkeyGL{
         ~TransferFunction(void);
 
     public:
-        void SetMinPos(int pos){
-            m_nMinPos = pos;
-        }
-        int GetMinPos(){
-            return m_nMinPos;
-        }
-
-        void SetMaxPos(int pos){
-            m_nMaxPos = pos;
-        }
-        int GetMaxPos(){
-            return m_nMaxPos;
-        }
-
         void SetControlPoints(std::map<int,RGBA> ctrlPts){
             m_pos2rgba = ctrlPts;
             m_pos2alpha.clear();

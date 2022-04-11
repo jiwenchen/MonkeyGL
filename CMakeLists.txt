@@ -53,7 +53,7 @@ set(SRC_LIST
   ./core/StopWatch.cpp
   ./core/TransferFunction.cpp
   ./core/VolumeInfo.cpp
-  ./core/render.cu
+  ./core/kernel.cu
   ./core/test.cu
 )
 

@@ -21,11 +21,11 @@
 >size: 512 x 512 x 361  
 >anisotropy: 0.351 x 0.351 x 0.3  
 >direction: [1, 0, 0; 0, 1, 0; 0, 0, -1]  
->render performance(no sampling): 40 fps  
+>render performance(no sampling): 35 fps  
 ![picture: Volume Render of Cardiac](./pics/cardiac_vr.png)
 ### body.raw
 >size: 512 x 512 x 1559  
 >anisotropy: 0.7422 x 0.7422 x 1.0  
 >direction: [1, 0, 0; 0, 1, 0; 0, 0, -1]  
->render performance(no sampling): 25 fps  
+>render performance(no sampling): 20 fps  
 ![picture: Volume Render of Body](./pics/body_vr.png)

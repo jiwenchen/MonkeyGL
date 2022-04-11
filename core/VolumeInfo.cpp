@@ -30,7 +30,7 @@ using namespace MonkeyGL;
 
 VolumeInfo::VolumeInfo( void )
 {
-	m_pVolume = NULL;
+	m_pVolume.reset();
 	m_fSliceThickness = 1.0;
 	m_fSlope = 1;
 	m_fIntercept = 0;
@@ -43,8 +43,6 @@ VolumeInfo::VolumeInfo( void )
 
 VolumeInfo::~VolumeInfo( void )
 {
-	if (NULL != m_pVolume)
-		delete [] m_pVolume;
 }
 
 void VolumeInfo::SetDirection( Direction3d dirX, Direction3d dirY, Direction3d dirZ )
@@ -72,15 +70,18 @@ bool VolumeInfo::IsPerpendicularCoord()
 
 void VolumeInfo::NormVolumeData()
 {
+	if (NULL == m_pVolume.get())
+		return;
+
 	if (!IsInvertZ())
 	{
 		int nSizeSlice = m_Dims[0] * m_Dims[1];
 		short* pslice = new short[nSizeSlice];
 		for (int i=0; i<m_Dims[2]/2; i++)
 		{
-			memcpy(pslice, m_pVolume + nSizeSlice * i, nSizeSlice * sizeof(short));
-			memcpy(m_pVolume + nSizeSlice * i, m_pVolume + nSizeSlice * (m_Dims[2]-1-i), nSizeSlice * sizeof(short));
-			memcpy(m_pVolume + nSizeSlice * (m_Dims[2] - 1 - i), pslice, nSizeSlice * sizeof(short));
+			memcpy(pslice, m_pVolume.get() + nSizeSlice * i, nSizeSlice * sizeof(short));
+			memcpy(m_pVolume.get() + nSizeSlice * i, m_pVolume.get() + nSizeSlice * (m_Dims[2]-1-i), nSizeSlice * sizeof(short));
+			memcpy(m_pVolume.get() + nSizeSlice * (m_Dims[2] - 1 - i), pslice, nSizeSlice * sizeof(short));
 		}
 		delete[] pslice;
 
@@ -130,7 +131,7 @@ void VolumeInfo::NormVolumeData()
 
 	//m_Dims[0] = nWidth;
 	//m_Dims[1] = nHeight;
-	short* pVolumeExt = new short[nWidth*nHeight*m_Dims[2]];
+	std::shared_ptr<short> pVolumeExt(new short[nWidth*nHeight*m_Dims[2]]);
 	for (auto i=0; i<m_Dims[2]; i++)
 	{
 		double zdelta = i*m_Anisotropy[2];
@@ -150,8 +151,8 @@ void VolumeInfo::NormVolumeData()
 		int xShift = xdelta/m_Anisotropy[0];
 		int yShift = ydelta/m_Anisotropy[1];
 
-		short* pVolumeExt_slice = pVolumeExt + nWidth*nHeight*i;
-		short* pVolume_slice = m_pVolume + m_Dims[0]*m_Dims[1]*i;
+		short* pVolumeExt_slice = pVolumeExt.get() + nWidth*nHeight*i;
+		short* pVolume_slice = m_pVolume.get() + m_Dims[0]*m_Dims[1]*i;
 		for (auto y=0; y<nHeight; y++)
 		{
 			if (y<yShift || y>=yShift+m_Dims[1])
@@ -182,7 +183,6 @@ void VolumeInfo::NormVolumeData()
 	m_Dims[0] = nWidth;
 	m_Dims[1] = nHeight;
 	m_dirZ = dirNorm;
-	delete [] m_pVolume;
 	m_pVolume = pVolumeExt;
 }
 
@@ -195,18 +195,33 @@ bool VolumeInfo::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, in
 	FILE* fp = fopen(szFile, "rb");
 	if (NULL == fp)
 		return false;
-	if (NULL != m_pVolume)
-		delete [] m_pVolume;
 	m_Dims[0] = nWidth;
 	m_Dims[1] = nHeight;
 	m_Dims[2] = nDepth;
-	m_pVolume = new short[GetVolumeSize()];
-	fread(m_pVolume, GetVolumeBytes(), 1, fp);
+	m_pVolume.reset(new short[GetVolumeSize()]);
+	fread(m_pVolume.get(), GetVolumeBytes(), 1, fp);
 	fclose(fp);
 
 	NormVolumeData();
 
 	return true;
+}
+
+bool VolumeInfo::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
+{
+	StopWatch sw("VolumeInfo::SetVolumeData");
+	if (NULL==pData.get() || nWidth<=0 || nHeight<=0 || nDepth<=0)
+		return false;
+
+	m_Dims[0] = nWidth;
+	m_Dims[1] = nHeight;
+	m_Dims[2] = nDepth;
+	m_pVolume = pData;
+
+	NormVolumeData();
+
+	return true;
+
 }
 
 bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, const PlaneType& planeType )
