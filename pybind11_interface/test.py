@@ -20,6 +20,10 @@ d3 = mk.Direction3d(1.0, 1.0, 1.0)
 
 hm = mk.HelloMonkey()
 # hm.SetLogLevel(mk.LogLevelWarn)
+dirX = mk.Direction3d(1., 0., 0.)
+dirY = mk.Direction3d(0., 1., 0.)
+dirZ = mk.Direction3d(0., 0., 1.)
+hm.SetDirection(dirX, dirY, dirZ)
 hm.SetVolumeFile(f'{sys.path[0]}/../data/cardiac.raw', 512, 512, 361)
 hm.SetAnisotropy(0.351, 0.351, 0.3)
 # hm.SetVolumeFile(f'{sys.path[0]}/../data/body.raw', 512, 512, 1559)
@@ -34,7 +38,7 @@ wl = 250
 hm.SetTransferFunc(tf)
 hm.SetColorBackgroundArray(np.array([0., 0., 0.4, 1.0]))
 vol1 = hm.GetVolumeArray()
-for i in range(100):
+for i in range(1):
     print(i)
     time.sleep(2)
     vol1 = (np.random.rand(512, 512, 361)*300).astype(np.int16)
@@ -44,7 +48,7 @@ vr = hm.GetVRArray(768, 768)
 b64str = hm.GetVRData_pngString(512, 512)
 # print(b64str)
 
-b64str_mpr = hm.GetPlaneData_pngString(mk.PlaneAxial)
+b64str_mpr = hm.GetPlaneData_pngString(mk.PlaneSagittal)
 # print(b64str)
 
 pass

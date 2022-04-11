@@ -3,6 +3,7 @@ source_path=$(pwd)
 
 build_path=${source_path}"/build"
 
+py_source_path=${source_path}"/pybind11_interface" 
 py_build_path=${source_path}"/pybind11_interface/build"
 
 build_type=$2
@@ -101,6 +102,10 @@ build_cpp() {
 }
 
 build_pybind() {
+    cd ${py_source_path}
+    if [ ! -d "./pybind11" ];then
+      tar -xvzf ../ThirdPartyDownloads/pybind11.tar.gz ./
+    fi
     makesure_folder ${py_build_path}
     cd ${py_build_path}
     if [ ${build_type} == "Clean" ]; then

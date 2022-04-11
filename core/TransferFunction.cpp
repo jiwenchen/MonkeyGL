@@ -55,7 +55,7 @@ bool TransferFunction::GetTransferFunction( RGBA*& pBuffer, int& nLen )
 	if (m_pos2rgba.begin()->first != m_nMinPos)
 	{
 		RGBA& rgba = m_pos2rgba.begin()->second;
-		m_pos2rgba[m_nMinPos] = RGBA(rgba.red, rgba.green, rgba.blue, 0);
+		m_pos2rgba[m_nMinPos] = RGBA(rgba.red, rgba.green, rgba.blue, rgba.alpha);
 	}
 	if (m_pos2rgba.rbegin()->first != m_nMaxPos)
 	{

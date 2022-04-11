@@ -71,6 +71,7 @@ namespace MonkeyGL {
         virtual void SetVRWWWL(float fWW, float fWL);
 
     private:
+        void InitLights();
         void CopyTransferFunc2Device();
         void NormalizeVOI();
 

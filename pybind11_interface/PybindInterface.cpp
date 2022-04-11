@@ -97,7 +97,7 @@ public:
     virtual py::array_t<unsigned char> GetVRArray(int nWidth, int nHeight){
 	    std::shared_ptr<unsigned char> pVR (new unsigned char[nWidth*nHeight*3]);
         GetVRData((unsigned char*)pVR.get(), nWidth, nHeight);
-        return _ptr_to_arrays_3d((unsigned char*)pVR.get(), 3, nHeight, nWidth);
+        return _ptr_to_arrays_3d((unsigned char*)pVR.get(), 3, nWidth, nHeight);
     }
     
     virtual py::array_t<uint8_t> GetVRDataArray_png(int nWidth, int nHeight){
@@ -174,5 +174,6 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("GetVRData_pngString", &pyHelloMonkey::GetVRData_pngString)
         .def("GetVRData_png", &pyHelloMonkey::GetVRData_png)
         .def("SaveVR2Png", &pyHelloMonkey::SaveVR2Png)
-        .def("GetPlaneData_pngString", &pyHelloMonkey::GetPlaneData_pngString);
+        .def("GetPlaneData_pngString", &pyHelloMonkey::GetPlaneData_pngString)
+        .def("GetOriginData_pngString", &pyHelloMonkey::GetOriginData_pngString);
 }

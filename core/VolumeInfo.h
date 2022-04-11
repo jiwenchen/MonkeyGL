@@ -80,7 +80,7 @@ namespace MonkeyGL {
 
         bool GetPlaneInitSize(int& nWidth, int& nHeight, int& nNumber, const PlaneType& planeType);
 
-        bool IsInvertZ();
+        bool Need2InvertZ();
         bool IsPerpendicularCoord();
         void NormVolumeData();
 

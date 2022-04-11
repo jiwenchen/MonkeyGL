@@ -47,11 +47,11 @@ namespace MonkeyGL {
             return m_orientation;
         }
 
+        bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
         bool LoadVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
         void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
         void SetAnisotropy(double x, double y, double z);
         void Reset();
-        bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
         std::shared_ptr<short> GetVolumeData();
         std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
         int GetDim(int index);

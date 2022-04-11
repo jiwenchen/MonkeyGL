@@ -52,7 +52,8 @@ namespace MonkeyGL {
         virtual std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
         virtual bool GetPlaneMaxSize(int& nWidth, int& nHeight, const PlaneType& planeType);
         virtual bool GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType);
-        virtual std::string  GetPlaneData_pngString(const PlaneType& planeType);
+        virtual std::string GetPlaneData_pngString(const PlaneType& planeType);
+        virtual std::string GetOriginData_pngString(const int& slice);
 
         virtual bool GetCrossHairPoint(double& x, double& y, const PlaneType& planeType);
         virtual bool TransferImage2Object(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType);

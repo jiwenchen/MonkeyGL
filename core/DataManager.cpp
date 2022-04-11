@@ -69,6 +69,14 @@ float* DataManager::GetColorBackground()
 	return m_colorBkg;
 }
 
+bool DataManager::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
+{
+	m_bHaveVolumeInfo =  m_volInfo.SetVolumeData(pData, nWidth, nHeight, nDepth);
+	
+	ResetPlaneInfos();
+	return m_bHaveVolumeInfo;
+}
+
 bool DataManager::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
 {
 	m_bHaveVolumeInfo = m_volInfo.LoadVolumeFile(szFile, nWidth, nHeight, nDepth);
@@ -151,11 +159,6 @@ void DataManager::ResetPlaneInfos()
 
 		m_ptCenter = m_ptCrossHair;
 	}
-}
-
-bool DataManager::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
-{
-	return m_volInfo.SetVolumeData(pData, nWidth, nHeight, nDepth);
 }
 
 std::shared_ptr<short> DataManager::GetVolumeData()

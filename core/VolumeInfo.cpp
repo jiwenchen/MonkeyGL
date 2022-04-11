@@ -52,7 +52,7 @@ void VolumeInfo::SetDirection( Direction3d dirX, Direction3d dirY, Direction3d d
 	m_dirZ = dirZ;
 }
 
-bool VolumeInfo::IsInvertZ()
+bool VolumeInfo::Need2InvertZ()
 {
 	Direction3d dirNorm = m_dirX.cross(m_dirY);
 	if (dirNorm.dot(m_dirZ) > 0)
@@ -73,7 +73,7 @@ void VolumeInfo::NormVolumeData()
 	if (NULL == m_pVolume.get())
 		return;
 
-	if (!IsInvertZ())
+	if (Need2InvertZ())
 	{
 		int nSizeSlice = m_Dims[0] * m_Dims[1];
 		short* pslice = new short[nSizeSlice];

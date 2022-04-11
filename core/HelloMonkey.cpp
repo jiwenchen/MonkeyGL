@@ -217,6 +217,54 @@ std::string HelloMonkey::GetPlaneData_pngString(const PlaneType& planeType)
 	return strBase64;
 }
 
+std::string HelloMonkey::GetOriginData_pngString(const int& slice)
+{
+	if (NULL == _pRender)
+		return "";
+
+	StopWatch sw("GetOriginData_pngString");
+
+	int nWidth = 0, nHeight = 0, nDepth = 0;
+	std::shared_ptr<short> pData = GetVolumeData(nWidth, nHeight, nDepth);
+
+	std::vector<uint8_t> out_buf;
+	{
+		StopWatch sw("fpng");
+		fpng::fpng_encode_image_to_memory(
+			(void*)(pData.get()+nWidth*nHeight*slice),
+			nWidth/2,
+			nHeight,
+			4,
+			out_buf
+		);
+		Logger::Info(
+			Logger::FormatMsg(
+				"plane encode, from %d to %d, ratio %.4f",
+				nWidth*nHeight*sizeof(short),
+				out_buf.size(),
+				1.0*out_buf.size()/(nWidth*nHeight*sizeof(short))
+			)
+		);
+	}
+
+	std::string strBase64 = "";
+	{
+		StopWatch sw("Base64 Encode");
+		strBase64 = Base64::Encode(out_buf.data(), out_buf.size());
+
+		Logger::Info(
+			Logger::FormatMsg(
+				"plane base64, from %d to %d, ratio %.4f",
+				out_buf.size(),
+				strBase64.length(),
+				1.0*strBase64.length()/out_buf.size()
+			)
+		);
+	}
+
+	return strBase64;
+}
+
 bool HelloMonkey::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 {
 	if (NULL == _pRender)
