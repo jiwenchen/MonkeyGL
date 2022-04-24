@@ -47,6 +47,7 @@ set(SRC_LIST
   ./core/IRender.cpp
   ./core/Logger.cpp
   ./core/Methods.cpp
+  ./core/ObjectInfo.cpp
   ./core/PlaneInfo.cpp
   ./core/Point.cpp
   ./core/Render.cpp

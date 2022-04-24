@@ -31,9 +31,9 @@ namespace MonkeyGL {
     public:
         static void Init();
         static void SetLevel(LogLevel level);
-        static void Info(std::string msg);
-        static void Warn(std::string msg);
-        static void Error(std::string msg);
+        static void Info(const char * format, ...);
+        static void Warn(const char * format, ...);
+        static void Error(const char * format, ...);
 
         static std::string FormatMsg(const char * format, ...);
     };

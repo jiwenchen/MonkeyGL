@@ -36,24 +36,10 @@ namespace MonkeyGL {
         ~VolumeInfo(void);
 
     public:
-        void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
         bool LoadVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
-        int GetVolumeSize(){
-            return m_Dims[0]*m_Dims[1]*m_Dims[2];
-        }
-        int GetVolumeBytes(){
-            return GetVolumeSize()*sizeof(short);
-        }
-        void SetAnisotropy(double x, double y, double z){
-            m_Anisotropy[0] = x;
-            m_Anisotropy[1] = y;
-            m_Anisotropy[2] = z;
-        }
-        void SetSliceThickness(double sliceTh){
-            m_fSliceThickness = sliceTh;
-        }
-
         bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
+        bool AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
+        bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
 
         std::shared_ptr<short> GetVolumeData(){
             return m_pVolume;
@@ -66,16 +52,42 @@ namespace MonkeyGL {
             return m_pVolume;
         }
 
+        std::shared_ptr<unsigned char> GetMaskData(){
+            return m_pMask;
+        }
+
+        void Clear();
+
+        void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
+        int GetVolumeSize(){
+            return m_Dims[0]*m_Dims[1]*m_Dims[2];
+        }
+        int GetVolumeBytes(){
+            return GetVolumeSize()*sizeof(short);
+        }
+        void SetSpacing(double x, double y, double z){
+            m_Spacing[0] = x;
+            m_Spacing[1] = y;
+            m_Spacing[2] = z;
+        }
+        void SetSliceThickness(double sliceTh){
+            m_fSliceThickness = sliceTh;
+        }
+
+        bool HasVolumeData(){
+            return bool(m_pVolume);
+        }
+
         int GetDim(int index){
             return m_Dims[index];
         }
-        double GetAnisotropy(int index){
-            return m_Anisotropy[index];
+        double GetSpacing(int index){
+            return m_Spacing[index];
         }
-        double GetMinAnisotropy()
+        double GetMinSpacing()
         {
-            double ani = m_Anisotropy[0]<m_Anisotropy[1] ? m_Anisotropy[0] : m_Anisotropy[1];
-            return ani<m_Anisotropy[2] ? ani : m_Anisotropy[2];
+            double ani = m_Spacing[0]<m_Spacing[1] ? m_Spacing[0] : m_Spacing[1];
+            return ani<m_Spacing[2] ? ani : m_Spacing[2];
         }
 
         bool GetPlaneInitSize(int& nWidth, int& nHeight, int& nNumber, const PlaneType& planeType);
@@ -83,14 +95,16 @@ namespace MonkeyGL {
         bool Need2InvertZ();
         bool IsPerpendicularCoord();
         void NormVolumeData();
+        std::shared_ptr<unsigned char> CheckAndNormMaskData(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
+        std::shared_ptr<unsigned char> NormMaskData(std::shared_ptr<unsigned char>pData);
 
     private:
         std::shared_ptr<short> m_pVolume;
+        bool m_bVolumeHasInverted;
+        std::shared_ptr<unsigned char> m_pMask;
         double m_fSliceThickness; //mm
-        double m_fSlope;
-        double m_fIntercept;
         int m_Dims[3];
-        double m_Anisotropy[3];
+        double m_Spacing[3];
         Point3d m_ptStart;
         Direction3d m_dirX;
         Direction3d m_dirY;

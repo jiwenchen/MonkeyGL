@@ -35,3 +35,4 @@
 build/
 pybind11/
 *.raw
+*.nrrd

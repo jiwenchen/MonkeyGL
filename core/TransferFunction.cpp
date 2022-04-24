@@ -35,7 +35,7 @@ TransferFunction::~TransferFunction(void)
 {
 }
 
-bool TransferFunction::GetTransferFunction( RGBA*& pBuffer, int& nLen )
+bool TransferFunction::GetTransferFunction( std::shared_ptr<RGBA>& pBuffer, int& nLen )
 {
 	std::map<int, RGBA>::iterator iter = m_pos2rgba.begin();
 	while (iter != m_pos2rgba.end())
@@ -64,11 +64,7 @@ bool TransferFunction::GetTransferFunction( RGBA*& pBuffer, int& nLen )
 	}
 
 	nLen = m_nMaxPos - m_nMinPos + 1;
-	if (NULL != pBuffer)
-	{
-		delete [] pBuffer;
-	}
-	pBuffer = new RGBA[nLen];
+	pBuffer.reset(new RGBA[nLen]);
 
 	iter = m_pos2rgba.begin();
 	int posPrev = iter->first;
@@ -84,11 +80,11 @@ bool TransferFunction::GetTransferFunction( RGBA*& pBuffer, int& nLen )
 		{
 			int index = j-m_nMinPos;
 
-			pBuffer[index].red = rgbaPrev.red + (rgbaCur.red - rgbaPrev.red)*(j-posPrev)/nLenPart;
-			pBuffer[index].green = rgbaPrev.green + (rgbaCur.green - rgbaPrev.green)*(j-posPrev)/nLenPart;
-			pBuffer[index].blue = rgbaPrev.blue + (rgbaCur.blue - rgbaPrev.blue)*(j-posPrev)/nLenPart;
+			pBuffer.get()[index].red = rgbaPrev.red + (rgbaCur.red - rgbaPrev.red)*(j-posPrev)/nLenPart;
+			pBuffer.get()[index].green = rgbaPrev.green + (rgbaCur.green - rgbaPrev.green)*(j-posPrev)/nLenPart;
+			pBuffer.get()[index].blue = rgbaPrev.blue + (rgbaCur.blue - rgbaPrev.blue)*(j-posPrev)/nLenPart;
 
-			pBuffer[index].alpha = rgbaPrev.alpha + (rgbaCur.alpha - rgbaPrev.alpha)*(j-posPrev)/nLenPart;
+			pBuffer.get()[index].alpha = rgbaPrev.alpha + (rgbaCur.alpha - rgbaPrev.alpha)*(j-posPrev)/nLenPart;
 		}
 		posPrev = iter->first;
 		rgbaPrev = iter->second;
@@ -97,7 +93,7 @@ bool TransferFunction::GetTransferFunction( RGBA*& pBuffer, int& nLen )
 
 	if (m_pos2alpha.size() > 1)
 	{
-		std::map<int, double>::iterator iterAlpha = m_pos2alpha.begin();
+		std::map<int, float>::iterator iterAlpha = m_pos2alpha.begin();
 		while (iterAlpha != m_pos2alpha.end())
 		{
 			if (iterAlpha->first<m_nMinPos || iterAlpha->first>m_nMaxPos)
@@ -115,25 +111,25 @@ bool TransferFunction::GetTransferFunction( RGBA*& pBuffer, int& nLen )
 		}
 		if (m_pos2alpha.rbegin()->first != m_nMaxPos)
 		{
-			double& alpha = m_pos2alpha.rbegin()->second;
+			float& alpha = m_pos2alpha.rbegin()->second;
 			m_pos2alpha[m_nMaxPos] = alpha;
 		}
 
 		iterAlpha = m_pos2alpha.begin();
 		int posPrev = iterAlpha->first;
-		double alphaPrev = iterAlpha->second;
+		float alphaPrev = iterAlpha->second;
 		iterAlpha++;
 		while (iterAlpha != m_pos2alpha.end())
 		{
 			int posCur = iterAlpha->first;
-			double alphaCur = iterAlpha->second;
+			float alphaCur = iterAlpha->second;
 			int nLenPart = posCur - posPrev + 1;
 
 			for (int j=posPrev; j<=posCur; j++)
 			{
 				int index = j-m_nMinPos;
 
-				pBuffer[index].alpha = alphaPrev + (alphaCur- alphaPrev)*(j-posPrev)/nLenPart;
+				pBuffer.get()[index].alpha = alphaPrev + (alphaCur- alphaPrev)*(j-posPrev)/nLenPart;
 			}
 			posPrev = iterAlpha->first;
 			alphaPrev= iterAlpha->second;

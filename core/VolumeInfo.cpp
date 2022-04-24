@@ -25,24 +25,115 @@
 #include "DataManager.h"
 #include <cstring>
 #include "StopWatch.h"
+#include "Logger.h"
 
 using namespace MonkeyGL;
 
 VolumeInfo::VolumeInfo( void )
 {
 	m_pVolume.reset();
+	m_pMask.reset();
+	m_bVolumeHasInverted = false;
 	m_fSliceThickness = 1.0;
-	m_fSlope = 1;
-	m_fIntercept = 0;
 	memset(m_Dims, 0, 3*sizeof(int));
-	memset(m_Anisotropy, 0, 3*sizeof(double));
+	m_Spacing[0] = 1.0;
+	m_Spacing[1] = 1.0;
+	m_Spacing[2] = 1.0;
 	m_dirX = Direction3d(1, 0, 0);
 	m_dirY = Direction3d(0, 1, 0);
-	m_dirZ = Direction3d(0, 0, 1);
+	m_dirZ = Direction3d(0, 0, -1); // raw data from head to foot
 }
 
 VolumeInfo::~VolumeInfo( void )
 {
+}
+
+void VolumeInfo::Clear(){
+	m_pVolume.reset();
+	m_pMask.reset();
+	m_bVolumeHasInverted = false;
+}
+
+bool VolumeInfo::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
+{
+	StopWatch sw("VolumeInfo::LoadVolumeFile");
+
+	if (nWidth<=0 || nHeight<=0 || nDepth<=0)
+		return false;
+	FILE* fp = fopen(szFile, "rb");
+	if (NULL == fp)
+		return false;
+	m_Dims[0] = nWidth;
+	m_Dims[1] = nHeight;
+	m_Dims[2] = nDepth;
+	m_pVolume.reset(new short[GetVolumeSize()]);
+	fread(m_pVolume.get(), GetVolumeBytes(), 1, fp);
+	fclose(fp);
+
+	m_pMask.reset();
+	NormVolumeData();
+
+	return true;
+}
+
+bool VolumeInfo::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
+{
+	StopWatch sw("VolumeInfo::SetVolumeData");
+	if (!pData || nWidth<=0 || nHeight<=0 || nDepth<=0)
+		return false;
+
+	m_Dims[0] = nWidth;
+	m_Dims[1] = nHeight;
+	m_Dims[2] = nDepth;
+	m_pVolume = pData;
+	m_pMask.reset();
+
+	NormVolumeData();
+
+	return true;
+}
+
+bool VolumeInfo::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
+{
+	pData = CheckAndNormMaskData(pData, nWidth, nHeight, nDepth);
+	if (!pData){
+		return false;
+	}
+	int nTotalVoxel = nWidth * nHeight * nDepth;
+	if (!m_pMask){
+		m_pMask.reset(new unsigned char[nTotalVoxel]);
+		for (int i=0; i<nTotalVoxel; i++){
+			if (pData.get()[i] > 0){
+				m_pMask.get()[i] = nLabel;
+			}
+		}
+	}
+	else{
+		for (int i=0; i<nWidth*nHeight*nDepth; i++){
+			if (pData.get()[i] > 0){
+				m_pMask.get()[i] = nLabel;
+			}
+		}
+	}
+	return true;
+}
+
+bool VolumeInfo::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
+{
+	pData = CheckAndNormMaskData(pData, nWidth, nHeight, nDepth);
+	if (!pData || !m_pMask){
+		return false;
+	}
+
+	for (int i=0; i<nWidth*nHeight*nDepth; i++){
+		if (pData.get()[i] > 0){
+			m_pMask.get()[i] = nLabel;
+		}
+		else if (pData.get()[i] == 0 && m_pMask.get()[i] == nLabel){
+			m_pMask.get()[i] = 0;
+		}
+	}
+	return true;
 }
 
 void VolumeInfo::SetDirection( Direction3d dirX, Direction3d dirY, Direction3d dirZ )
@@ -70,31 +161,31 @@ bool VolumeInfo::IsPerpendicularCoord()
 
 void VolumeInfo::NormVolumeData()
 {
-	if (NULL == m_pVolume.get())
+	if (!m_pVolume)
 		return;
 
 	if (Need2InvertZ())
 	{
 		int nSizeSlice = m_Dims[0] * m_Dims[1];
-		short* pslice = new short[nSizeSlice];
+		std::shared_ptr<short> pslice(new short[nSizeSlice]);
 		for (int i=0; i<m_Dims[2]/2; i++)
 		{
-			memcpy(pslice, m_pVolume.get() + nSizeSlice * i, nSizeSlice * sizeof(short));
+			memcpy(pslice.get(), m_pVolume.get() + nSizeSlice * i, nSizeSlice * sizeof(short));
 			memcpy(m_pVolume.get() + nSizeSlice * i, m_pVolume.get() + nSizeSlice * (m_Dims[2]-1-i), nSizeSlice * sizeof(short));
-			memcpy(m_pVolume.get() + nSizeSlice * (m_Dims[2] - 1 - i), pslice, nSizeSlice * sizeof(short));
+			memcpy(m_pVolume.get() + nSizeSlice * (m_Dims[2] - 1 - i), pslice.get(), nSizeSlice * sizeof(short));
 		}
-		delete[] pslice;
 
 		m_dirZ = Direction3d(-m_dirZ.x(), -m_dirZ.y(), -m_dirZ.z());
+		m_bVolumeHasInverted = true;
 	}
 
 	if (IsPerpendicularCoord())
 		return;
 
 	Direction3d dirNorm = m_dirX.cross(m_dirY);
-	double xLen = m_Anisotropy[0] * m_Dims[0];
-	double yLen = m_Anisotropy[1] * m_Dims[1];
-	double zLen = m_Anisotropy[2] * m_Dims[2];
+	double xLen = m_Spacing[0] * m_Dims[0];
+	double yLen = m_Spacing[1] * m_Dims[1];
+	double zLen = m_Spacing[2] * m_Dims[2];
 
 	double cosV = abs(dirNorm.dot(m_dirZ));
 	if (cosV == 0)
@@ -126,15 +217,15 @@ void VolumeInfo::NormVolumeData()
 	xLen += ptShift_proj.x();
 	yLen += ptShift_proj.y();
 
-	int nWidth = xLen / m_Anisotropy[0];
-	int nHeight = yLen / m_Anisotropy[1];
+	int nWidth = xLen / m_Spacing[0];
+	int nHeight = yLen / m_Spacing[1];
 
 	//m_Dims[0] = nWidth;
 	//m_Dims[1] = nHeight;
 	std::shared_ptr<short> pVolumeExt(new short[nWidth*nHeight*m_Dims[2]]);
 	for (auto i=0; i<m_Dims[2]; i++)
 	{
-		double zdelta = i*m_Anisotropy[2];
+		double zdelta = i*m_Spacing[2];
 		Point3d ptLT(ptStart.x()+zdelta*dirNorm.x(),
 			ptStart.y()+zdelta*dirNorm.y(),
 			ptStart.z()+zdelta*dirNorm.z()
@@ -148,8 +239,8 @@ void VolumeInfo::NormVolumeData()
 		double xdelta = abs(ptLT_ori.x() - ptLT.x());
 		double ydelta = abs(ptLT_ori.y() - ptLT.y());
 
-		int xShift = xdelta/m_Anisotropy[0];
-		int yShift = ydelta/m_Anisotropy[1];
+		int xShift = xdelta/m_Spacing[0];
+		int yShift = ydelta/m_Spacing[1];
 
 		short* pVolumeExt_slice = pVolumeExt.get() + nWidth*nHeight*i;
 		short* pVolume_slice = m_pVolume.get() + m_Dims[0]*m_Dims[1]*i;
@@ -186,80 +277,76 @@ void VolumeInfo::NormVolumeData()
 	m_pVolume = pVolumeExt;
 }
 
-bool VolumeInfo::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
+std::shared_ptr<unsigned char> VolumeInfo::NormMaskData(std::shared_ptr<unsigned char>pData)
 {
-	StopWatch sw("VolumeInfo::LoadVolumeFile");
+	if (!pData)
+		return pData;
 
-	if (nWidth<=0 || nHeight<=0 || nDepth<=0)
-		return false;
-	FILE* fp = fopen(szFile, "rb");
-	if (NULL == fp)
-		return false;
-	m_Dims[0] = nWidth;
-	m_Dims[1] = nHeight;
-	m_Dims[2] = nDepth;
-	m_pVolume.reset(new short[GetVolumeSize()]);
-	fread(m_pVolume.get(), GetVolumeBytes(), 1, fp);
-	fclose(fp);
+	if (m_bVolumeHasInverted)
+	{
+		int nSizeSlice = m_Dims[0] * m_Dims[1];
+		std::shared_ptr<unsigned char> pslice(new unsigned char[nSizeSlice]);
+		for (int i=0; i<m_Dims[2]/2; i++)
+		{
+			memcpy(pslice.get(), pData.get() + nSizeSlice * i, nSizeSlice * sizeof(unsigned char));
+			memcpy(pData.get() + nSizeSlice * i, pData.get() + nSizeSlice * (m_Dims[2]-1-i), nSizeSlice * sizeof(unsigned char));
+			memcpy(pData.get() + nSizeSlice * (m_Dims[2] - 1 - i), pslice.get(), nSizeSlice * sizeof(unsigned char));
+		}
+	}
 
-	NormVolumeData();
-
-	return true;
+	return pData;
 }
 
-bool VolumeInfo::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
+std::shared_ptr<unsigned char> VolumeInfo::CheckAndNormMaskData(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth)
 {
-	StopWatch sw("VolumeInfo::SetVolumeData");
-	if (NULL==pData.get() || nWidth<=0 || nHeight<=0 || nDepth<=0)
-		return false;
+	if (!pData || nWidth<=0 || nHeight<=0 || nDepth<=0)
+		return std::shared_ptr<unsigned char>(NULL);
 
-	m_Dims[0] = nWidth;
-	m_Dims[1] = nHeight;
-	m_Dims[2] = nDepth;
-	m_pVolume = pData;
-
-	NormVolumeData();
-
-	return true;
-
+	if (nWidth != m_Dims[0] || nHeight != m_Dims[1] || nDepth != m_Dims[2])
+	{
+		Logger::Warn("invalid mask size[%d, %d, %d], to volume size[%d, %d, %d]", m_Dims[0], m_Dims[1], m_Dims[2], nWidth, nHeight, nDepth);
+		return std::shared_ptr<unsigned char>(NULL);
+	}
+	pData = NormMaskData(pData);
+	return pData;
 }
 
 bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, const PlaneType& planeType )
 {
 	if (m_Dims[0]<=0 || m_Dims[1]<=0 || m_Dims[2]<=0)
 		return false;
-	if (m_Anisotropy[0]<=0 || m_Anisotropy[1]<=0 || m_Anisotropy[2]<=0)
+	if (m_Spacing[0]<=0 || m_Spacing[1]<=0 || m_Spacing[2]<=0)
 		return false;
 
-	double minAnisotropy = m_Anisotropy[0]<m_Anisotropy[1] ? m_Anisotropy[0]:m_Anisotropy[1];
-	minAnisotropy = minAnisotropy<m_Anisotropy[2] ? minAnisotropy:m_Anisotropy[2];	
+	double minSpacing = m_Spacing[0]<m_Spacing[1] ? m_Spacing[0]:m_Spacing[1];
+	minSpacing = minSpacing<m_Spacing[2] ? minSpacing:m_Spacing[2];	
 
 	switch (planeType)
 	{
 	case PlaneAxial:
 	case PlaneAxialOblique:
 		{
-			nWidth = m_Dims[0]*m_Anisotropy[0]/minAnisotropy;
-			nHeight = m_Dims[1]*m_Anisotropy[1]/minAnisotropy;
-			nNumber = m_Dims[2]*m_Anisotropy[2]/minAnisotropy;
+			nWidth = m_Dims[0]*m_Spacing[0]/minSpacing;
+			nHeight = m_Dims[1]*m_Spacing[1]/minSpacing;
+			nNumber = m_Dims[2]*m_Spacing[2]/minSpacing;
 			return true;
 		}
 		break;
 	case PlaneSagittal:
 	case PlaneSagittalOblique:
 		{
-			nWidth = m_Dims[1]*m_Anisotropy[1]/minAnisotropy;
-			nHeight = m_Dims[2]*m_Anisotropy[2]/minAnisotropy;
-			nNumber = m_Dims[0]*m_Anisotropy[0]/minAnisotropy;
+			nWidth = m_Dims[1]*m_Spacing[1]/minSpacing;
+			nHeight = m_Dims[2]*m_Spacing[2]/minSpacing;
+			nNumber = m_Dims[0]*m_Spacing[0]/minSpacing;
 			return true;
 		}
 		break;
 	case PlaneCoronal:
 	case PlaneCoronalOblique:
 		{
-			nWidth = m_Dims[0]*m_Anisotropy[0]/minAnisotropy;
-			nHeight = m_Dims[2]*m_Anisotropy[2]/minAnisotropy;
-			nNumber = m_Dims[1]*m_Anisotropy[1]/minAnisotropy;
+			nWidth = m_Dims[0]*m_Spacing[0]/minSpacing;
+			nHeight = m_Dims[2]*m_Spacing[2]/minSpacing;
+			nNumber = m_Dims[1]*m_Spacing[1]/minSpacing;
 			return true;
 		}
 		break;

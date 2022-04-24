@@ -41,19 +41,19 @@ namespace MonkeyGL {
         virtual void SetLogLevel(LogLevel level);
         virtual void SetVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
         virtual void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
-        virtual void SetAnisotropy(double x, double y, double z);
+        virtual void SetSpacing(double x, double y, double z);
         virtual void Reset();
-        virtual void SetTransferFunc(const std::map<int, RGBA>& ctrlPoints);
-        virtual void SetTransferFunc(const std::map<int, RGBA>& rgbPoints, const std::map<int, double>& alphaPoints);
-        virtual void SetColorBackground(float clrBkg[], int count);
+        virtual void SetColorBackground(RGBA clrBG);
+        virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
+        virtual unsigned char AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
+        virtual bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
 
     // output
-        virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
         virtual std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
         virtual bool GetPlaneMaxSize(int& nWidth, int& nHeight, const PlaneType& planeType);
         virtual bool GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType);
         virtual std::string GetPlaneData_pngString(const PlaneType& planeType);
-        virtual std::string GetOriginData_pngString(const int& slice);
+        virtual std::string GetOriginData_pngString(int slice);
 
         virtual bool GetCrossHairPoint(double& x, double& y, const PlaneType& planeType);
         virtual bool TransferImage2Object(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType);
@@ -87,7 +87,14 @@ namespace MonkeyGL {
         virtual void Rotate(float fxRotate, float fyRotate);
         virtual void Zoom(float ratio);
         virtual void Pan(float fxShift, float fyShift);
-        virtual void SetVRWWWL(float fWW, float fWL);
+        virtual bool SetVRWWWL(float fWW, float fWL);
+        virtual bool SetVRWWWL(float fWW, float fWL, unsigned char nLabel);
+        virtual bool SetObjectAlpha(float fAlpha);
+        virtual bool SetObjectAlpha(float fAlpha, unsigned char nLabel);
+        virtual bool SetTransferFunc(std::map<int, RGBA> ctrlPoints);
+        virtual bool SetTransferFunc(std::map<int, RGBA> ctrlPoints, unsigned char nLabel);
+        virtual bool SetTransferFunc(std::map<int, RGBA> rgbPoints, std::map<int, float> alphaPoints);
+        virtual bool SetTransferFunc(std::map<int, RGBA> rgbPoints, std::map<int, float> alphaPoints, unsigned char nLabel);
 
         virtual void Browse(float fDelta, PlaneType planeType);	
         virtual void PanCrossHair(int nx, int ny, PlaneType planeType);

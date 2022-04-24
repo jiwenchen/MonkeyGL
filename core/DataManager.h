@@ -26,6 +26,8 @@
 #include "Defines.h"
 #include "PlaneInfo.h"
 #include <vector>
+#include <set>
+#include "ObjectInfo.h"
 
 namespace MonkeyGL {
 
@@ -36,27 +38,40 @@ namespace MonkeyGL {
         ~DataManager(void);
 
     public:
-        void SetControlPoints_TF(std::map<int,RGBA> ctrlPts);
-        void SetControlPoints_TF(std::map<int,RGBA> rgbPts, std::map<int, double> alphaPts);
-        bool GetTransferFunction(RGBA*& pBuffer, int& nLen);
+        bool LoadVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
+        bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
+        unsigned char AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
+        bool UpdateActiveObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
+        bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
+        std::shared_ptr<short> GetVolumeData();
+        std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
+        std::shared_ptr<unsigned char> GetMaskData();
 
-        void SetColorBackground(float clrBkg[]);
-        float* GetColorBackground();
+        void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
+        void SetSpacing(double x, double y, double z);
+
+        bool SetVRWWWL(float fWW, float fWL);
+        bool SetVRWWWL(float fWW, float fWL, unsigned char nLabel);
+        bool SetObjectAlpha(float fAlpha);
+        bool SetObjectAlpha(float fAlpha, unsigned char nLabel);
+        bool SetControlPoints_TF(std::map<int, RGBA> ctrlPts);
+        bool SetControlPoints_TF(std::map<int, RGBA> ctrlPts, unsigned char nLabel);
+        bool SetControlPoints_TF(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts);
+        bool SetControlPoints_TF(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts, unsigned char nLabel);
+        std::map<unsigned char, ObjectInfo> GetObjectInfos();
+
+        void Reset();
 
         Orientation& GetOrientation(){
             return m_orientation;
         }
 
-        bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
-        bool LoadVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
-        void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
-        void SetAnisotropy(double x, double y, double z);
-        void Reset();
-        std::shared_ptr<short> GetVolumeData();
-        std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
+        void SetColorBackground(RGBA clrBG);
+        RGBA GetColorBackground();
+
         int GetDim(int index);
-        double GetAnisotropy(int index);
-        double GetMinAnisotropy();
+        double GetSpacing(int index);
+        double GetMinSpacing();
         bool GetPlaneMaxSize(int& nWidth, int& nHeight, const PlaneType& planeType);
         bool GetPlaneSize(int& nWidth, int& nHeight, const PlaneType& planeType);
         bool GetPlaneNumber(int& nNumber, const PlaneType& planeType);
@@ -81,9 +96,9 @@ namespace MonkeyGL {
             return m_ptCenter;
         }
         Point3d GetCrossHair_Voxel(){
-            return Point3d(m_ptCrossHair.x()/m_volInfo.GetAnisotropy(0),
-                m_ptCrossHair.y()/m_volInfo.GetAnisotropy(1),
-                m_ptCrossHair.z()/m_volInfo.GetAnisotropy(2));
+            return Point3d(m_ptCrossHair.x()/m_volInfo.GetSpacing(0),
+                m_ptCrossHair.y()/m_volInfo.GetSpacing(1),
+                m_ptCrossHair.z()/m_volInfo.GetSpacing(2));
         }
         bool GetCrossHairPoint(double& x, double& y, const PlaneType& planeType);
         bool TransferImage2Object(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType);
@@ -93,15 +108,15 @@ namespace MonkeyGL {
         bool GetBatchDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, double fAngle, const PlaneType& planeType );
 
         bool GetPlaneInfo(PlaneType planeType, PlaneInfo& info){
-            if (m_mapPlaneType2Info.find(planeType) == m_mapPlaneType2Info.end())
+            if (m_planeInfos.find(planeType) == m_planeInfos.end())
                 return false;
-            info = m_mapPlaneType2Info[planeType];
+            info = m_planeInfos[planeType];
             return true;
         }
         Point3d Object2Voxel(Point3d ptObject){
-            return Point3d(ptObject.x()/m_volInfo.GetAnisotropy(0),
-                ptObject.y()/m_volInfo.GetAnisotropy(1),
-                ptObject.z()/m_volInfo.GetAnisotropy(2));
+            return Point3d(ptObject.x()/m_volInfo.GetSpacing(0),
+                ptObject.y()/m_volInfo.GetSpacing(1),
+                ptObject.z()/m_volInfo.GetSpacing(2));
         }
         Point3d GetCenterPointPlane(Direction3d dirN){
             return DataManager::GetProjectPoint(dirN, m_ptCrossHair, m_ptCenter);
@@ -118,6 +133,7 @@ namespace MonkeyGL {
         }
 
     private:
+        void ClearAndReset();
         void ResetPlaneInfos();
         bool IsExistGroupPlaneInfos(PlaneType planeType);
         PlaneType GetHorizonalPlaneType(PlaneType planeType);
@@ -130,17 +146,16 @@ namespace MonkeyGL {
         std::vector<Point3d> GetVertexes();
 
     private:
-        TransferFunction m_tf;
         VolumeInfo m_volInfo;
+        int m_activeLabel;
+        std::map<unsigned char, ObjectInfo> m_objectInfos;
+
         Orientation m_orientation;
         Point3d m_ptCrossHair;
         Point3d m_ptCenter;
-        float m_colorBkg[4];
+        RGBA m_colorBG;
 
-        std::map<PlaneType, PlaneInfo> m_mapPlaneType2Info;
-
-        bool m_bHaveVolumeInfo;
-        bool m_bHaveAnisotropy;
+        std::map<PlaneType, PlaneInfo> m_planeInfos;
     };
 
 }

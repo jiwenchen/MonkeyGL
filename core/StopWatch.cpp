@@ -31,17 +31,12 @@ StopWatch::StopWatch(const char* szMsg)
 {
     m_starttime_ms = StopWatch::GetMSStamp();
     m_strMsg = std::string(szMsg);
-    Logger::Info(m_strMsg +  " begin...");
+    Logger::Info("%s begin...", m_strMsg.c_str());
 }
 
 StopWatch::~StopWatch()
 {
-    std::string msg = Logger::FormatMsg(
-        "%s end. cost %d ms",
-        m_strMsg.c_str(),
-        StopWatch::GetMSStamp() - m_starttime_ms
-    );
-    Logger::Info(msg);
+    Logger::Info("%s end. cost %d ms", m_strMsg.c_str(), StopWatch::GetMSStamp() - m_starttime_ms);
 }
 
 long long StopWatch::GetMSStamp()

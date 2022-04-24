@@ -80,18 +80,34 @@ std::shared_ptr<T> _arrays_3d_to_ptr(py::array_t<T> npData, int& nWidth, int& nH
 class pyHelloMonkey : public HelloMonkey {
 
 public:
-    py::array_t<short> GetVolumeArray(){
+    virtual py::array_t<short> GetVolumeArray(){
         int nWidth=0, nHeight=0, nDepth=0;
         std::shared_ptr<short> pData = GetVolumeData(nWidth, nHeight, nDepth);
         return _ptr_to_arrays_3d(pData.get(), nWidth, nHeight, nDepth);
     };
 
-    bool SetVolumeArray(py::array_t<short> npData){
+    virtual bool SetVolumeArray(py::array_t<short> npData){
         int nWidth = 0;
         int nHeight = 0;
         int nDepth = 0;
         std::shared_ptr<short> pData = _arrays_3d_to_ptr(npData, nWidth, nHeight, nDepth);
         return SetVolumeData(pData, nWidth, nHeight, nDepth);
+    };
+
+    virtual unsigned char AddNewObjectMaskArray(py::array_t<unsigned char> npData){
+        int nWidth = 0;
+        int nHeight = 0;
+        int nDepth = 0;
+        std::shared_ptr<unsigned char> pData = _arrays_3d_to_ptr(npData, nWidth, nHeight, nDepth);
+        return AddNewObjectMask(pData, nWidth, nHeight, nDepth);
+    };
+
+    virtual bool UpdateMaskArray(py::array_t<unsigned char> npData, const unsigned char& nLabel){
+        int nWidth = 0;
+        int nHeight = 0;
+        int nDepth = 0;
+        std::shared_ptr<unsigned char> pData = _arrays_3d_to_ptr(npData, nWidth, nHeight, nDepth);
+        return UpdateObjectMask(pData, nWidth, nHeight, nDepth, nLabel);
     };
 
     virtual py::array_t<unsigned char> GetVRArray(int nWidth, int nHeight){
@@ -105,11 +121,6 @@ public:
         return _ptr_to_arrays_1d(out_buf.data(), out_buf.size());
     }
 
-    virtual void SetColorBackgroundArray(py::array_t<float> clrBkg){
-        int cnt = 0;
-        std::shared_ptr<float> pData = _arrays_1d_to_ptr(clrBkg, cnt);
-        SetColorBackground(pData.get(), cnt);
-    }
 };
 
 PYBIND11_MODULE(pyMonkeyGL, m) {
@@ -157,13 +168,20 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetLogLevel", &pyHelloMonkey::SetLogLevel)
         .def("SetVolumeFile", &pyHelloMonkey::SetVolumeFile)
         .def("SetVolumeArray", &pyHelloMonkey::SetVolumeArray)
-        .def("SetAnisotropy", &pyHelloMonkey::SetAnisotropy)
+        .def("AddNewObjectMaskArray", &pyHelloMonkey::AddNewObjectMaskArray)
+        .def("UpdateMaskArray", &pyHelloMonkey::UpdateMaskArray)
+        .def("SetSpacing", &pyHelloMonkey::SetSpacing)
         .def("SetDirection", &pyHelloMonkey::SetDirection)
-        .def("SetTransferFunc", static_cast<void (pyHelloMonkey::*)(const std::map<int, RGBA>&)>(&pyHelloMonkey::SetTransferFunc))
-        .def("SetTransferFunc", static_cast<void (pyHelloMonkey::*)(const std::map<int, RGBA>&, const std::map<int, double>&)>(&pyHelloMonkey::SetTransferFunc))
-        .def("SetColorBackgroundArray", &pyHelloMonkey::SetColorBackgroundArray)
+        .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>)>(&pyHelloMonkey::SetTransferFunc))
+        .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>, unsigned char)>(&pyHelloMonkey::SetTransferFunc))
+        .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>, std::map<int, float>)>(&pyHelloMonkey::SetTransferFunc))
+        .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>, std::map<int, float>, unsigned char)>(&pyHelloMonkey::SetTransferFunc))
+        .def("SetColorBackground", &pyHelloMonkey::SetColorBackground)
         .def("Reset", &pyHelloMonkey::Reset)
-        .def("SetVRWWWL", &pyHelloMonkey::SetVRWWWL)
+        .def("SetVRWWWL", static_cast<bool (pyHelloMonkey::*)(float, float)>(&pyHelloMonkey::SetVRWWWL))
+        .def("SetVRWWWL", static_cast<bool (pyHelloMonkey::*)(float, float, unsigned char)>(&pyHelloMonkey::SetVRWWWL))
+        .def("SetObjectAlpha", static_cast<bool (pyHelloMonkey::*)(float)>(&pyHelloMonkey::SetObjectAlpha))
+        .def("SetObjectAlpha", static_cast<bool (pyHelloMonkey::*)(float, unsigned char)>(&pyHelloMonkey::SetObjectAlpha))
         .def("Rotate", &pyHelloMonkey::Rotate)
         .def("Browse", &pyHelloMonkey::Browse)
         .def("UpdateThickness", &pyHelloMonkey::UpdateThickness)

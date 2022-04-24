@@ -29,6 +29,7 @@ using namespace std;
 namespace MonkeyGL{
 
     #define PI 3.141592654
+    #define MAXOBJECTCOUNT 64
 
     struct RGBA
     {
@@ -82,6 +83,18 @@ namespace MonkeyGL{
         float cx;
         float cy;
         float cz;
+
+        Orientation(){
+            reset();
+        }
+        void reset(){
+            rx = 1.0f;
+            ry = 0.0f;
+            rz = 0.0f;
+            cx = 0.0f;
+            cy = 1.0f;
+            cz = 0.0f;
+        }
     } ;
 
     struct Lightparams{
@@ -92,6 +105,23 @@ namespace MonkeyGL{
         float globalAmbient[4];
     };
 
+    struct AlphaAndWWWL{
+        float alpha;
+        float ww;
+        float wl;
+
+        AlphaAndWWWL(){
+            alpha = 0.0f;
+            ww = 0.0f;
+            wl = 0.0f;
+        }
+        AlphaAndWWWL(float a, float w, float l){
+            alpha = a;
+            ww = w;
+            wl = l;
+        }
+    };
+    
     enum PlaneType
     {
         PlaneNotDefined = -1,

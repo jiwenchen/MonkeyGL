@@ -44,10 +44,10 @@ void initLogger(){
 
 std::string Logger::FormatMsg(const char * format, ...)
 {
-	char buf[4069];
+	char buf[4096];
 	va_list list;
 	va_start(list, format);
-	vsnprintf(buf, 4069, format, list);
+	vsnprintf(buf, 4096, format, list);
 	va_end(list);
 	return std::string(buf);
 }
@@ -74,14 +74,29 @@ void Logger::SetLevel(LogLevel level){
     }
 }
 
-void Logger::Info(std::string msg){
-    LOG4CPLUS_INFO(logger, LOG4CPLUS_TEXT(msg.c_str()));
+void Logger::Info(const char * format, ...){
+	char buf[4096];
+	va_list list;
+	va_start(list, format);
+	vsnprintf(buf, 4096, format, list);
+	va_end(list);
+    LOG4CPLUS_INFO(logger, LOG4CPLUS_TEXT(buf));
 }
 
-void Logger::Warn(std::string msg){
-    LOG4CPLUS_WARN(logger, LOG4CPLUS_TEXT(msg.c_str()));
+void Logger::Warn(const char * format, ...){
+	char buf[4096];
+	va_list list;
+	va_start(list, format);
+	vsnprintf(buf, 4096, format, list);
+	va_end(list);
+    LOG4CPLUS_WARN(logger, LOG4CPLUS_TEXT(buf));
 }
 
-void Logger::Error(std::string msg){
-    LOG4CPLUS_ERROR(logger, LOG4CPLUS_TEXT(msg.c_str()));
+void Logger::Error(const char * format, ...){
+	char buf[4096];
+	va_list list;
+	va_start(list, format);
+	vsnprintf(buf, 4096, format, list);
+	va_end(list);
+    LOG4CPLUS_ERROR(logger, LOG4CPLUS_TEXT(buf));
 }

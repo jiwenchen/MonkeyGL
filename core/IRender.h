@@ -41,13 +41,13 @@ namespace MonkeyGL{
     public:
     // volume info
         virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
+        virtual unsigned char AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
+        bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
         virtual void SetVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
         virtual void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
-        virtual void SetAnisotropy(double x, double y, double z);
+        virtual void SetSpacing(double x, double y, double z);
         virtual void Reset();
-        virtual void SetTransferFunc(const std::map<int, RGBA>& ctrlPoints);
-        virtual void SetTransferFunc(const std::map<int, RGBA>& rgbPoints, const std::map<int, double>& alphaPoints);
-        virtual void SetColorBackground(float clrBkg[]);
+        virtual void SetColorBackground(RGBA clrBG);
 
         virtual void Browse(float fDelta, PlaneType planeType);
         virtual void SetPlaneIndex(int index, PlaneType planeType);
@@ -60,6 +60,7 @@ namespace MonkeyGL{
 
     // output
         virtual std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
+        virtual std::shared_ptr<unsigned char> GetMaskData();
         virtual bool GetPlaneMaxSize(int& nWidth, int& nHeight, const PlaneType& planeType);
         virtual bool GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType);
 
@@ -91,7 +92,14 @@ namespace MonkeyGL{
         virtual void Rotate(float fxRotate, float fyRotate) = 0;
         virtual void Zoom(float ratio) = 0;
         virtual void Pan(float fxShift, float fyShift) = 0;
-        virtual void SetVRWWWL(float fWW, float fWL) = 0;
+        virtual bool SetVRWWWL(float fWW, float fWL);
+        virtual bool SetVRWWWL(float fWW, float fWL, unsigned char nLabel);
+        virtual bool SetObjectAlpha(float fAlpha);
+        virtual bool SetObjectAlpha(float fAlpha, unsigned char nLabel);
+        virtual bool SetTransferFunc(std::map<int, RGBA> ctrlPts);
+        virtual bool SetTransferFunc(std::map<int, RGBA> ctrlPts, unsigned char nLabel);
+        virtual bool SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts);
+        virtual bool SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts, unsigned char nLabel);
 
     protected:
         DataManager m_dataMan;

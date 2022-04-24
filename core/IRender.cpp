@@ -38,6 +38,16 @@ bool IRender::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight
 	return m_dataMan.SetVolumeData(pData, nWidth, nHeight, nDepth);
 }
 
+unsigned char IRender::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth)
+{
+	return m_dataMan.AddNewObjectMask(pData, nWidth, nHeight, nDepth);
+}
+
+bool IRender::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
+{
+	return m_dataMan.UpdateObjectMask(pData, nWidth, nHeight, nDepth, nLabel);
+}
+
 void IRender::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
 {
 	m_dataMan.LoadVolumeFile(szFile, nWidth, nHeight, nDepth);
@@ -48,9 +58,9 @@ void IRender::SetDirection( Direction3d dirX, Direction3d dirY, Direction3d dirZ
 	m_dataMan.SetDirection(dirX, dirY, dirZ);
 }
 
-void IRender::SetAnisotropy( double x, double y, double z )
+void IRender::SetSpacing( double x, double y, double z )
 {
-	m_dataMan.SetAnisotropy(x, y, z);
+	m_dataMan.SetSpacing(x, y, z);
 }
 
 void IRender::Reset()
@@ -58,24 +68,40 @@ void IRender::Reset()
 	m_dataMan.Reset();
 }
 
-void IRender::SetTransferFunc( const std::map<int, RGBA>& ctrlPoints )
+
+bool IRender::SetTransferFunc(std::map<int, RGBA> ctrlPts)
 {
-	m_dataMan.SetControlPoints_TF(ctrlPoints);
+	return m_dataMan.SetControlPoints_TF(ctrlPts);
 }
 
-void IRender::SetTransferFunc( const std::map<int, RGBA>& rgbPoints, const std::map<int, double>& alphaPoints)
+bool IRender::SetTransferFunc(std::map<int, RGBA> ctrlPts, unsigned char nLabel)
 {
-	m_dataMan.SetControlPoints_TF(rgbPoints, alphaPoints);
+	return m_dataMan.SetControlPoints_TF(ctrlPts, nLabel);
 }
 
-void IRender::SetColorBackground(float clrBkg[])
+bool IRender::SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts)
 {
-	m_dataMan.SetColorBackground(clrBkg);
+	return m_dataMan.SetControlPoints_TF(rgbPts, alphaPts);
+}
+
+bool IRender::SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts, unsigned char nLabel)
+{
+	return m_dataMan.SetControlPoints_TF(rgbPts, alphaPts, nLabel);
+}
+
+void IRender::SetColorBackground(RGBA clrBG)
+{
+	m_dataMan.SetColorBackground(clrBG);
 }
 
 std::shared_ptr<short> IRender::GetVolumeData(int& nWidth, int& nHeight, int& nDepth)
 {
 	return m_dataMan.GetVolumeData(nWidth, nHeight, nDepth);
+}
+
+std::shared_ptr<unsigned char> IRender::GetMaskData()
+{
+	return m_dataMan.GetMaskData();
 }
 
 bool IRender::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& planeType )
@@ -178,3 +204,24 @@ void IRender::SetMPRType(MPRType type)
 {
 	m_dataMan.SetMPRType(type);
 }
+
+bool IRender::SetVRWWWL(float fWW, float fWL)
+{
+	return m_dataMan.SetVRWWWL(fWW, fWL);
+}
+
+bool IRender::SetVRWWWL(float fWW, float fWL, unsigned char nLabel)
+{
+	return m_dataMan.SetVRWWWL(fWW, fWL, nLabel);
+}
+
+bool IRender::SetObjectAlpha(float fAlpha)
+{
+	return m_dataMan.SetObjectAlpha(fAlpha);
+}
+
+bool IRender::SetObjectAlpha(float fAlpha, unsigned char nLabel)
+{
+	return m_dataMan.SetObjectAlpha(fAlpha, nLabel);
+}
+

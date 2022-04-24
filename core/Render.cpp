@@ -30,11 +30,13 @@
 using namespace MonkeyGL;
 
 extern "C"
-void cu_InitCommon(float fxSample, float fySample, float fzSample);
+void cu_InitCommon(float fxSpacing, float fySpacing, float fzSpacing);
 extern "C"
 void cu_copyVolumeData( short* h_volumeData, cudaExtent volumeSize, Orientation orientation);
 extern "C"
-void cu_copyTransferFunc( float* pTransferFunc, int nLenTransferFunc);
+void cu_copyMaskData( unsigned char* h_maskData);
+extern "C"
+bool cu_setTransferFunc( float* pTransferFunc, int nLenTransferFunc, unsigned char nLabel);
 extern "C"
 void cu_copyOperatorMatrix( float *pTransformMatrix, float *pTransposeTransformMatrix);
 extern "C"
@@ -42,10 +44,10 @@ void cu_copyLightPara( float *pLightPara, int nLen);
 extern "C"
 void cu_setVOI(VOI voi);
 extern "C"
-void cu_copyAxialInfo( float *pPlaneAxial);
+void cu_copyAlphaAndWWWL(float *pAlphaAndWWWL);
 
 extern "C"
-void cu_render(unsigned char* pVR, int nWidth, int nHeight, float fWW, float fWL, float fxTranslate, float fyTranslate, float fScale, float colorBkg[]);
+void cu_render(unsigned char* pVR, int nWidth, int nHeight, float fxTranslate, float fyTranslate, float fScale, RGBA colorBG);
 
 extern "C"
 void cu_renderAxial(short* pData, int nWidth, int nHeight, float fDepth);
@@ -66,10 +68,12 @@ void ReleaseCuda();
 
 extern "C" 
 void cu_test_3d( short* h_volumeData, cudaExtent volumeSize );
-extern "C" 
-void cu_test_1d( float* h_volumeData, int nLen );
 extern "C"
-void cu_init_test_1d();
+void cu_init_id();
+extern "C" 
+bool cu_set_1d( float* h_volumeData, int nLen, unsigned char nLabel );
+extern "C" 
+void cu_test_1d( int nLen,  unsigned char nLabel );
 
 cudaExtent m_VolumeSize;
 
@@ -78,8 +82,6 @@ Render::Render(void)
 	m_fTotalXTranslate = 0.0f;
 	m_fTotalYTranslate = 0.0f;
 	m_fTotalScale = 1.0f;
-	m_fWW = 400.0f;
-	m_fWL = 40.0f;
 
 	m_pRotateMatrix = new float[9];
 	Methods::SetSeg(m_pRotateMatrix,3);
@@ -89,6 +91,8 @@ Render::Render(void)
 	Methods::SetSeg(m_pTransformMatrix,3);
 	m_pTransposeTransformMatrix = new float[9];
 	Methods::SetSeg(m_pTransposeTransformMatrix,3);
+
+	// testcuda();
 }
 
 
@@ -104,29 +108,102 @@ Render::~Render(void)
 		delete [] m_pTransposeTransformMatrix;
 }
 
-void Render::SetTransferFunc( const std::map<int, RGBA>& ctrlPoints )
+bool Render::SetTransferFunc( std::map<int, RGBA> ctrlPoints )
 {
-	IRender::SetTransferFunc(ctrlPoints);
+	if (!IRender::SetTransferFunc(ctrlPoints)){
+		return false;
+	}
 	CopyTransferFunc2Device();
+	return true;
 }
 
-void Render::SetTransferFunc(const std::map<int, RGBA>& rgbPoints, const std::map<int, double>& alphaPoints)
+bool Render::SetTransferFunc(std::map<int, RGBA> ctrlPoints, unsigned char nLabel )
 {
-	IRender::SetTransferFunc(rgbPoints, alphaPoints);
+	if (!IRender::SetTransferFunc(ctrlPoints, nLabel)){
+		return false;
+	}
 	CopyTransferFunc2Device();
+	return true;
+}
+
+bool Render::SetTransferFunc(std::map<int, RGBA> rgbPoints, std::map<int, float> alphaPoints)
+{
+	if (!IRender::SetTransferFunc(rgbPoints, alphaPoints)){
+		return false;
+	}
+	CopyTransferFunc2Device();
+	return true;
+}
+
+bool Render::SetTransferFunc(std::map<int, RGBA> rgbPoints, std::map<int, float> alphaPoints, unsigned char nLabel)
+{
+	if (!IRender::SetTransferFunc(rgbPoints, alphaPoints, nLabel)){
+		return false;
+	}
+	CopyTransferFunc2Device();
+	return true;
 }
 
 void Render::CopyTransferFunc2Device()
 {
-	RGBA* ptfBuffer = NULL;
+	std::shared_ptr<RGBA> ptfBuffer(NULL);
 	int ntfLength = 0;
-	if (m_dataMan.GetTransferFunction(ptfBuffer, ntfLength))
-	{
-		cu_copyTransferFunc((float*)ptfBuffer, ntfLength);
-	}
 
-	if (NULL != ptfBuffer)
-		delete [] ptfBuffer;
+	std::map<unsigned char, ObjectInfo> objectInfos = m_dataMan.GetObjectInfos();
+	for (std::map<unsigned char, ObjectInfo>::iterator iter=objectInfos.begin(); iter!=objectInfos.end(); iter++){
+		if (iter->second.GetTransferFunction(ptfBuffer, ntfLength))
+		{
+			cu_setTransferFunc((float*)(ptfBuffer.get()), ntfLength, iter->first);
+		}
+	}
+}
+
+bool Render::SetVRWWWL(float fWW, float fWL)
+{
+	if (!IRender::SetVRWWWL(fWW, fWL)){
+		return false;
+	}
+	CopyAlphaWWWL2Device();
+	return true;
+}
+
+bool Render::SetVRWWWL(float fWW, float fWL, unsigned char nLabel)
+{
+	if (!IRender::SetVRWWWL(fWW, fWL, nLabel)){
+		return false;
+	}
+	CopyAlphaWWWL2Device();
+	return true;
+}
+
+bool Render::SetObjectAlpha(float fAlpha)
+{
+	if (!IRender::SetObjectAlpha(fAlpha)){
+		return false;
+	}
+	CopyAlphaWWWL2Device();
+	return true;
+}
+
+bool Render::SetObjectAlpha(float fAlpha, unsigned char nLabel)
+{
+	if (!IRender::SetObjectAlpha(fAlpha, nLabel)){
+		return false;
+	}
+	CopyAlphaWWWL2Device();
+	return true;
+}
+
+void Render::CopyAlphaWWWL2Device()
+{
+	std::map<unsigned char, ObjectInfo> objectInfos = m_dataMan.GetObjectInfos();
+	for (std::map<unsigned char, ObjectInfo>::iterator iter=objectInfos.begin(); iter!=objectInfos.end(); iter++){
+		unsigned char label = iter->first;
+		ObjectInfo info = iter->second;
+		m_AlphaAndWWWL[label] = AlphaAndWWWL(info.alpha, info.ww, info.wl);
+		Logger::Info("Render::CopyAlphaWWWL2Device: label[%d], alpha[%.2f], ww[%.2f], wl[%.2f]", label, info.alpha, info.ww, info.wl);
+	}
+	cu_copyAlphaAndWWWL((float*)m_AlphaAndWWWL);
 }
 
 void Render::InitLights()
@@ -161,13 +238,31 @@ bool Render::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight,
 	return true;
 }
 
+unsigned char Render::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth)
+{
+	unsigned char nLabel = IRender::AddNewObjectMask(pData, nWidth, nHeight, nDepth);
+	if (nLabel == 0)
+		return 0;
+
+	cu_copyMaskData(m_dataMan.GetMaskData().get());
+
+	return nLabel;
+}
+
+bool Render::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
+{
+	if (!IRender::AddNewObjectMask(pData, nWidth, nHeight, nDepth))
+		return false;
+
+	cu_copyMaskData(m_dataMan.GetMaskData().get());
+
+	return true;
+}
+
 void Render::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
 {
-	Logger::Info(
-		Logger::FormatMsg(
-			"load volume file: %s", szFile
-		)
-	);
+	Logger::Info("load volume file: %s", szFile);
+	
 	IRender::SetVolumeFile(szFile, nWidth, nHeight, nDepth);
 
 	m_VolumeSize.width = m_dataMan.GetDim(0);
@@ -206,9 +301,9 @@ void Render::NormalizeVOI()
 	m_voi_Normalize.foot = (int)m_fVOI_zEnd;
 }
 
-void Render::SetAnisotropy( double x, double y, double z )
+void Render::SetSpacing( double x, double y, double z )
 {
-	IRender::SetAnisotropy(x, y, z);
+	IRender::SetSpacing(x, y, z);
 	cu_InitCommon(x, y, z);
 }
 
@@ -304,13 +399,13 @@ bool Render::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType
 		double x = ptRotate.x();
 		double z = ptRotate.z();
 
-		double xLen = m_dataMan.GetDim(0)*m_dataMan.GetAnisotropy(0);
-		double zLen = m_dataMan.GetDim(2)*m_dataMan.GetAnisotropy(2);
+		double xLen = m_dataMan.GetDim(0)*m_dataMan.GetSpacing(0);
+		double zLen = m_dataMan.GetDim(2)*m_dataMan.GetSpacing(2);
 
-		double ans = (xLen/nWidth)>(zLen/nHeight) ? (xLen/nWidth) : (zLen/nHeight);
+		double spacing = (xLen/nWidth)>(zLen/nHeight) ? (xLen/nWidth) : (zLen/nHeight);
 		
-		x = (nWidth-1)/2.0 + (x/ans) + m_fTotalXTranslate;
-		y = (nHeight-1)/2.0 + (z/ans) + m_fTotalYTranslate;
+		x = (nWidth-1)/2.0 + (x/spacing) + m_fTotalXTranslate;
+		y = (nHeight-1)/2.0 + (z/spacing) + m_fTotalYTranslate;
 	}
 	else
 	{
@@ -323,89 +418,89 @@ void Render::PanCrossHair( int nx, int ny, PlaneType planeType )
 {
 	if (PlaneVR == planeType)
 	{
-		RGBA* ptfBuffer = NULL;
-		int ntfLength = 0;
-		if (!m_dataMan.GetTransferFunction(ptfBuffer, ntfLength))
-			return;
+		// std::shared_ptr<RGBA> ptfBuffer(NULL);
+		// int ntfLength = 0;
+		// // if (!m_dataMan.GetTransferFunction(ptfBuffer, ntfLength))
+		// // 	return;
 
-		double xLen = m_dataMan.GetDim(0)*m_dataMan.GetAnisotropy(0);
-		double yLen = m_dataMan.GetDim(1)*m_dataMan.GetAnisotropy(1);
-		double zLen = m_dataMan.GetDim(2)*m_dataMan.GetAnisotropy(2);
-		double maxLen = xLen > yLen ? xLen : yLen;
-		maxLen = maxLen > zLen ? maxLen : zLen;
-		double xMaxPer = maxLen/xLen;
-		double yMaxPer = maxLen/yLen;
-		double zMaxPer = maxLen/zLen;
-		double xPerMax = 1.0/xMaxPer;
-		double yPerMax = 1.0/yMaxPer;
-		double zPerMax = 1.0/zMaxPer;
-		double fStep = 1.0/m_dataMan.GetDim(2);
-		short* pVolumeData = m_dataMan.GetVolumeData().get();
-		int nFrameSize = m_dataMan.GetDim(0)*m_dataMan.GetDim(1);
-		int nLineSize = m_dataMan.GetDim(0);
+		// double xLen = m_dataMan.GetDim(0)*m_dataMan.GetSpacing(0);
+		// double yLen = m_dataMan.GetDim(1)*m_dataMan.GetSpacing(1);
+		// double zLen = m_dataMan.GetDim(2)*m_dataMan.GetSpacing(2);
+		// double maxLen = xLen > yLen ? xLen : yLen;
+		// maxLen = maxLen > zLen ? maxLen : zLen;
+		// double xMaxPer = maxLen/xLen;
+		// double yMaxPer = maxLen/yLen;
+		// double zMaxPer = maxLen/zLen;
+		// double xPerMax = 1.0/xMaxPer;
+		// double yPerMax = 1.0/yMaxPer;
+		// double zPerMax = 1.0/zMaxPer;
+		// double fStep = 1.0/m_dataMan.GetDim(2);
+		// short* pVolumeData = m_dataMan.GetVolumeData().get();
+		// int nFrameSize = m_dataMan.GetDim(0)*m_dataMan.GetDim(1);
+		// int nLineSize = m_dataMan.GetDim(0);
 
-		float fMinV = m_fWL - m_fWW*0.5f;
+		// float fMinV = m_fWL - m_fWW*0.5f;
 
-		int nWidth = 0;
-		int nHeight = 0;
-		m_dataMan.GetPlaneSize(nWidth, nHeight, planeType);
-		double u = 1.0*(nx - nWidth/2 - m_fTotalXTranslate)/nWidth;
-		double v = 1.0*(ny- nHeight/2 - m_fTotalYTranslate)/nHeight;
-		double accuLength = 0.0f;
-		double alpha_acc = 0.0f;
-		double fy = 0;
-		int nx=0, ny=0, nz=0;
-		int nxPos = nx, nyPos = ny, nzPos = nz;
-		while (accuLength < 1.732)
-		{
-			fy = (accuLength - 0.866)*m_fTotalScale;
-			Point3d pt(u, fy, v);
-			Point3d ptRotate = Methods::matrixMul(m_pTransformMatrix, pt);
-			double x = ptRotate[0] * xMaxPer + 0.5;
-			double y = ptRotate[1] * yMaxPer + 0.5;
-			double z = ptRotate[2] * zMaxPer + 0.5;
-			if (x<0 || x>=1 || y<0 || y>=1 || z<0 || z>=1)
-			{
-				accuLength += fStep;
-				continue;
-			}
-			nx = x*m_dataMan.GetDim(0);
-			ny = y*m_dataMan.GetDim(1);
-			nz = z*m_dataMan.GetDim(2);
-			short huValue = pVolumeData[nz*nFrameSize+ny*nLineSize+nx];
-			short hut = (huValue-fMinV)/m_fWW * ntfLength;
-			hut = hut<0 ? 0:hut;
-			hut = hut>=ntfLength ? (ntfLength-1):hut;
+		// int nWidth = 0;
+		// int nHeight = 0;
+		// m_dataMan.GetPlaneSize(nWidth, nHeight, planeType);
+		// double u = 1.0*(nx - nWidth/2 - m_fTotalXTranslate)/nWidth;
+		// double v = 1.0*(ny- nHeight/2 - m_fTotalYTranslate)/nHeight;
+		// double accuLength = 0.0f;
+		// double alpha_acc = 0.0f;
+		// double fy = 0;
+		// int nx=0, ny=0, nz=0;
+		// int nxPos = nx, nyPos = ny, nzPos = nz;
+		// while (accuLength < 1.732)
+		// {
+		// 	fy = (accuLength - 0.866)*m_fTotalScale;
+		// 	Point3d pt(u, fy, v);
+		// 	Point3d ptRotate = Methods::matrixMul(m_pTransformMatrix, pt);
+		// 	double x = ptRotate[0] * xMaxPer + 0.5;
+		// 	double y = ptRotate[1] * yMaxPer + 0.5;
+		// 	double z = ptRotate[2] * zMaxPer + 0.5;
+		// 	if (x<0 || x>=1 || y<0 || y>=1 || z<0 || z>=1)
+		// 	{
+		// 		accuLength += fStep;
+		// 		continue;
+		// 	}
+		// 	nx = x*m_dataMan.GetDim(0);
+		// 	ny = y*m_dataMan.GetDim(1);
+		// 	nz = z*m_dataMan.GetDim(2);
+		// 	short huValue = pVolumeData[nz*nFrameSize+ny*nLineSize+nx];
+		// 	short hut = (huValue-fMinV)/m_fWW * ntfLength;
+		// 	hut = hut<0 ? 0:hut;
+		// 	hut = hut>=ntfLength ? (ntfLength-1):hut;
 
-			double w = ptfBuffer[hut].alpha;
+		// 	double w = ptfBuffer.get()[hut].alpha;
 
-			if (w > 0)
-			{
-				nxPos = nx;
-				nyPos = ny;
-				nzPos = nz;
-				alpha_acc += w;
-				if (alpha_acc > 0.995)
-					break;
-			}
+		// 	if (w > 0)
+		// 	{
+		// 		nxPos = nx;
+		// 		nyPos = ny;
+		// 		nzPos = nz;
+		// 		alpha_acc += w;
+		// 		if (alpha_acc > 0.995)
+		// 			break;
+		// 	}
 
-			accuLength += fStep;
-		}
-		if (alpha_acc <= 0)
-		{
-			fy = 0;
-			Point3d pt(u, fy, v);
-			Point3d ptRotate = Methods::matrixMul(m_pTransformMatrix, pt);
-			double x = ptRotate[0] * xMaxPer + 0.5;
-			double y = ptRotate[1] * yMaxPer + 0.5;
-			double z = ptRotate[2] * zMaxPer + 0.5;
-			nxPos = x*m_dataMan.GetDim(0);
-			nyPos = y*m_dataMan.GetDim(1);
-			nzPos = z*m_dataMan.GetDim(2);
-		}
+		// 	accuLength += fStep;
+		// }
+		// if (alpha_acc <= 0)
+		// {
+		// 	fy = 0;
+		// 	Point3d pt(u, fy, v);
+		// 	Point3d ptRotate = Methods::matrixMul(m_pTransformMatrix, pt);
+		// 	double x = ptRotate[0] * xMaxPer + 0.5;
+		// 	double y = ptRotate[1] * yMaxPer + 0.5;
+		// 	double z = ptRotate[2] * zMaxPer + 0.5;
+		// 	nxPos = x*m_dataMan.GetDim(0);
+		// 	nyPos = y*m_dataMan.GetDim(1);
+		// 	nzPos = z*m_dataMan.GetDim(2);
+		// }
 
-		Point3d ptObject(nxPos*m_dataMan.GetAnisotropy(0), nyPos*m_dataMan.GetAnisotropy(1), nzPos*m_dataMan.GetAnisotropy(2));
-		m_dataMan.SetCrossHair(ptObject);
+		// Point3d ptObject(nxPos*m_dataMan.GetSpacing(0), nyPos*m_dataMan.GetSpacing(1), nzPos*m_dataMan.GetSpacing(2));
+		// m_dataMan.SetCrossHair(ptObject);
 	}
 	else
 	{
@@ -424,7 +519,7 @@ bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 	NormalizeVOI();
 	cu_setVOI(m_voi_Normalize);
 
-	cu_render(pVR, nWidth, nHeight, m_fWW, m_fWL, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale, m_dataMan.GetColorBackground());
+	cu_render(pVR, nWidth, nHeight, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale, m_dataMan.GetColorBackground());
 
 	return true;
 }
@@ -447,6 +542,7 @@ void Render::testcuda()
 
 	delete [] pData;
 #else
+	cu_init_id();
 	int nLen = 100;
 	float* pData = new float[nLen*4];
 	for(int i=0; i<nLen; i++){
@@ -455,9 +551,7 @@ void Render::testcuda()
 		pData[4*i+2] = i;
 		pData[4*i+3] = i+1;
 	}
-
-	cu_init_test_1d();
-	cu_test_1d(pData, nLen);
+	cu_set_1d(pData, nLen, 1);
 
 	for(int i=0; i<nLen; i++){
 		pData[4*i] = i+20;
@@ -465,7 +559,13 @@ void Render::testcuda()
 		pData[4*i+2] = i+20;
 		pData[4*i+3] = i+20+1;
 	}
-	cu_test_1d(pData, nLen);
+	cu_set_1d(pData, nLen, 10);
+
+	for (int l=0; l<10000; l++)
+	{
+		for (int i=0; i<12; i++)
+			cu_test_1d(nLen, i);
+	}
 
 	delete [] pData;
 #endif
@@ -646,10 +746,4 @@ void Render::Pan(float fxShift, float fyShift)
 {
 	m_fTotalXTranslate += fxShift;
 	m_fTotalYTranslate += fyShift;
-}
-
-void Render::SetVRWWWL(float fWW, float fWL)
-{
-	m_fWW = fWW;
-	m_fWL = fWL;
 }

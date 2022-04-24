@@ -24,6 +24,7 @@
 #include <string>
 #include <map>
 #include "Defines.h"
+#include <memory>
 
 namespace MonkeyGL{
 
@@ -34,11 +35,11 @@ namespace MonkeyGL{
         ~TransferFunction(void);
 
     public:
-        void SetControlPoints(std::map<int,RGBA> ctrlPts){
+        void SetControlPoints(std::map<int, RGBA> ctrlPts){
             m_pos2rgba = ctrlPts;
             m_pos2alpha.clear();
         }
-        void SetControlPoints(std::map<int,RGBA> rgbPts, std::map<int, double> alphaPts){
+        void SetControlPoints(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts){
             m_pos2rgba = rgbPts;
             m_pos2alpha = alphaPts;
         }
@@ -50,11 +51,11 @@ namespace MonkeyGL{
             return m_pos2rgba;
         }
 
-        bool GetTransferFunction(RGBA*& pBuffer, int& nLen);
+        bool GetTransferFunction(std::shared_ptr<RGBA>& pBuffer, int& nLen);
 
     private:
         std::map<int, RGBA> m_pos2rgba;
-        std::map<int, double> m_pos2alpha;
+        std::map<int, float> m_pos2alpha;
         int m_nMinPos;
         int m_nMaxPos;
     };

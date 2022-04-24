@@ -38,11 +38,10 @@ namespace MonkeyGL {
     public:
     // volume info
         virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
+        virtual unsigned char AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
+        virtual bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
         virtual void SetVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
-        virtual void SetAnisotropy(double x, double y, double z);
-
-        virtual void SetTransferFunc(const std::map<int, RGBA>& ctrlPoints);
-        virtual void SetTransferFunc(const std::map<int, RGBA>& rgbPoints, const std::map<int, double>& alphaPoints);
+        virtual void SetSpacing(double x, double y, double z);
 
     // output
         virtual bool GetPlaneMaxSize(int& nWidth, int& nHeight, const PlaneType& planeType);
@@ -68,11 +67,20 @@ namespace MonkeyGL {
         virtual void Rotate(float fxRotate, float fyRotate);
         virtual void Zoom(float ratio);
         virtual void Pan(float fxShift, float fyShift);
-        virtual void SetVRWWWL(float fWW, float fWL);
+        
+        virtual bool SetVRWWWL(float fWW, float fWL);
+        virtual bool SetVRWWWL(float fWW, float fWL, unsigned char nLabel);
+        virtual bool SetObjectAlpha(float fAlpha);
+        virtual bool SetObjectAlpha(float fAlpha, unsigned char nLabel);
+        virtual bool SetTransferFunc(std::map<int, RGBA> ctrlPts);
+        virtual bool SetTransferFunc(std::map<int, RGBA> ctrlPts, unsigned char nLabel);
+        virtual bool SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts);
+        virtual bool SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts, unsigned char nLabel);
 
     private:
         void InitLights();
         void CopyTransferFunc2Device();
+        void CopyAlphaWWWL2Device();
         void NormalizeVOI();
 
         void testcuda();
@@ -89,9 +97,8 @@ namespace MonkeyGL {
         float m_fTotalXTranslate;
         float m_fTotalYTranslate;
         float m_fTotalScale;
-        float m_fWW;
-        float m_fWL;
 
+        AlphaAndWWWL m_AlphaAndWWWL[MAXOBJECTCOUNT+1];
         float* m_pRotateMatrix;
         float* m_pTransposRotateMatrix;
         float* m_pTransformMatrix;

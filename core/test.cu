@@ -105,55 +105,47 @@ void cu_test_3d( VolumeType* h_volumeData, cudaExtent volumeSize)
     free(pOut);
 }
 
-cudaArray *d_transferFuncArray_test = 0;
-cudaTextureObject_t transferTex_test;
+__constant__ cudaTextureObject_t cTexts[32];
+cudaTextureObject_t texts[32];
+cudaArray *d_transferFuncArray_test[32];
 
-
-__global__ void transformKernel_1d(
-    float* output,
-    cudaTextureObject_t texObj,
-    int nLen
-) 
-{
-	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
-
-    float4 c = tex1D<float4>(texObj, 1.0*x/nLen);
-    output[4*x] = c.x;
-    output[4*x+1] = c.y;
-    output[4*x+2] = c.z;
-    output[4*x+3] = c.w;
-}
-
-
-cudaResourceDesc texRes;
-cudaTextureDesc texDescr;
 
 extern "C"
-void cu_init_test_1d()
+void cu_init_id()
 {
+    for (int i=0; i<32; i++){
+        d_transferFuncArray_test[i] = 0;
+    }
+}
+
+extern "C" 
+bool cu_set_1d( float* pTransferFunc, int nLenTransferFunc, unsigned char nLabel )
+{
+    if (nLabel >= 32){
+        return false;
+    }
+    cudaResourceDesc texRes;
     memset(&texRes, 0, sizeof(cudaResourceDesc));
     texRes.resType = cudaResourceTypeArray;
 
+    cudaTextureDesc texDescr;
     memset(&texDescr, 0, sizeof(cudaTextureDesc));
     texDescr.normalizedCoords = true;
     texDescr.filterMode = cudaFilterModeLinear;
     texDescr.addressMode[0] = cudaAddressModeClamp;
     texDescr.readMode = cudaReadModeElementType;
 
-    // checkCudaErrors(
-    //     cudaCreateTextureObject(&transferTex_test, &texRes, &texDescr, NULL)
-    // );
-}
-
-
-extern "C" 
-void cu_test_1d( float* pTransferFunc, int nLenTransferFunc )
-{
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float4>();
-    checkCudaErrors(cudaMallocArray( &d_transferFuncArray_test, &channelDesc, nLenTransferFunc, 1));
+
+    if (d_transferFuncArray_test[nLabel] != 0)
+	{
+		checkCudaErrors(cudaFreeArray(d_transferFuncArray_test[nLabel]));
+		d_transferFuncArray_test[nLabel] = 0;
+	}
+    checkCudaErrors(cudaMallocArray( &d_transferFuncArray_test[nLabel], &channelDesc, nLenTransferFunc, 1));
     checkCudaErrors(
         cudaMemcpy2DToArray(
-            d_transferFuncArray_test, 
+            d_transferFuncArray_test[nLabel], 
             0, 
             0, 
             pTransferFunc,
@@ -164,22 +156,48 @@ void cu_test_1d( float* pTransferFunc, int nLenTransferFunc )
         )
     );
 
-    texRes.res.array.array = d_transferFuncArray_test;
+    texRes.res.array.array = d_transferFuncArray_test[nLabel];
 
+    cudaTextureObject_t text = 0;
     checkCudaErrors(
-        cudaCreateTextureObject(&transferTex_test, &texRes, &texDescr, NULL)
+        cudaCreateTextureObject(&text, &texRes, &texDescr, NULL)
     );
 
+    texts[nLabel] = text;
+    cudaMemcpyToSymbol(cTexts, texts, sizeof(texts));
+
+    return true;
+}
+
+__global__ void transformKernel_1d(
+    float* output,
+    int nLen,
+    unsigned char nLabel
+) 
+{
+	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
+
+    float4 c = tex1D<float4>(cTexts[nLabel], 1.0*x/nLen);
+    output[4*x] = c.x;
+    output[4*x+1] = c.y;
+    output[4*x+2] = c.z;
+    output[4*x+3] = c.w;
+}
+
+extern "C" 
+void cu_test_1d(int nLenTransferFunc, unsigned char nLabel)
+{
     float* result_arr;
     cudaMalloc(&result_arr, nLenTransferFunc * 4 * sizeof(float));
 
     dim3 blockSize(16);
 	dim3 gridSize( (nLenTransferFunc-1)/blockSize.x+1 );
-    transformKernel_1d<<<gridSize, blockSize>>>(result_arr, transferTex_test, nLenTransferFunc);
+    transformKernel_1d<<<gridSize, blockSize>>>(result_arr, nLenTransferFunc, nLabel);
 
     float* pOut = (float*)malloc(nLenTransferFunc * 4 * sizeof(float));
 
     cudaMemcpy( pOut, result_arr, nLenTransferFunc * 4 * sizeof(float), cudaMemcpyDeviceToHost );
+    cudaFree(result_arr);
 
     for (int i=0; i<nLenTransferFunc; i++){
         printf("%.2f %.2f %.2f %.2f\n", pOut[4*i], pOut[4*i+1], pOut[4*i+2], pOut[4*i+3]);
