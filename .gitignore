@@ -36,3 +36,4 @@ build/
 pybind11/
 *.raw
 *.nrrd
+*.pyc

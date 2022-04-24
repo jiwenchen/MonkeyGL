@@ -5,7 +5,7 @@ import base64
 import io
 
 print (sys.path[0])
-sys.path.append(f'{sys.path[0]}/build')
+sys.path.append(f'{sys.path[0]}/../pybind11_interface/build')
 import pyMonkeyGL as mk
 
 from typing import Optional

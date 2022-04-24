@@ -1,5 +1,5 @@
 import sys
-sys.path.append(f'{sys.path[0]}/build')
+sys.path.append(f'{sys.path[0]}/../pybind11_interface/build')
 
 import pyMonkeyGL as mk
 import numpy as np
