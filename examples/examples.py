@@ -57,43 +57,38 @@ def test_load_volme():
     # print(b64str)
 
 def test_set_data(): 
+    hm = mk.HelloMonkey()
     itk_img = sitk.ReadImage(f'{file_path}/corocta.nrrd')
-    npdata = sitk.GetArrayFromImage(itk_img)
-    npdatat = npdata.swapaxes(2, 0)
-
-    itk_mask = sitk.ReadImage(f'{file_path}/corocta_vessel_mask.nii.gz')
-    npmaskdata = sitk.GetArrayFromImage(itk_mask)
-    npmaskdatat = npmaskdata.swapaxes(2, 0)
-
-    itk_mask2 = sitk.ReadImage(f'{file_path}/corocta_heart_mask.nii.gz')
-    npmaskdata2 = sitk.GetArrayFromImage(itk_mask2)
-    npmaskdatat2 = npmaskdata2.swapaxes(2, 0)
-
     dir = itk_img.GetDirection()
     dirX = mk.Direction3d(dir[0], dir[1], dir[2])
     dirY = mk.Direction3d(dir[3], dir[4], dir[5])
     dirZ = mk.Direction3d(dir[6], dir[7], dir[8])
     spacing = itk_img.GetSpacing()
- 
-    hm = mk.HelloMonkey()
+    depth = itk_img.GetDepth()
+    npdata = sitk.GetArrayFromImage(itk_img)
+    npdatat = npdata.swapaxes(2,0)
+
+    itk_mask = sitk.ReadImage(f'{file_path}/corocta_vessel_mask.nii.gz')
+    npmaskdata = sitk.GetArrayFromImage(itk_mask)
+    npmaskdatat = npmaskdata.swapaxes(2,0)
+
+    itk_mask2 = sitk.ReadImage(f'{file_path}/corocta_heart_mask.nii.gz')
+    npmaskdata2 = sitk.GetArrayFromImage(itk_mask2)
+    npmaskdatat2 = npmaskdata2.swapaxes(2,0)
+
     hm.SetDirection(dirX, dirY, dirZ)
     hm.SetVolumeArray(npdatat)
-    # label1 = hm.AddNewObjectMaskArray(npmaskdatat)
-    # hm.UpdateMaskArray(npmaskdatat, label1)
-    # label2 = hm.AddNewObjectMaskArray(npmaskdatat2)
-    # hm.SetSpacing(spacing[0], spacing[1], spacing[2])
 
     tf0 = {}
     tf0[5] = mk.RGBA(0.8, 0.8, 0.8, 0)
     tf0[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
-    ww0 = 400
-    wl0 = -40
+    ww0 = 500
+    wl0 = 100
     hm.SetVRWWWL(ww0, wl0)
-    hm.SetObjectAlpha(0.3, 0)
+    hm.SetObjectAlpha(0, 0)
     hm.SetTransferFunc(tf0)
 
     label1 = hm.AddNewObjectMaskArray(npmaskdatat)
-    # label2 = hm.AddNewObjectMaskArray(npmaskdatat2)
     tf1 = {}
     tf1[5] = mk.RGBA(0.8, 0, 0, 0)
     tf1[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
@@ -103,9 +98,22 @@ def test_set_data():
     hm.SetObjectAlpha(1, 1)
     hm.SetTransferFunc(tf1)
 
+    label2 = hm.AddNewObjectMaskArray(npmaskdatat2)
+    tf1 = {}
+    tf1[5] = mk.RGBA(0.8, 0, 0, 0)
+    tf1[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
+    ww1 = 500
+    wl1 = 100
+    hm.SetVRWWWL(ww1, wl1, label2)
+    hm.SetObjectAlpha(0.4, label2)
+    hm.SetTransferFunc(tf1)
+
+    hm.SetSpacing(spacing[0], spacing[1], spacing[2])
+
     hm.GetOriginData_pngString(250)
 
     b64str = hm.GetVRData_pngString(512, 512)
+    hm.SaveVR2Png('multivol.png', 512, 512)
 
 
 if __name__ == "__main__":

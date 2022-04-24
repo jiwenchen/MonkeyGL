@@ -29,3 +29,11 @@
 >direction: [1, 0, 0; 0, 1, 0; 0, 0, -1]  
 >render performance(no sampling): 20 fps  
 ![picture: Volume Render of Body](./pics/body_vr.png)
+
+### multi volume
+>size: 512 x 512 x 256  
+>spacing: 0.458983 x 0.458983 x 0.625  
+>direction: [1, 0, 0; 0, 1, 0; 0, 0, -1]  
+>alpha: aorta - 1.0, heart - 0.4  
+>render performance(no sampling): 25 fps  
+![picture: Volume Render of Body](./pics/multivol.png)
