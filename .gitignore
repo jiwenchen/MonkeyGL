@@ -37,3 +37,4 @@ pybind11/
 *.raw
 *.nrrd
 *.pyc
+*.DS_Store

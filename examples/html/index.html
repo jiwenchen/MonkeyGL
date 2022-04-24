@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MonkeyGL</title>
+    <style>
+      .bm-wrap {
+        width: 384px;
+        height: 384px;
+        border: 1px solid #ccc;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+  VR:
+  <label for="v1"><input id="v1" value="1" type="radio" class="radio-volume" name="volume"/>cardiac</label>
+  <label for="v2"><input id="v2" value="2" type="radio" class="radio-volume" name="volume"/>body</label>
+  <label for="v3"><input id="v3" value="3" type="radio" class="radio-volume" name="volume"/>rib</label>
+  <label for="v4"><input id="v4" value="4" type="radio" class="radio-volume" name="volume"/>neckcta</label>
+  <label for="v5"><input id="v5" value="5" type="radio" class="radio-volume" name="volume"/>corocta</label>
+
+  <button id="reset" type="button" class="btn btn-default">Reset</button>
+
+  <br>
+  MPR:
+  <label><input name="MPR Type" type="radio" id="averageMPR" value="" />Average</label>
+  <label><input name="MPR Type" type="radio" id="mipMPR" value="" />MIP</label>
+  <label><input name="MPR Type" type="radio" id="minipMPR" value="" />MinIP</label>
+
+  Thickness:
+  <button id="addThickness" type="button" class="btn btn-default">⬆</button>
+  <button id="subThickness" type="button" class="btn btn-default">⬇</button>
+
+  <br>
+    <div class="bm-wrap" id="vr"></div>
+    <div class="bm-wrap" id="origin"></div>
+    <br />
+    <div class="bm-wrap" id="axial"></div>
+    <div class="bm-wrap" id="sagittal"></div>
+    <div class="bm-wrap" id="coronal"></div>
+
+  </body>
+  <script src="js/jquery.js"></script>
+  <script src="js/pako.js"></script>
+  <script src="js/zlib.js"></script>
+  <script src="js/png.js"></script>
+  <script src="js/cornerstone.js"></script>
+  <script src="utils.js"></script>
+  <script>
+    window.onload = function () {
+        let host = "http://127.0.0.1:7788";
+
+      $(".radio-volume").change((e) => {
+        let val = e.target.value;
+        let url = `${host}/volumetype`;
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ vol_type: +val }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            rotateVR(0, 0);
+            browseOrigin(100);
+            getMPR(0);
+            getMPR(1);
+            getMPR(2);
+          });
+      });
+
+      let rotating = false;
+      let totalDeltaX = 0;
+      let totalDeltaY = 0;
+      function rotateVRAPI(x_angle, y_angle){
+        totalDeltaX += x_angle;
+        totalDeltaY += y_angle;
+        if (!rotating){
+          rotateVR(totalDeltaX, totalDeltaY);
+          totalDeltaX = 0;
+          totalDeltaY = 0;
+        }
+        else{
+        }
+      }
+
+      function rotateVR(x_angle, y_angle){
+          rotating = true;
+          let url = `${host}/vrdata?x_angle=` + String(x_angle) + "&y_angle=" + String(y_angle);
+          displayVR(url);
+      }
+
+        document.getElementById('addThickness').addEventListener('click', function (e) {
+            updateThickness(1);
+        });
+        document.getElementById('subThickness').addEventListener('click', function (e) {
+            updateThickness(-1);
+        });
+
+        document.getElementById('averageMPR').addEventListener('click', function (e) {
+            updateMPRType(0);
+        });
+        document.getElementById('mipMPR').addEventListener('click', function (e) {
+            updateMPRType(1);
+        });
+        document.getElementById('minipMPR').addEventListener('click', function (e) {
+            updateMPRType(2);
+        });
+
+        function getMPR(plane_type){
+            let url = `${host}/mprdata?plane_type=` + String(plane_type);
+            fetch(url, { credentials: "same-origin" })
+                .then((response) => response.json())
+                .then((buffer) => {
+                    let cornerstoneMetaData = decodeMPR(buffer);
+                    if (0 == plane_type){
+                        showAxial(cornerstoneMetaData);
+                    }
+                    else if (1 == plane_type){
+                        showSagittal(cornerstoneMetaData);
+                    }
+                    else if (2 == plane_type){
+                        showCoronal(cornerstoneMetaData);
+                    }
+                });
+        }
+
+        function browseMPR(plane_type, delta){
+            let url = `${host}/mprbrowse?plane_type=${String(plane_type)}&delta=${delta}`;
+            fetch(url, { credentials: "same-origin" })
+                .then((response) => response.json())
+                .then((buffer) => {
+                    let cornerstoneMetaData = decodeMPR(buffer);
+                    if (0 == plane_type){
+                        showAxial(cornerstoneMetaData);
+                    }
+                    else if (1 == plane_type){
+                        showSagittal(cornerstoneMetaData);
+                    }
+                    else if (2 == plane_type){
+                        showCoronal(cornerstoneMetaData);
+                    }
+                });
+        }
+
+        let slice = 0;
+        function browseOrigin(delta){
+            slice = slice + delta;
+            let url = `${host}/originbrowse?slice=` + String(slice);
+            fetch(url, { credentials: "same-origin" })
+                .then((response) => response.json())
+                .then((buffer) => {
+                    let cornerstoneMetaData = decodeMPR(buffer);
+                    showOrigin(cornerstoneMetaData);
+                });
+        }
+
+        let thickness = 1.0;
+        function updateThickness(delta){
+            thickness = thickness + delta;
+            let url = `${host}/updatethickness?thickness=` + String(thickness);
+            fetch(url, { credentials: "same-origin" })
+                .then((response) => response.json())
+                .then((buffer) => {
+                    getMPR(0);
+                    getMPR(1);
+                    getMPR(2);
+                });
+        }
+
+        function updateMPRType(mpr_type){
+            let url = `${host}/updatemprtype?mpr_type=` + String(mpr_type);
+            fetch(url, { credentials: "same-origin" })
+                .then((response) => response.json())
+                .then((buffer) => {
+                    getMPR(0);
+                    getMPR(1);
+                    getMPR(2);
+                });
+        }
+
+      /**
+       * @param url: string
+       * 加载文件跨域 需要启动live server
+       */
+      function displayVR(url) {
+        fetch(url, { credentials: "same-origin" })
+          .then((response) => response.json())
+          .then((result) => {
+            if(result.message === "successful"){
+              let cornerstoneMetaData = decodeVR(result);
+              showVR(cornerstoneMetaData);
+              rotating = false;
+            } else {
+              alert("displayVR error!");
+            }
+          });
+      }
+
+      const element_vr = document.getElementById("vr");
+      cornerstone.enable(element_vr);
+      function showVR(image) {
+        cornerstone.displayImage(element_vr, image);
+        cornerstone.updateImage(element_vr, true);
+      }
+      element_vr.addEventListener('mousedown', function (e) {
+        let lastX = e.pageX;
+        let lastY = e.pageY;
+        const mouseButton = e.which;
+
+        function mouseMoveHandler(e) {
+            const deltaX = e.pageX - lastX;
+            const deltaY = e.pageY - lastY;
+            lastX = e.pageX;
+            lastY = e.pageY;
+            if (mouseButton === 1) {
+              rotateVRAPI(deltaX, deltaY);
+            } else if (mouseButton === 2) {
+            } else if (mouseButton === 3) {
+            }
+        }
+        function mouseUpHandler() {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        }
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+      });
+
+
+      const element_origin = document.getElementById("origin");
+      cornerstone.enable(element_origin);
+      function showOrigin(image) {
+        cornerstone.displayImage(element_origin, image);
+        cornerstone.updateImage(element_origin, true);
+      }
+      element_origin.addEventListener('mousewheel', function (e) {
+        e.preventDefault();
+        let delta = event.detail || -event.wheelDelta;
+        if (delta > 0){
+          browseOrigin(1);
+        }
+        else{
+          browseOrigin(-1);
+        }
+      });
+
+      const element_axial = document.getElementById("axial");
+      cornerstone.enable(element_axial);
+      function showAxial(image) {
+        cornerstone.displayImage(element_axial, image);
+        cornerstone.updateImage(element_axial, true);
+      }
+      element_axial.addEventListener('mousewheel', function (e) {
+        e.preventDefault();
+        let delta = event.detail || -event.wheelDelta;
+        if (delta > 0){
+          browseMPR(0, 1);
+        }
+        else{
+          browseMPR(0, -1);
+        }
+      });
+
+      const element_sagittal = document.getElementById("sagittal");
+      cornerstone.enable(element_sagittal);
+      function showSagittal(image) {
+        cornerstone.displayImage(element_sagittal, image);
+        cornerstone.updateImage(element_sagittal, true);
+      }
+      element_sagittal.addEventListener('mousewheel', function (e) {
+        e.preventDefault();
+        let delta = event.detail || -event.wheelDelta;
+        if (delta > 0){
+          browseMPR(1, 1);
+        }
+        else{
+          browseMPR(1, -1);
+        }
+      });
+
+      const element_coronal = document.getElementById("coronal");
+      cornerstone.enable(element_coronal);
+      function showCoronal(image) {
+        cornerstone.displayImage(element_coronal, image);
+        cornerstone.updateImage(element_coronal, true);
+      }
+      element_coronal.addEventListener('mousewheel', function (e) {
+        e.preventDefault();
+        let delta = event.detail || -event.wheelDelta;
+        if (delta > 0){
+          browseMPR(2, 1);
+        }
+        else{
+          browseMPR(2, -1);
+        }
+      });
+    };
+  </script>
+</html>
