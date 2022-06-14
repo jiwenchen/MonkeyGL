@@ -42,10 +42,12 @@ namespace MonkeyGL {
         virtual bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
         virtual void SetVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
         virtual void SetSpacing(double x, double y, double z);
+        
+        virtual bool TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeight, Point3d ptVoxel);
 
     // output
         virtual bool GetPlaneMaxSize(int& nWidth, int& nHeight, const PlaneType& planeType);
-        virtual bool GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType);
+        virtual bool GetPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType);
 
         virtual bool GetCrossHairPoint(double& x, double& y, const PlaneType& planeType);
         virtual void PanCrossHair(int nx, int ny, PlaneType planeType);
@@ -82,6 +84,9 @@ namespace MonkeyGL {
         void CopyTransferFunc2Device();
         void CopyAlphaWWWL2Device();
         void NormalizeVOI();
+
+        bool GetMPRPlaneData(std::shared_ptr<short> pData, int nWidth, int nHeight, const PlaneType& planeType);
+        bool GetCPRPlaneData(std::shared_ptr<short> pData, int nWidth, int nHeight, const PlaneType& planeType);
 
         void testcuda();
 

@@ -32,7 +32,7 @@ using namespace MonkeyGL;
 extern "C"
 void cu_InitCommon(float fxSpacing, float fySpacing, float fzSpacing);
 extern "C"
-void cu_copyVolumeData( short* h_volumeData, cudaExtent volumeSize, Orientation orientation);
+void cu_copyVolumeData( short* h_volumeData, cudaExtent volumeSize);
 extern "C"
 void cu_copyMaskData( unsigned char* h_maskData);
 extern "C"
@@ -47,7 +47,7 @@ extern "C"
 void cu_copyAlphaAndWWWL(float *pAlphaAndWWWL);
 
 extern "C"
-void cu_render(unsigned char* pVR, int nWidth, int nHeight, float fxTranslate, float fyTranslate, float fScale, RGBA colorBG);
+void cu_render(unsigned char* pVR, int nWidth, int nHeight, float fxTranslate, float fyTranslate, float fScale, bool invertZ, RGBA colorBG);
 
 extern "C"
 void cu_renderAxial(short* pData, int nWidth, int nHeight, float fDepth);
@@ -57,11 +57,14 @@ extern "C"
 void cu_renderCoronal(short* pData, int nWidth, int nHeight, float fDepth);
 
 extern "C"
-void cu_renderPlane_MIP(short* pData, int nWidth, int nHeight, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, float halfNum);
+void cu_renderPlane_MIP(short* pData, int nWidth, int nHeight, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum);
 extern "C"
-void cu_renderPlane_MinIP(short* pData, int nWidth, int nHeight, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, float halfNum);
+void cu_renderPlane_MinIP(short* pData, int nWidth, int nHeight, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum);
 extern "C"
-void cu_renderPlane_Average(short* pData, int nWidth, int nHeight, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, float halfNum);
+void cu_renderPlane_Average(short* pData, int nWidth, int nHeight, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum);
+
+extern "C"
+void cu_renderCPR(short* pData, int width, int height, double* pPoints, double* pDirs, bool invertZ);
 
 extern "C"
 void ReleaseCuda();
@@ -231,7 +234,7 @@ bool Render::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight,
 	m_VolumeSize.height = m_dataMan.GetDim(1);
 	m_VolumeSize.depth = m_dataMan.GetDim(2);
 
-	cu_copyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize, m_dataMan.GetOrientation());
+	cu_copyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize);
 
 	InitLights();
 
@@ -269,34 +272,17 @@ void Render::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDe
 	m_VolumeSize.height = m_dataMan.GetDim(1);
 	m_VolumeSize.depth = m_dataMan.GetDim(2);
 
-	cu_copyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize, m_dataMan.GetOrientation());
+	cu_copyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize);
 
 	InitLights();
 }
 
 void Render::NormalizeVOI()
 {
-	if (m_dataMan.GetOrientation().rx==-1)
-	{
-		m_voi_Normalize.left = m_VolumeSize.width - 1 - (int)m_fVOI_xEnd;
-		m_voi_Normalize.right = m_VolumeSize.width - 1 - (int)m_fVOI_xStart;
-	}
-	else
-	{
-		m_voi_Normalize.left = (int)m_fVOI_xStart;
-		m_voi_Normalize.right = (int)m_fVOI_xEnd;
-	}
-	if (m_dataMan.GetOrientation().cy==-1)
-	{
-		m_voi_Normalize.posterior = m_VolumeSize.height - 1 - (int)m_fVOI_yEnd;
-		m_voi_Normalize.anterior = m_VolumeSize.height - 1 - (int)m_fVOI_yStart;
-	}
-	else
-	{
-		m_voi_Normalize.posterior = (int)m_fVOI_yStart;
-		m_voi_Normalize.anterior = (int)m_fVOI_yEnd;
-	}
-
+	m_voi_Normalize.left = (int)m_fVOI_xStart;
+	m_voi_Normalize.right = (int)m_fVOI_xEnd;
+	m_voi_Normalize.posterior = (int)m_fVOI_yStart;
+	m_voi_Normalize.anterior = (int)m_fVOI_yEnd;
 	m_voi_Normalize.head = (int)m_fVOI_zStart;
 	m_voi_Normalize.foot = (int)m_fVOI_zEnd;
 }
@@ -307,16 +293,39 @@ void Render::SetSpacing( double x, double y, double z )
 	cu_InitCommon(x, y, z);
 }
 
-bool Render::GetPlaneData( short* pData, int& nWidth, int& nHeight, const PlaneType& planeType)
+bool Render::GetPlaneData( std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType)
 {
 	if (!m_dataMan.GetPlaneSize(nWidth, nHeight, planeType))
 		return false;
 
-	if (nWidth % 2){
+	if (nWidth % 2) // just for fpng
+	{
 		nWidth += 1;
 	}
+	pData.reset(new short[nWidth*nHeight]);
 
-	if (NULL == pData || nWidth<=0 || nHeight<=0)
+	if (
+		PlaneAxial == planeType ||
+		PlaneAxialOblique == planeType ||
+		PlaneSagittal == planeType ||
+		PlaneSagittalOblique == planeType ||
+		PlaneCoronal == planeType ||
+		PlaneCoronalOblique == planeType
+	)
+	{
+		return GetMPRPlaneData(pData, nWidth, nHeight, planeType);
+	}
+	else if (PlaneStretchedCPR == planeType || PlaneStraightenedCPR == planeType) 
+	{
+		return GetCPRPlaneData(pData, nWidth, nHeight, planeType);
+	}
+
+	return false;
+}
+
+bool Render::GetMPRPlaneData(std::shared_ptr<short> pData, int nWidth, int nHeight, const PlaneType& planeType)
+{
+	if (!pData || nWidth<=0 || nHeight<=0)
 		return false;
 
 	PlaneInfo info;
@@ -358,19 +367,19 @@ bool Render::GetPlaneData( short* pData, int& nWidth, int& nHeight, const PlaneT
 	{
 	case MPRTypeAverage:
 		{
-			cu_renderPlane_Average(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, halfNum);
+			cu_renderPlane_Average(pData.get(), nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, m_dataMan.Need2InvertZ(), halfNum);
 			return true;
 		}
 		break;
 	case MPRTypeMIP:
 		{
-			cu_renderPlane_MIP(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, halfNum);
+			cu_renderPlane_MIP(pData.get(), nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, m_dataMan.Need2InvertZ(), halfNum);
 			return true;
 		}
 		break;
 	case MPRTypeMinIP:
 		{
-			cu_renderPlane_MinIP(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, halfNum);
+			cu_renderPlane_MinIP(pData.get(), nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, m_dataMan.Need2InvertZ(), halfNum);
 			return true;
 		}
 		break;
@@ -378,6 +387,28 @@ bool Render::GetPlaneData( short* pData, int& nWidth, int& nHeight, const PlaneT
 		break;
 	}
 	return false;
+}
+bool Render::GetCPRPlaneData(std::shared_ptr<short> pData, int nWidth, int nHeight, const PlaneType& planeType)
+{
+	StopWatch sw("Render::GetCPRPlaneData: PlaneType[%s]", PlaneTypeName(planeType).c_str());
+
+	if (!pData || nWidth<=0 || nHeight<=0)
+		return false;
+
+	Point3d* pPoints = NULL;
+	Direction3d* pDirs = NULL;
+	int len = 0;
+	if (!m_dataMan.GetCPRInfo(pPoints, pDirs, len, planeType))
+		return false;
+	if (len != nHeight)
+		return false;
+
+	cu_renderCPR(pData.get(), nWidth, nHeight, (double*)pPoints, (double*)pDirs, m_dataMan.Need2InvertZ());
+
+	delete [] pPoints;
+	delete [] pDirs;
+
+	return true;
 }
 
 bool Render::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& planeType )
@@ -519,7 +550,7 @@ bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 	NormalizeVOI();
 	cu_setVOI(m_voi_Normalize);
 
-	cu_render(pVR, nWidth, nHeight, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale, m_dataMan.GetColorBackground());
+	cu_render(pVR, nWidth, nHeight, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale, m_dataMan.Need2InvertZ(), m_dataMan.GetColorBackground());
 
 	return true;
 }
@@ -648,7 +679,7 @@ bool Render::GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInf
 		{
 		case MPRTypeAverage:
 			{
-				cu_renderPlane_Average(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, batchInfo.m_fPixelSpacing, halfNum);
+				cu_renderPlane_Average(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, batchInfo.m_fPixelSpacing, m_dataMan.Need2InvertZ(), halfNum);
 			}
 			break;
 		default:
@@ -727,7 +758,7 @@ void Render::Foot()
 	Methods::SetSeg(m_pTransposeTransformMatrix, 3);
 	Methods::ComputeTransformMatrix(m_pRotateMatrix, m_pTransposRotateMatrix, m_pTransformMatrix, m_pTransposeTransformMatrix, -90.0f, 0.0f, m_fTotalScale);
 	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
-};
+}
 
 void Render::Rotate( float fxRotate, float fyRotate )
 {
@@ -746,4 +777,27 @@ void Render::Pan(float fxShift, float fyShift)
 {
 	m_fTotalXTranslate += fxShift;
 	m_fTotalYTranslate += fyShift;
+}
+
+bool Render::TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeight, Point3d ptVoxel)
+{
+	double fxSpacing = m_dataMan.GetSpacing(0);
+	double fySpacing = m_dataMan.GetSpacing(1);
+	double fzSpacing = m_dataMan.GetSpacing(2);
+
+	float fMaxLen = max(m_VolumeSize.width*fxSpacing, max(m_VolumeSize.height*fySpacing, m_VolumeSize.depth*fzSpacing));
+	Point3d maxper(fMaxLen/(m_VolumeSize.width*fxSpacing), fMaxLen/(m_VolumeSize.height*fySpacing), fMaxLen/(m_VolumeSize.depth*fzSpacing));
+
+	Point3d pt(ptVoxel.x()/m_VolumeSize.width, ptVoxel.y()/m_VolumeSize.height, ptVoxel.z()/m_VolumeSize.depth);
+	if (m_dataMan.Need2InvertZ()){
+		pt.SetZ(1.0 - pt.z());
+	}
+	pt -= Point3d(0.5, 0.5, 0.5);
+	pt /= maxper;
+
+	pt = Methods::matrixMul(m_pTransposeTransformMatrix, pt);
+	fx = (pt.x() + 0.5) * nWidth + m_fTotalXTranslate;
+	fy = (pt.z() + 0.5) * nHeight + m_fTotalYTranslate;
+
+	return true;
 }

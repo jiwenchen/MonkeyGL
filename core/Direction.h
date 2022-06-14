@@ -52,6 +52,14 @@ namespace MonkeyGL{
 
             Normalize();
         }
+        Direction(Point<double, dim> ptStart, Point<double, dim> ptEnd){
+            m_Coords[0] = ptEnd.x() - ptStart.x();
+            m_Coords[1] = ptEnd.y() - ptStart.y();
+            if (dim == 3)
+                m_Coords[2] = ptEnd.z() - ptStart.z();
+
+            Normalize();
+        }
         ~Direction(void){
         };
 
@@ -117,13 +125,13 @@ namespace MonkeyGL{
             if (dim < 2)
                 return;
 
-            double n = Norm();
+            double n = Length();
             m_Coords[0] /= n;
             m_Coords[1] /= n;
             if (dim == 3)
                 m_Coords[2] /= n;
         }
-        double Norm()
+        double Length()
         {
             if (dim == 2)
                 return sqrt(m_Coords[0]*m_Coords[0]+m_Coords[1]*m_Coords[1]);

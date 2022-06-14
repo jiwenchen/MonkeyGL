@@ -77,6 +77,24 @@ std::shared_ptr<T> _arrays_3d_to_ptr(py::array_t<T> npData, int& nWidth, int& nH
     return pData;
 }
 
+std::vector<Point3d> _arrays_3d_to_points(py::array_t<float> cprLineArray) {
+    std::vector<Point3d> cprLine;
+    py::buffer_info buf = cprLineArray.request();
+    int nLen = buf.shape[0];
+    int nDim = buf.shape[1];
+    if (nDim != 3){
+        return cprLine;
+    }
+    int cnt = buf.size;
+    float* ptr = (float*)buf.ptr;
+
+    for (int i=0; i<nLen; i++)
+    {
+        cprLine.push_back(Point3d(ptr[3*i], ptr[3*i+1], ptr[3*i+2]));
+    }
+    return cprLine;
+}
+
 class pyHelloMonkey : public HelloMonkey {
 
 public:
@@ -121,6 +139,16 @@ public:
         return _ptr_to_arrays_1d(out_buf.data(), out_buf.size());
     }
 
+    virtual bool SetCPRLinePatientArray(py::array_t<float> cprLineArray){
+        std::vector<Point3d> cprLine = _arrays_3d_to_points(cprLineArray);
+        return SetCPRLinePatient(cprLine);
+    }
+
+    virtual bool SetCPRLineVoxelArray(py::array_t<float> cprLineArray){
+        std::vector<Point3d> cprLine = _arrays_3d_to_points(cprLineArray);
+        return SetCPRLineVoxel(cprLine);
+    }
+
 };
 
 PYBIND11_MODULE(pyMonkeyGL, m) {
@@ -141,6 +169,8 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .value("PlaneSagittalOblique", PlaneType::PlaneSagittalOblique)
         .value("PlaneCoronalOblique", PlaneType::PlaneCoronalOblique)
         .value("PlaneVR", PlaneType::PlaneVR)
+        .value("PlaneStretchedCPR", PlaneType::PlaneStretchedCPR)
+        .value("PlaneStraightenedCPR", PlaneType::PlaneStraightenedCPR)
         .export_values();
 
     py::enum_<MPRType>(m, "MPRType")
@@ -161,7 +191,11 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
 
     py::class_<Direction3d>(m, "Direction3d")
         .def(py::init<>())
-        .def(py::init<float, float, float>());
+        .def(py::init<double, double, double>());
+
+    py::class_<Point3d>(m, "Point3d")
+        .def(py::init<>())
+        .def(py::init<double, double, double>());
 
     py::class_<pyHelloMonkey>(m, "HelloMonkey")
         .def(py::init<>())
@@ -172,6 +206,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("UpdateMaskArray", &pyHelloMonkey::UpdateMaskArray)
         .def("SetSpacing", &pyHelloMonkey::SetSpacing)
         .def("SetDirection", &pyHelloMonkey::SetDirection)
+        .def("SetOrigin", &pyHelloMonkey::SetOrigin)
         .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>)>(&pyHelloMonkey::SetTransferFunc))
         .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>, unsigned char)>(&pyHelloMonkey::SetTransferFunc))
         .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>, std::map<int, float>)>(&pyHelloMonkey::SetTransferFunc))
@@ -184,8 +219,14 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetObjectAlpha", static_cast<bool (pyHelloMonkey::*)(float, unsigned char)>(&pyHelloMonkey::SetObjectAlpha))
         .def("Rotate", &pyHelloMonkey::Rotate)
         .def("Browse", &pyHelloMonkey::Browse)
+        .def("Pan", &pyHelloMonkey::Pan)
+        .def("Zoom", &pyHelloMonkey::Zoom)
         .def("UpdateThickness", &pyHelloMonkey::UpdateThickness)
         .def("SetMPRType", &pyHelloMonkey::SetMPRType)
+        .def("SetCPRLinePatientArray", &pyHelloMonkey::SetCPRLinePatientArray)
+        .def("SetCPRLineVoxelArray", &pyHelloMonkey::SetCPRLineVoxelArray)
+        .def("RotateCPR", &pyHelloMonkey::RotateCPR)
+        .def("ShowCPRLineInVR", &pyHelloMonkey::ShowCPRLineInVR)
 
         .def("GetVolumeArray", &pyHelloMonkey::GetVolumeArray)
         .def("GetVRArray", &pyHelloMonkey::GetVRArray)

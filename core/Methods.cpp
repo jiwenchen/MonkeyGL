@@ -24,7 +24,6 @@
 #include "math.h"
 #include <iostream>
 #include <cstring>
-#include "Defines.h"
 
 using namespace MonkeyGL;
 
@@ -159,4 +158,171 @@ Point3d Methods::matrixMul( float *fMatrix, Point3d pt )
 	double y = fMatrix[3]*pt.x() + fMatrix[4]*pt.y() + fMatrix[5]*pt.z();
 	double z = fMatrix[6]*pt.x() + fMatrix[7]*pt.y() + fMatrix[8]*pt.z();
 	return Point3d(x, y, z);
+}
+
+void Methods::DrawDotInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, int x, int y, RGB clr)
+{
+	if (x<0 || x>=nWidth || y<0 || y>=nHeight){
+		return;
+	}
+	int red = int(clr.red * 255);
+	int green = int(clr.green * 255);
+	int blue = int(clr.blue * 255);
+	pVR[3*(y*nWidth+x)] = red;
+	pVR[3*(y*nWidth+x)+1] = green;
+	pVR[3*(y*nWidth+x)+2] = blue;
+}
+
+void Methods::DrawLineInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x0, float y0, float x1, float y1, int nLineWidth, RGB clr){
+	double len = sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
+	Direction2d dir = Direction2d(x1-x0, y1-y0);
+	Direction2d dirN = Direction2d(-dir.y(), dir.x());
+
+	float half = 1.0*nLineWidth/2;
+	float x0Fist = x0 - (half-0.5)*dirN.x();
+	float y0Fist = y0 - (half-0.5)*dirN.y();
+	for (int idx=0; idx<nLineWidth; idx++){
+		float x0temp = x0Fist + idx*dirN.x();
+		float y0temp = y0Fist + idx*dirN.y();
+		for (int i=0; i<=int(len+0.5)*2; i++){
+			int x = int(x0temp + i*dir.x()/2.0 + 0.5);
+			int y = int(y0temp + i*dir.y()/2.0 + 0.5);
+			DrawDotInImage24Bit(pVR, nWidth, nHeight, x, y, clr);
+		}
+	}
+}
+
+void Methods::DrawCircleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x, float y, float r, int nLineWidth, RGB clr){
+	double angDelta = PI/180.0;
+	double m[2][2] = {{cos(angDelta), -sin(angDelta)}, {sin(angDelta), cos(angDelta)}};
+
+	float xPre = -r;
+	float yPre = 0;
+	float xNxt = xPre;
+	float yNxt = yPre;
+	for (int i=0; i<360; i++){
+		xNxt = m[0][0] * xPre + m[0][1] * yPre;
+		yNxt = m[1][0] * xPre + m[1][1] * yPre;
+		Methods::DrawLineInImage24Bit(pVR, nWidth, nHeight, xPre+x, yPre+y, xNxt+x, yNxt+y, nLineWidth, clr);
+		xPre = xNxt;
+		yPre = yNxt;
+	}
+}
+
+double Methods::Distance_Point2Line(Point3d pt, Direction3d dir, Point3d ptLine)
+{
+	double lengthVec = pt.DistanceTo(ptLine);
+	double lengthProj = Methods::Length_VectorInLine(pt, dir, ptLine);
+	return sqrt(lengthVec*lengthVec - lengthProj*lengthProj);
+}
+
+double Methods::Length_VectorInLine(Point3d pt, Direction3d dir, Point3d ptLine)
+{
+	Point3d vec = pt - ptLine;
+	return vec.x()*dir.x() + vec.y()*dir.y() + vec.z()*dir.z();
+}
+
+Point3d Methods::Projection_Point2Line(Point3d pt, Direction3d dir, Point3d ptLine)
+{
+	double l = Methods::Length_VectorInLine(pt, dir, ptLine);
+	return ptLine + dir * l;
+}
+
+double Methods::Distance_Point2Plane(Point3d pt, Direction3d dirH, Direction3d dirV, Point3d ptPlane)
+{
+	Direction3d dirNorm = dirH.cross(dirV);
+	return Methods::Distance_Point2Plane(pt, dirNorm, ptPlane);
+}
+
+double Methods::Distance_Point2Plane(Point3d pt, Direction3d dirNorm, Point3d ptPlane)
+{
+	Point3d vec = pt - ptPlane;
+	return vec.x()*dirNorm.x() + vec.y()*dirNorm.y() + vec.z()*dirNorm.z();
+}
+
+Point3d Methods::Projection_Point2Plane(Point3d pt, Direction3d dirH, Direction3d dirV, Point3d ptPlane)
+{
+	Direction3d dirNorm = dirH.cross(dirV);
+	return Methods::Projection_Point2Plane(pt, dirNorm, ptPlane);
+}
+
+Point3d Methods::Projection_Point2Plane(Point3d pt, Direction3d dirNorm, Point3d ptPlane)
+{
+	double dist = Methods::Distance_Point2Plane(pt, dirNorm, ptPlane);
+	return Point3d(pt.x()-dist*dirNorm.x(), pt.y()-dist*dirNorm.y(), pt.z()-dist*dirNorm.z());
+}
+
+Point3d Methods::RotatePoint3D(Point3d pt, Direction3d dirNorm, Point3d ptCenter, float theta)
+{  
+	Point3d ptOut;
+	double dx = dirNorm.x();
+	double dy = dirNorm.y();
+	double dz = dirNorm.z();
+	double x0 = pt.x() - ptCenter.x();
+	double y0 = pt.y() - ptCenter.y();
+	double z0 = pt.z() - ptCenter.z();
+
+	ptOut.SetX(
+		x0 * (dx * dx * (1 - cosf(theta)) + cosf(theta)) + 
+		y0 * (dx * dy * (1 - cosf(theta)) - dz * sinf(theta)) + 
+		z0 * (dx * dz * (1 - cosf(theta)) + dy * sinf(theta))
+	);
+	ptOut.SetY(
+		x0 * (dy * dx * (1 - cosf(theta)) + dz * sinf(theta)) +  
+		y0 * (dy * dy * (1 - cosf(theta)) + cosf(theta)) + 
+		z0 * (dy * dz * (1 - cosf(theta)) - dx * sinf(theta))
+	);
+	ptOut.SetZ(
+		x0 * (dz * dx * (1 - cosf(theta)) - dy * sinf(theta)) + 
+		y0 * (dy * dz * (1 - cosf(theta)) + dx * sinf(theta)) + 
+		z0 * (dz * dz * (1 - cosf(theta)) + cosf(theta))
+	);
+
+	return (ptOut + ptCenter);
+}
+
+int Methods::GetLengthofCrossLineInBox(Direction3d dir, double spacing, double xMin, double xMax, double yMin, double yMax, double zMin, double zMax)
+{
+	double xCenter = (xMin + xMax) / 2;
+	double yCenter = (yMin + yMax) / 2;
+	double zCenter = (zMin + zMax) / 2;
+
+	int nUpPart = 0, nDownPart = 0;
+	for (int i=0; ;i++)
+	{
+		double xTemp = xCenter + i*spacing*dir.x();
+		double yTemp = yCenter + i*spacing*dir.y();
+		double zTemp = zCenter + i*spacing*dir.z();
+		if (xTemp<=xMin || xTemp>=xMax || yTemp<=yMin || yTemp>=yMax || zTemp<=zMin || zTemp>=zMax)
+		{
+			nUpPart = i;
+			break;
+		}
+	}
+	for (int i=0; ;i--)
+	{
+		double xTemp = xCenter + i*spacing*dir.x();
+		double yTemp = yCenter + i*spacing*dir.y();
+		double zTemp = zCenter + i*spacing*dir.z();
+		if (xTemp<=xMin || xTemp>=xMax || yTemp<=yMin || yTemp>=yMax || zTemp<=zMin || zTemp>=zMax)
+		{
+			nDownPart = -i;
+			break;
+		}
+	}
+	return nUpPart + nDownPart;
+}
+
+Point3d Methods::GetTransferPoint(double m[3][3], Point3d pt)
+{
+	double r[3];
+	for (int i=0; i<3; i++)
+	{
+		r[i] = 0;
+		for (int j=0; j<3; j++)
+		{
+			r[i] += m[i][j]*pt[j];
+		}
+	}
+	return Point3d(r[0], r[1], r[2]);
 }

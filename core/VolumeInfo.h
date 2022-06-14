@@ -65,14 +65,22 @@ namespace MonkeyGL {
         int GetVolumeBytes(){
             return GetVolumeSize()*sizeof(short);
         }
-        void SetSpacing(double x, double y, double z){
-            m_Spacing[0] = x;
-            m_Spacing[1] = y;
-            m_Spacing[2] = z;
-        }
+        void SetSpacing(double x, double y, double z);
+        
         void SetSliceThickness(double sliceTh){
             m_fSliceThickness = sliceTh;
         }
+
+        void SetOrigin(Point3d pt){
+            m_ptOriginPatient = pt;
+        }
+
+        Point3d GetOrigin(){
+            return m_ptOriginPatient;
+        }
+
+        Point3d Voxel2Patient(Point3d ptVoxel);
+        Point3d Patient2Voxel(Point3d ptPatient);
 
         bool HasVolumeData(){
             return bool(m_pVolume);
@@ -90,8 +98,6 @@ namespace MonkeyGL {
             return ani<m_Spacing[2] ? ani : m_Spacing[2];
         }
 
-        bool GetPlaneInitSize(int& nWidth, int& nHeight, int& nNumber, const PlaneType& planeType);
-
         bool Need2InvertZ();
         bool IsPerpendicularCoord();
         void NormVolumeData();
@@ -105,7 +111,7 @@ namespace MonkeyGL {
         double m_fSliceThickness; //mm
         int m_Dims[3];
         double m_Spacing[3];
-        Point3d m_ptStart;
+        Point3d m_ptOriginPatient;
         Direction3d m_dirX;
         Direction3d m_dirY;
         Direction3d m_dirZ;

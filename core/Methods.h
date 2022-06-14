@@ -22,6 +22,8 @@
 
 #pragma once
 #include "Point.h"
+#include "Defines.h"
+#include "Direction.h"
 
 namespace MonkeyGL {
 
@@ -53,6 +55,28 @@ namespace MonkeyGL {
             float fzRotate, 
             float fScale
         );
+
+        static void DrawDotInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, int x, int y, RGB clr=RGB(1.0, 1.0, 1.0));
+        static void DrawLineInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x0, float y0, float x1, float y1, int nLineWidth=2, RGB clr=RGB(1.0, 1.0, 1.0));
+        static void DrawCircleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x, float y, float r, int nLineWidth=2, RGB clr=RGB(1.0, 1.0, 1.0));
+
+        static double Distance_Point2Line(Point3d pt, Direction3d dir, Point3d ptLine);
+        static double Length_VectorInLine(Point3d pt, Direction3d dir, Point3d ptLine);
+        static Point3d Projection_Point2Line(Point3d pt, Direction3d dir, Point3d ptLine);
+        static double Distance_Point2Plane(Point3d pt, Direction3d dirH, Direction3d dirV, Point3d ptPlane);
+        static double Distance_Point2Plane(Point3d pt, Direction3d dirNorm, Point3d ptPlane);
+        static Point3d Projection_Point2Plane(Point3d pt, Direction3d dirH, Direction3d dirV, Point3d ptPlane);
+        static Point3d Projection_Point2Plane(Point3d pt, Direction3d dirNorm, Point3d ptPlane);
+        static Point3d RotatePoint3D(Point3d pt, Direction3d dirNorm, Point3d ptCenter, float theta);
+        static int GetLengthofCrossLineInBox(Direction3d dir, double spacing, double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
+
+        static int TrimValue(int nValue, int nMin, int nMax){
+            nValue = nValue>=nMin ? nValue:nMin;
+            nValue = nValue<=nMax ? nValue:nMin;
+            return nValue;
+        }
+
+        static Point3d GetTransferPoint(double m[3][3], Point3d pt);
     };
 
 }

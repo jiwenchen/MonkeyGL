@@ -76,7 +76,9 @@ def test_set_data():
     npmaskdata2 = sitk.GetArrayFromImage(itk_mask2)
     npmaskdatat2 = npmaskdata2.swapaxes(2,0)
 
+    origin = mk.Point3d(itk_img.GetOrigin()[0], itk_img.GetOrigin()[1], itk_img.GetOrigin()[2])
     hm.SetDirection(dirX, dirY, dirZ)
+    hm.SetOrigin(origin)
     hm.SetVolumeArray(npdatat)
 
     tf0 = {}
@@ -112,8 +114,23 @@ def test_set_data():
 
     hm.GetOriginData_pngString(250)
 
+    hm.SetCPRLinePatientArray(np.array([
+        [
+            36.81390382,
+            -156.6719971,
+            -424.0480042
+        ],
+        [
+            36.81390382,
+            -156.6719971,
+            -361.5480042
+        ]
+    ]))
+
     b64str = hm.GetVRData_pngString(512, 512)
-    hm.SaveVR2Png('multivol.png', 512, 512)
+    # hm.SaveVR2Png('multivol.png', 512, 512)
+
+    hm.GetPlaneData_pngString(mk.PlaneStretchedCPR)
 
 
 if __name__ == "__main__":

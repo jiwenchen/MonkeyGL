@@ -29,7 +29,7 @@ namespace MonkeyGL {
     class StopWatch
     {
     public:
-        StopWatch(const char* sMsg);
+        StopWatch(const char * format, ...);
         ~StopWatch();
 
     static long long GetMSStamp();

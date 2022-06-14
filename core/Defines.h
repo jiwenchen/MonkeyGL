@@ -23,6 +23,8 @@
 #pragma once
 #include <iostream>
 #include <cstring>
+#include "Point.h"
+#include "Direction.h"
 
 using namespace std;
 
@@ -30,6 +32,29 @@ namespace MonkeyGL{
 
     #define PI 3.141592654
     #define MAXOBJECTCOUNT 64
+
+    struct RGB
+    {
+        float red;
+        float green;
+        float blue;
+
+        RGB(){
+            red = 0.0f;
+            green = 0.0f;
+            blue = 0.0f;
+        }
+        RGB(float r, float g, float b){
+            red = r;
+            green = g;
+            blue = b;
+        }
+        void Print(){
+            cout << "red: " << red << endl; 
+            cout << "green: " << green << endl; 
+            cout << "blue: " << blue << endl;
+        }
+    };
 
     struct RGBA
     {
@@ -76,27 +101,6 @@ namespace MonkeyGL{
         }
     };
 
-    struct Orientation{
-        float rx;
-        float ry;
-        float rz;
-        float cx;
-        float cy;
-        float cz;
-
-        Orientation(){
-            reset();
-        }
-        void reset(){
-            rx = 1.0f;
-            ry = 0.0f;
-            rz = 0.0f;
-            cx = 0.0f;
-            cy = 1.0f;
-            cz = 0.0f;
-        }
-    } ;
-
     struct Lightparams{
         float ka;
         float ks;
@@ -131,8 +135,50 @@ namespace MonkeyGL{
         PlaneAxialOblique,
         PlaneSagittalOblique,
         PlaneCoronalOblique,
-        PlaneVR
+        PlaneVR,
+        PlaneStretchedCPR,
+        PlaneStraightenedCPR
     };
+
+    static std::string PlaneTypeName(PlaneType planeType){
+        std::string strName;
+        switch (planeType)
+        {
+        case PlaneNotDefined:
+            strName = "PlaneNotDefined";
+            break;
+        case PlaneAxial:
+            strName = "PlaneAxial";
+            break;
+        case PlaneSagittal:
+            strName = "PlaneSagittal";
+            break;
+        case PlaneCoronal:
+            strName = "PlaneCoronal";
+            break;
+        case PlaneAxialOblique:
+            strName = "PlaneAxialOblique";
+            break;
+        case PlaneSagittalOblique:
+            strName = "PlaneSagittalOblique";
+            break;
+        case PlaneCoronalOblique:
+            strName = "PlaneCoronalOblique";
+            break;
+        case PlaneVR:
+            strName = "PlaneVR";
+            break;
+        case PlaneStretchedCPR:
+            strName = "PlaneStretchedCPR";
+            break;
+        case PlaneStraightenedCPR:
+            strName = "PlaneStraightenedCPR";
+            break;
+        default:
+            break;
+        }
+        return strName;
+    }
 
 	enum MPRType
 	{

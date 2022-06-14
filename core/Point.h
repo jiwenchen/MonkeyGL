@@ -126,6 +126,30 @@ namespace MonkeyGL{
             return ptOutput;
         }
 
+        Point<T, dim> operator/=(double r){
+            SetX(x()/r);
+            SetY(y()/r);
+            if (dim == 3)
+                SetZ(z()/r);
+            return *this;
+        }
+
+        Point<T, dim> operator/=(Point<T, dim> pt){
+            SetX(x()/pt.x());
+            SetY(y()/pt.y());
+            if (dim == 3)
+                SetZ(z()/pt.z());
+            return *this;
+        }
+        Point<T, dim> operator/(Point<T, dim> pt){
+            Point<T, dim> ptOutput;
+            ptOutput.SetX(x()/pt.x());
+            ptOutput.SetY(y()/pt.y());
+            if (dim == 3)
+                ptOutput.SetZ(z()/pt.z());
+            return ptOutput;
+        }
+
         T operator[](int idx){
             if (idx<0 || idx>=dim)
                 return 0;

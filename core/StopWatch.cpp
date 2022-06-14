@@ -23,14 +23,20 @@
 #include "StopWatch.h"
 #include <sys/time.h>
 #include "Logger.h"
+#include "log4cplus/log4cplus.h"
 
 using namespace MonkeyGL;
 
 
-StopWatch::StopWatch(const char* szMsg)
+StopWatch::StopWatch(const char * format, ...)
 {
     m_starttime_ms = StopWatch::GetMSStamp();
-    m_strMsg = std::string(szMsg);
+    char buf[4096];
+	va_list list;
+	va_start(list, format);
+	vsnprintf(buf, 4096, format, list);
+	va_end(list);
+    m_strMsg = std::string(buf);
     Logger::Info("%s begin...", m_strMsg.c_str());
 }
 

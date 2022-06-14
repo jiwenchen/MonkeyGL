@@ -27,6 +27,7 @@
 #include "StopWatch.h"
 #include "fpng/fpng.h"
 #include "Logger.h"
+#include "Methods.h"
 
 using namespace MonkeyGL;
 
@@ -35,6 +36,7 @@ std::shared_ptr<IRender> _pRender;
 HelloMonkey::HelloMonkey()
 {
 	_pRender.reset(new Render());
+	m_bShowCPRLineInVR = false;
 
 	Logger::Init();
 
@@ -53,7 +55,8 @@ HelloMonkey::~HelloMonkey(void)
 {
 }
 
-void HelloMonkey::SetLogLevel(LogLevel level){
+void HelloMonkey::SetLogLevel(LogLevel level)
+{
 	Logger::SetLevel(level);
 }
 
@@ -118,6 +121,13 @@ void HelloMonkey::SetSpacing( double x, double y, double z )
 	_pRender->SetSpacing(x, y, z);
 }
 
+void HelloMonkey::SetOrigin(Point3d pt)
+{
+	if (!_pRender)
+		return;
+	_pRender->SetOrigin(pt);
+}
+
 void HelloMonkey::Reset()
 {
 	if (!_pRender)
@@ -142,7 +152,7 @@ unsigned char HelloMonkey::AddNewObjectMask(std::shared_ptr<unsigned char>pData,
 bool HelloMonkey::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
 {
 	if (!_pRender)
-		return 0;
+		return false;
 	return _pRender->UpdateObjectMask(pData, nWidth, nHeight, nDepth, nLabel);
 }
 
@@ -160,7 +170,7 @@ bool HelloMonkey::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& p
 	return _pRender->GetPlaneMaxSize(nWidth, nHeight, planeType);
 }
 
-bool HelloMonkey::GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType)
+bool HelloMonkey::GetPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType)
 {
 	if (!_pRender)
 		return NULL;
@@ -172,15 +182,13 @@ std::string HelloMonkey::GetPlaneData_pngString(const PlaneType& planeType)
 	if (!_pRender)
 		return "";
 
-	StopWatch sw("GetPlaneData_pngString");
+	StopWatch sw("GetPlaneData_pngString[%s]", PlaneTypeName(planeType).c_str());
 
 	int nWidth = 0, nHeight = 0;
-	GetPlaneMaxSize(nWidth, nHeight, planeType);
-	
- 	std::shared_ptr<short> pData (new short[nWidth*nHeight]);
+ 	std::shared_ptr<short> pData;
 	{
 		StopWatch sw("GetPlaneData");
-		if (!_pRender->GetPlaneData(pData.get(), nWidth, nHeight, planeType))
+		if (!_pRender->GetPlaneData(pData, nWidth, nHeight, planeType))
 			return "";
 	}
 
@@ -303,6 +311,22 @@ std::vector<uint8_t> HelloMonkey::GetVRData_png(int nWidth, int nHeight)
 		StopWatch sw("GetVRData");
 		if (!_pRender->GetVRData(pVR.get(), nWidth, nHeight))
 			return out_buf;
+
+		if (m_bShowCPRLineInVR)
+		{
+			std::vector<Point3d> cprLine = _pRender->GetCPRLineVoxel();
+			StopWatch sw("cpr line size: %d", cprLine.size());
+			if (cprLine.size() >= 2){
+				float x0, y0, x1, y1;
+				_pRender->TransferVoxel2ImageInVR(x0, y0, nWidth, nHeight, cprLine[0]);
+				for (int i=1; i<cprLine.size(); i++){
+					_pRender->TransferVoxel2ImageInVR(x1, y1, nWidth, nHeight, cprLine[i]);
+					Methods::DrawLineInImage24Bit(pVR.get(), nWidth, nHeight, x0, y0, x1, y1, 1);
+					x0 = x1;
+					y0 = y1;
+				}
+			}
+		}
 	}
 	{
 		StopWatch sw("fpng");
@@ -542,11 +566,11 @@ double HelloMonkey::GetPixelSpacing( PlaneType planeType )
 	return _pRender->GetPixelSpacing(planeType);
 }
 
-bool HelloMonkey::TransferImage2Object( double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType )
+bool HelloMonkey::TransferImage2Voxel( double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType )
 {
 	if (!_pRender)
 		return false;
-	return _pRender->TransferImage2Object( x, y, z, xImage, yImage, planeType );
+	return _pRender->TransferImage2Voxel( x, y, z, xImage, yImage, planeType );
 }
 
 bool HelloMonkey::GetCrossHairPoint3D( Point3d& pt )
@@ -582,4 +606,30 @@ void HelloMonkey::SetMPRType( MPRType type )
 	if (!_pRender)
 		return;
 	return _pRender->SetMPRType(type);
+}
+
+bool HelloMonkey::SetCPRLinePatient(std::vector<Point3d> cprLine)
+{
+	if (!_pRender)
+		return false;
+	return _pRender->SetCPRLinePatient(cprLine);
+}
+
+bool HelloMonkey::SetCPRLineVoxel(std::vector<Point3d> cprLine)
+{
+	if (!_pRender)
+		return false;
+	return _pRender->SetCPRLineVoxel(cprLine);
+}
+
+bool HelloMonkey::RotateCPR(float angle, PlaneType planeType)
+{
+	if (!_pRender)
+		return false;
+	return _pRender->RotateCPR(angle, planeType);
+}
+
+void HelloMonkey::ShowCPRLineInVR(bool bShow)
+{
+	m_bShowCPRLineInVR = bShow;
 }

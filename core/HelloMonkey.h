@@ -42,6 +42,7 @@ namespace MonkeyGL {
         virtual void SetVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
         virtual void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
         virtual void SetSpacing(double x, double y, double z);
+        virtual void SetOrigin(Point3d pt);
         virtual void Reset();
         virtual void SetColorBackground(RGBA clrBG);
         virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
@@ -51,12 +52,12 @@ namespace MonkeyGL {
     // output
         virtual std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
         virtual bool GetPlaneMaxSize(int& nWidth, int& nHeight, const PlaneType& planeType);
-        virtual bool GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType);
+        virtual bool GetPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType);
         virtual std::string GetPlaneData_pngString(const PlaneType& planeType);
         virtual std::string GetOriginData_pngString(int slice);
 
         virtual bool GetCrossHairPoint(double& x, double& y, const PlaneType& planeType);
-        virtual bool TransferImage2Object(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType);
+        virtual bool TransferImage2Voxel(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType);
         virtual bool GetCrossHairPoint3D(Point3d& pt);
         virtual bool GetDirection(Direction2d& dirH, Direction2d& dirV, const PlaneType& planeType);
         virtual bool GetDirection3D(Direction3d& dir3dH, Direction3d& dir3dV, const PlaneType& planeType);
@@ -105,5 +106,14 @@ namespace MonkeyGL {
         virtual void SetThickness(double val, PlaneType planeType);
         virtual bool GetThickness(double& val, PlaneType planeType);
         virtual void SetMPRType(MPRType type);
+
+        // cpr
+        virtual bool SetCPRLinePatient(std::vector<Point3d> cprLine);
+        virtual bool SetCPRLineVoxel(std::vector<Point3d> cprLine);
+        virtual bool RotateCPR(float angle, PlaneType planeType);
+        virtual void ShowCPRLineInVR(bool bShow);
+
+    private:
+        bool m_bShowCPRLineInVR;
     };
 }

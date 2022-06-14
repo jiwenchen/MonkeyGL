@@ -26,6 +26,7 @@
 #include <cstring>
 #include "StopWatch.h"
 #include "Logger.h"
+#include "Methods.h"
 
 using namespace MonkeyGL;
 
@@ -71,7 +72,7 @@ bool VolumeInfo::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, in
 	fclose(fp);
 
 	m_pMask.reset();
-	NormVolumeData();
+	// NormVolumeData();
 
 	return true;
 }
@@ -88,14 +89,14 @@ bool VolumeInfo::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHei
 	m_pVolume = pData;
 	m_pMask.reset();
 
-	NormVolumeData();
+	// NormVolumeData();
 
 	return true;
 }
 
 bool VolumeInfo::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
 {
-	pData = CheckAndNormMaskData(pData, nWidth, nHeight, nDepth);
+	// pData = CheckAndNormMaskData(pData, nWidth, nHeight, nDepth);
 	if (!pData){
 		return false;
 	}
@@ -120,7 +121,7 @@ bool VolumeInfo::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidt
 
 bool VolumeInfo::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
 {
-	pData = CheckAndNormMaskData(pData, nWidth, nHeight, nDepth);
+	// pData = CheckAndNormMaskData(pData, nWidth, nHeight, nDepth);
 	if (!pData || !m_pMask){
 		return false;
 	}
@@ -195,7 +196,7 @@ void VolumeInfo::NormVolumeData()
 
 	Point3d ptLeftTop_StartSlice(0, 0, 0);
 	Point3d ptLeftTop_EndSlice = ptLeftTop_StartSlice + Point3d(m_dirZ.x()*zLen/cosV, m_dirZ.y()*zLen/cosV, m_dirZ.z()*zLen/cosV);
-	Point3d ptProj_LeftTop_EndSlice = DataManager::GetProjectPoint(dirNorm, ptLeftTop_StartSlice, ptLeftTop_EndSlice);
+	Point3d ptProj_LeftTop_EndSlice = Methods::Projection_Point2Plane(ptLeftTop_EndSlice, dirNorm, ptLeftTop_StartSlice);
 
 	Direction3d dirShift_proj(
 		ptProj_LeftTop_EndSlice.x() - ptLeftTop_StartSlice.x(),
@@ -311,61 +312,25 @@ std::shared_ptr<unsigned char> VolumeInfo::CheckAndNormMaskData(std::shared_ptr<
 	return pData;
 }
 
-bool VolumeInfo::GetPlaneInitSize( int& nWidth, int& nHeight, int& nNumber, const PlaneType& planeType )
+void VolumeInfo::SetSpacing(double x, double y, double z)
 {
-	if (m_Dims[0]<=0 || m_Dims[1]<=0 || m_Dims[2]<=0)
-		return false;
-	if (m_Spacing[0]<=0 || m_Spacing[1]<=0 || m_Spacing[2]<=0)
-		return false;
+	m_Spacing[0] = x;
+	m_Spacing[1] = y;
+	m_Spacing[2] = z;
+}
 
-	double minSpacing = m_Spacing[0]<m_Spacing[1] ? m_Spacing[0]:m_Spacing[1];
-	minSpacing = minSpacing<m_Spacing[2] ? minSpacing:m_Spacing[2];	
+Point3d VolumeInfo::Patient2Voxel(Point3d ptPatient)
+{	
+	double x = Methods::Length_VectorInLine(ptPatient, m_dirX, m_ptOriginPatient) / m_Spacing[0];
+	double y = Methods::Length_VectorInLine(ptPatient, m_dirY, m_ptOriginPatient) / m_Spacing[1];
+	double z = Methods::Length_VectorInLine(ptPatient, m_dirZ, m_ptOriginPatient) / m_Spacing[2];
+	return Point3d(x, y, z);
+}
 
-	switch (planeType)
-	{
-	case PlaneAxial:
-	case PlaneAxialOblique:
-		{
-			nWidth = m_Dims[0]*m_Spacing[0]/minSpacing;
-			nHeight = m_Dims[1]*m_Spacing[1]/minSpacing;
-			nNumber = m_Dims[2]*m_Spacing[2]/minSpacing;
-			return true;
-		}
-		break;
-	case PlaneSagittal:
-	case PlaneSagittalOblique:
-		{
-			nWidth = m_Dims[1]*m_Spacing[1]/minSpacing;
-			nHeight = m_Dims[2]*m_Spacing[2]/minSpacing;
-			nNumber = m_Dims[0]*m_Spacing[0]/minSpacing;
-			return true;
-		}
-		break;
-	case PlaneCoronal:
-	case PlaneCoronalOblique:
-		{
-			nWidth = m_Dims[0]*m_Spacing[0]/minSpacing;
-			nHeight = m_Dims[2]*m_Spacing[2]/minSpacing;
-			nNumber = m_Dims[1]*m_Spacing[1]/minSpacing;
-			return true;
-		}
-		break;
-	case PlaneVR:
-		{
-			nWidth = 512;
-			nHeight = 512;
-			nNumber = 1;
-			return true;
-		}
-		break;
-	case PlaneNotDefined:
-	default:
-		{
-			nWidth = -1;
-			nHeight = -1;
-			nNumber = -1;
-		}
-		break;
-	}
-	return false;
+Point3d VolumeInfo::Voxel2Patient(Point3d ptVoxel)
+{
+	double x = ptVoxel.x() * m_Spacing[0];
+	double y = ptVoxel.y() * m_Spacing[1];
+	double z = ptVoxel.z() * m_Spacing[2];
+	return m_ptOriginPatient + m_dirX * x + m_dirY * y + m_dirZ * z;
 }

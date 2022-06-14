@@ -44,10 +44,9 @@ float3 alphaAndWWWL[MAXOBJECTCOUNT+1];
 cudaTextureObject_t maskText;
 cudaArray* d_maskArray = 0;
 
-float3 m_f3Nor, m_f3Spacing, m_f3maxper, m_f3permax;
+float3 m_f3Nor, m_f3Spacing, m_f3maxper;
 VOI m_voi;
 cudaExtent m_volumeSize;
-Orientation m_orientation;
 
 __constant__ float3x3 constTransposeTransformMatrix;
 __constant__ float3x3 constTransformMatrix;
@@ -88,15 +87,9 @@ void ReleaseCuda()
 }
 
 extern "C"
-void cu_copyVolumeData( short* h_volumeData, cudaExtent volumeSize, Orientation orientation)
+void cu_copyVolumeData( short* h_volumeData, cudaExtent volumeSize)
 {
 	m_volumeSize = make_cudaExtent(volumeSize.width, volumeSize.height, volumeSize.depth);
-	m_orientation.rx = orientation.rx;
-	m_orientation.ry = orientation.ry;
-	m_orientation.rz = orientation.rz;
-	m_orientation.cx = orientation.cx;
-	m_orientation.cy = orientation.cy;
-	m_orientation.cz = orientation.cz;
 
 	if (d_volumeArray != 0)
 	{
@@ -212,11 +205,7 @@ void cu_InitCommon(float fxSpacing, float fySpacing, float fzSpacing)
 	float fMaxLen = max(m_volumeSize.width*fxSpacing, max(m_volumeSize.height*fySpacing, m_volumeSize.depth*fzSpacing));
 	m_f3maxper.x = 1.0f*fMaxLen/(m_volumeSize.width*fxSpacing);
 	m_f3maxper.y = 1.0f*fMaxLen/(m_volumeSize.height*fySpacing);
-	m_f3maxper.z = 1.0f*fMaxLen/(m_volumeSize.depth*fzSpacing);	
-
-	m_f3permax.x = 1.0f / m_f3maxper.x;
-	m_f3permax.y = 1.0f / m_f3maxper.y;
-	m_f3permax.z = 1.0f / m_f3maxper.z;
+	m_f3maxper.z = 1.0f*fMaxLen/(m_volumeSize.depth*fzSpacing);
 
     for (int i=0; i<MAXOBJECTCOUNT; i++){
         d_transferFuncArrays[i] = 0;
@@ -336,19 +325,13 @@ __device__ float4 tracing(
 	float4 col,
 	float3 dirLight,
 	float3 f3Spacing,
-	float3 f3Nor,
-	Orientation orientation
+	float3 f3Nor
 )
 {
-	float3 Ntemp;
-	Ntemp.x = (tex3D<float>(volumeText, pos.x+f3Nor.x, pos.y, pos.z) - tex3D<float>(volumeText, pos.x-f3Nor.x, pos.y, pos.z))*f3Spacing.x;
-	Ntemp.y = (tex3D<float>(volumeText, pos.x, pos.y+f3Nor.y, pos.z) - tex3D<float>(volumeText, pos.x, pos.y-f3Nor.y, pos.z))*f3Spacing.y;
-	Ntemp.z = (tex3D<float>(volumeText, pos.x, pos.y, pos.z+f3Nor.z) - tex3D<float>(volumeText, pos.x, pos.y, pos.z-f3Nor.z))*f3Spacing.z;
-
 	float3 N;
-	N.x = Ntemp.x*orientation.rx + Ntemp.y*orientation.ry;
-	N.y = Ntemp.x*orientation.cx + Ntemp.y*orientation.cy;
-	N.z = Ntemp.z;
+	N.x = (tex3D<float>(volumeText, pos.x+f3Nor.x, pos.y, pos.z) - tex3D<float>(volumeText, pos.x-f3Nor.x, pos.y, pos.z))*f3Spacing.x;
+	N.y = (tex3D<float>(volumeText, pos.x, pos.y+f3Nor.y, pos.z) - tex3D<float>(volumeText, pos.x, pos.y-f3Nor.y, pos.z))*f3Spacing.y;
+	N.z = (tex3D<float>(volumeText, pos.x, pos.y, pos.z+f3Nor.z) - tex3D<float>(volumeText, pos.x, pos.y, pos.z-f3Nor.z))*f3Spacing.z;
 	N = normalize(N);
 
 	float diffuse = dot(N, dirLight);
@@ -439,7 +422,7 @@ __global__ void d_render(
 	float3 f3Nor,
 	VOI voi,
 	cudaExtent volumeSize,
-	Orientation orientation,
+	bool invertZ,
 	float4 f4ColorBG
 )
 {
@@ -467,7 +450,6 @@ __global__ void d_render(
 		float mask = 0.0f;
 
 		float3 pos;
-		float3 posTemp;
 
 		float alphaAccObject[MAXOBJECTCOUNT+1];
 		for (int i=0; i<MAXOBJECTCOUNT+1; i++){
@@ -495,12 +477,11 @@ __global__ void d_render(
 			pos = make_float3(u, fy, v);
 			pos = mul(constTransformMatrix, pos);
 
-			posTemp.x = pos.x * f3maxper.x;
-			posTemp.y = pos.y * f3maxper.y;	
-			pos.x = posTemp.x*orientation.rx + posTemp.y*orientation.ry + 0.5f;
-			pos.y = posTemp.x*orientation.cx + posTemp.y*orientation.cy + 0.5f;
-
+			pos.x = pos.x * f3maxper.x + 0.5f;
+			pos.y = pos.y * f3maxper.y + 0.5f;
 			pos.z = pos.z * f3maxper.z + 0.5f;
+			if (invertZ)
+				pos.z = 1.0f - pos.z;
 
 			nxIdx = pos.x * volumeSize.width;
 			nyIdx = pos.y * volumeSize.height;
@@ -528,44 +509,24 @@ __global__ void d_render(
 
 			fAlphaTemp = col.w;
 
-			if (true){
+			if (!getNextStep(fAlphaTemp, fStepTemp, accuLength, fAlphaPre, fStepL1, fStepL4, fStepL8)){
+				continue;
+			}	
+			
+			fAlphaPre = fAlphaTemp;
+			accuLength += fStepTemp;
 
-				if (!getNextStep(fAlphaTemp, fStepTemp, accuLength, fAlphaPre, fStepL1, fStepL4, fStepL8)){
-					continue;
-				}	
-				
-				fAlphaPre = fAlphaTemp;
-				accuLength += fStepTemp;
+			col.w = fAlphaTemp;
 
-				col.w = fAlphaTemp;
-
-				if (col.w > 0.0005f && alphaAccObject[label] < alphawwwl.x){
-					sum = tracing(sum, alphaAcc, volumeText, pos, col, dirLight, f3Spacing, f3Nor, orientation);
-					alphaAccObject[label] += (1.0f - alphaAcc) * col.w;
-					alphaAcc += (1.0f - alphaAcc) * col.w;
-				}
-
-				if (alphaAcc > 0.995f){
-					break;
-				}
+			if (col.w > 0.0005f && alphaAccObject[label] < alphawwwl.x){
+				sum = tracing(sum, alphaAcc, volumeText, pos, col, dirLight, f3Spacing, f3Nor);
+				alphaAccObject[label] += (1.0f - alphaAcc) * col.w;
+				alphaAcc += (1.0f - alphaAcc) * col.w;
 			}
-			// else{
-			// 	if (!getNextStep(fAlphaTemp, fStepTemp, accuLength, fAlphaPre, fStepL1, fStepL4, fStepL8)){
-			// 		continue;
-			// 	}	
-				
-			// 	fAlphaPre = fAlphaTemp;
-			// 	accuLength += fStepTemp;
 
-			// 	col.w = fAlphaTemp;
-			// 	if( col.w > 0.0005f )
-			// 	{
-			// 		sum = tracing(sum, alphaAccObject, volumeText, pos, col, dirLight, f3Spacing, f3Nor, orientation);
-			// 		alphaAccObject += (1.0f - alphaAccObject) * col.w;
-			// 		if(alphaAccObject>0.995f)
-			// 			break;
-			// 	}
-			// }
+			if (alphaAcc > 0.995f){
+				break;
+			}
 
 		}
 		
@@ -582,7 +543,7 @@ __global__ void d_render(
 }
 
 extern "C"
-void cu_render(unsigned char* pVR, int width, int height, float xTranslate, float yTranslate, float scale, RGBA colorBG)
+void cu_render(unsigned char* pVR, int width, int height, float xTranslate, float yTranslate, float scale, bool invertZ, RGBA colorBG)
 {
 	if (width>nWidth_VR || height>nHeight_VR)
 	{
@@ -612,7 +573,7 @@ void cu_render(unsigned char* pVR, int width, int height, float xTranslate, floa
 		m_f3Nor,
 		m_voi,
 		m_volumeSize,
-		m_orientation,
+		invertZ,
 		clrBG
 	);
 	cudaError_t t = cudaMemcpy( pVR, d_pVR, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost );
@@ -729,7 +690,7 @@ void cu_renderCoronal(short* pData, int width, int height, float fDepth)
 	cudaError_t t = cudaMemcpy( pData, d_pMPR, width*height*sizeof(short), cudaMemcpyDeviceToHost );
 }
 
-__global__ void d_renderPlane_MIP(short* pData, cudaTextureObject_t volumeText, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, float halfNum, float3 f3Spacing, cudaExtent volumeSize)
+__global__ void d_renderPlane_MIP(short* pData, cudaTextureObject_t volumeText, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum, float3 f3Spacing, cudaExtent volumeSize)
 {
 	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
 	const int y = __umul24(blockIdx.y, blockDim.y) + threadIdx.y;
@@ -749,9 +710,11 @@ __global__ void d_renderPlane_MIP(short* pData, cudaTextureObject_t volumeText, 
 			float fx = (pt_x + x*fPixelSpacing*dirH.x + y*fPixelSpacing*dirV.x)/(f3Spacing.x*volumeSize.width);
 			float fy = (pt_y + x*fPixelSpacing*dirH.y + y*fPixelSpacing*dirV.y)/(f3Spacing.y*volumeSize.height);
 			float fz = (pt_z + x*fPixelSpacing*dirH.z + y*fPixelSpacing*dirV.z)/(f3Spacing.z*volumeSize.depth);
+			if (!invertZ)
+				fz = 1.0 - fz;
 
 			if (fx>=0 && fx<=1 && fy>=0 && fy<=1 && fz>=0 && fz<=1)
-				nVal = 32768*tex3D<float>(volumeText, fx, fy, 1.0f-fz);
+				nVal = 32768*tex3D<float>(volumeText, fx, fy, fz);
 			else
 				nVal = -32768;
 			pData[nIdx] = pData[nIdx]>nVal ? pData[nIdx]:nVal;
@@ -760,7 +723,7 @@ __global__ void d_renderPlane_MIP(short* pData, cudaTextureObject_t volumeText, 
 }
 
 extern "C"
-void cu_renderPlane_MIP(short* pData, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, float halfNum)
+void cu_renderPlane_MIP(short* pData, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum)
 {
 	if (width>nWidth_MPR || height>nHeight_MPR)
 	{
@@ -775,12 +738,12 @@ void cu_renderPlane_MIP(short* pData, int width, int height, float3 dirH, float3
 	dim3 blockSize(16, 16);
 	dim3 gridSize( (width-1)/blockSize.x+1, (height-1)/blockSize.y+1 );
 
-	d_renderPlane_MIP<<<gridSize, blockSize>>>(d_pMPR, volumeText, width, height, dirH, dirV, dirN, ptLeftTop, fPixelSpacing, halfNum, m_f3Spacing, m_volumeSize);
+	d_renderPlane_MIP<<<gridSize, blockSize>>>(d_pMPR, volumeText, width, height, dirH, dirV, dirN, ptLeftTop, fPixelSpacing, invertZ, halfNum, m_f3Spacing, m_volumeSize);
 
 	cudaError_t t = cudaMemcpy( pData, d_pMPR, width*height*sizeof(short), cudaMemcpyDeviceToHost );
 }
 
-__global__ void d_renderPlane_MinIP(short* pData, cudaTextureObject_t volumeText, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, float halfNum, float3 f3Spacing, cudaExtent volumeSize)
+__global__ void d_renderPlane_MinIP(short* pData, cudaTextureObject_t volumeText, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum, float3 f3Spacing, cudaExtent volumeSize)
 {
 	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
 	const int y = __umul24(blockIdx.y, blockDim.y) + threadIdx.y;
@@ -800,9 +763,11 @@ __global__ void d_renderPlane_MinIP(short* pData, cudaTextureObject_t volumeText
 			float fx = (pt_x + x*fPixelSpacing*dirH.x + y*fPixelSpacing*dirV.x)/(f3Spacing.x*volumeSize.width);
 			float fy = (pt_y + x*fPixelSpacing*dirH.y + y*fPixelSpacing*dirV.y)/(f3Spacing.y*volumeSize.height);
 			float fz = (pt_z + x*fPixelSpacing*dirH.z + y*fPixelSpacing*dirV.z)/(f3Spacing.z*volumeSize.depth);
+			if (!invertZ)
+				fz = 1.0 - fz;
 
 			if (fx>=0 && fx<=1 && fy>=0 && fy<=1 && fz>=0 && fz<=1)
-				nVal = 32768*tex3D<float>(volumeText, fx, fy, 1.0f-fz);
+				nVal = 32768*tex3D<float>(volumeText, fx, fy, fz);
 			else
 				nVal = -32768;
 			pData[nIdx] = pData[nIdx]<nVal ? pData[nIdx]:nVal;
@@ -811,7 +776,7 @@ __global__ void d_renderPlane_MinIP(short* pData, cudaTextureObject_t volumeText
 }
 
 extern "C"
-void cu_renderPlane_MinIP(short* pData, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, float halfNum)
+void cu_renderPlane_MinIP(short* pData, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum)
 {
 	if (width>nWidth_MPR || height>nHeight_MPR)
 	{
@@ -826,12 +791,12 @@ void cu_renderPlane_MinIP(short* pData, int width, int height, float3 dirH, floa
 	dim3 blockSize(16, 16);
 	dim3 gridSize( (width-1)/blockSize.x+1, (height-1)/blockSize.y+1 );
 
-	d_renderPlane_MinIP<<<gridSize, blockSize>>>(d_pMPR, volumeText, width, height, dirH, dirV, dirN, ptLeftTop, fPixelSpacing, halfNum, m_f3Spacing, m_volumeSize);
+	d_renderPlane_MinIP<<<gridSize, blockSize>>>(d_pMPR, volumeText, width, height, dirH, dirV, dirN, ptLeftTop, fPixelSpacing, invertZ, halfNum, m_f3Spacing, m_volumeSize);
 
 	cudaError_t t = cudaMemcpy( pData, d_pMPR, width*height*sizeof(short), cudaMemcpyDeviceToHost );
 }
 
-__global__ void d_renderPlane_Average(short* pData, cudaTextureObject_t volumeText, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, float halfNum, float3 f3Spacing, cudaExtent volumeSize)
+__global__ void d_renderPlane_Average(short* pData, cudaTextureObject_t volumeText, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum, float3 f3Spacing, cudaExtent volumeSize)
 {
 	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
 	const int y = __umul24(blockIdx.y, blockDim.y) + threadIdx.y;
@@ -850,9 +815,11 @@ __global__ void d_renderPlane_Average(short* pData, cudaTextureObject_t volumeTe
 			float fx = (pt_x + x*fPixelSpacing*dirH.x + y*fPixelSpacing*dirV.x)/(f3Spacing.x*volumeSize.width);
 			float fy = (pt_y + x*fPixelSpacing*dirH.y + y*fPixelSpacing*dirV.y)/(f3Spacing.y*volumeSize.height);
 			float fz = (pt_z + x*fPixelSpacing*dirH.z + y*fPixelSpacing*dirV.z)/(f3Spacing.z*volumeSize.depth);
+			if (!invertZ)
+				fz = 1.0 - fz;
 
 			if (fx>=0 && fx<=1 && fy>=0 && fy<=1 && fz>=0 && fz<=1)
-				fSum += 32768*tex3D<float>(volumeText, fx, fy, 1.0f-fz);
+				fSum += 32768*tex3D<float>(volumeText, fx, fy, fz);
 			else
 				fSum += -32768;
 		}
@@ -861,7 +828,7 @@ __global__ void d_renderPlane_Average(short* pData, cudaTextureObject_t volumeTe
 }
 
 extern "C"
-void cu_renderPlane_Average(short* pData, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, float halfNum)
+void cu_renderPlane_Average(short* pData, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum)
 {
 	if (width>nWidth_MPR || height>nHeight_MPR)
 	{
@@ -876,7 +843,62 @@ void cu_renderPlane_Average(short* pData, int width, int height, float3 dirH, fl
 	dim3 blockSize(16, 16);
 	dim3 gridSize( (width-1)/blockSize.x+1, (height-1)/blockSize.y+1 );
 
-	d_renderPlane_Average<<<gridSize, blockSize>>>(d_pMPR, volumeText, width, height, dirH, dirV, dirN, ptLeftTop, fPixelSpacing, halfNum, m_f3Spacing, m_volumeSize);
+	d_renderPlane_Average<<<gridSize, blockSize>>>(d_pMPR, volumeText, width, height, dirH, dirV, dirN, ptLeftTop, fPixelSpacing, invertZ, halfNum, m_f3Spacing, m_volumeSize);
 
 	cudaError_t t = cudaMemcpy( pData, d_pMPR, width*height*sizeof(short), cudaMemcpyDeviceToHost );
 }
+
+__global__ void d_renderCPR(short* pData, cudaTextureObject_t volumeText, int width, int height, double* pPoints, double* pDirs, bool invertZ, cudaExtent volumeSize)
+{
+	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
+	const int y = __umul24(blockIdx.y, blockDim.y) + threadIdx.y;
+
+	if ((x < width) && (y < height) && (x >= 0) && (y >= 0))
+	{
+		uint nIdx = __umul24(y, width) + x;
+
+		double* pt = pPoints+y*3;
+		double* dir = pDirs+y*3;
+
+		float fx = (pt[0] + x * dir[0]) / volumeSize.width;
+		float fy = (pt[1] + x * dir[1]) / volumeSize.height;
+		float fz = (pt[2] + x * dir[2]) / volumeSize.depth;
+		if (!invertZ)
+			fz = 1.0 - fz;
+
+		if (fx<0 || fx>1 || fy<0 || fy>1 || fz<0 || fz > 1){
+			pData[nIdx] = -2048;
+		}
+		else{
+			pData[nIdx] = 32768*tex3D<float>(volumeText, fx, fy, fz);
+		}
+	}
+}
+
+extern "C"
+void cu_renderCPR(short* pData, int width, int height, double* pPoints, double* pDirs, bool invertZ)
+{
+	if (NULL == pPoints)
+		return;
+	short* d_pData = 0;
+	checkCudaErrors(cudaMalloc( (void**)&d_pData, width*height*sizeof(short) ));
+
+	double* d_pPoints = 0;
+	checkCudaErrors(cudaMalloc( (void**)&d_pPoints, height*3*sizeof(double) ));
+	checkCudaErrors(cudaMemcpy( d_pPoints, pPoints, height*3*sizeof(double), cudaMemcpyHostToDevice));
+
+	double* d_pDirs = 0;
+	checkCudaErrors(cudaMalloc( (void**)&d_pDirs, height*3*sizeof(double) ));
+	checkCudaErrors(cudaMemcpy( d_pDirs, pDirs, height*3*sizeof(double), cudaMemcpyHostToDevice));
+
+	dim3 blockSize(16, 16);
+	dim3 gridSize( (width-1)/blockSize.x+1, (height-1)/blockSize.y+1 );
+	d_renderCPR<<<gridSize, blockSize>>>(d_pData, volumeText, width, height, d_pPoints, d_pDirs, invertZ, m_volumeSize);
+
+	checkCudaErrors(cudaMemcpy( pData, d_pData, width*height*sizeof(short), cudaMemcpyDeviceToHost ));
+
+	checkCudaErrors(cudaFree(d_pData));
+	checkCudaErrors(cudaFree(d_pPoints));
+	checkCudaErrors(cudaFree(d_pDirs));
+}
+

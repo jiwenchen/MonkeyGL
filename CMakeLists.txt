@@ -39,6 +39,7 @@ set(SRC_LIST
   ./core/fpng/fpng.cpp
   ./core/Base64.hpp
   ./core/BatchInfo.cpp
+  ./core/CPRInfo.cpp
   ./core/DataManager.cpp
   ./core/DeviceInfo.cpp
   ./core/Defines.cpp
@@ -47,6 +48,7 @@ set(SRC_LIST
   ./core/IRender.cpp
   ./core/Logger.cpp
   ./core/Methods.cpp
+  ./core/MPRInfo.cpp
   ./core/ObjectInfo.cpp
   ./core/PlaneInfo.cpp
   ./core/Point.cpp

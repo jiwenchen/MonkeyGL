@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "IRender.h"
+#include "Logger.h"
 
 using namespace MonkeyGL;
 
@@ -61,6 +62,11 @@ void IRender::SetDirection( Direction3d dirX, Direction3d dirY, Direction3d dirZ
 void IRender::SetSpacing( double x, double y, double z )
 {
 	m_dataMan.SetSpacing(x, y, z);
+}
+
+void IRender::SetOrigin(Point3d pt)
+{
+	m_dataMan.SetOrigin(pt);
 }
 
 void IRender::Reset()
@@ -109,7 +115,7 @@ bool IRender::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& plane
 	return m_dataMan.GetPlaneMaxSize(nWidth, nHeight, planeType);
 }
 
-bool IRender::GetPlaneData(short* pData, int& nWidth, int& nHeight, const PlaneType& planeType)
+bool IRender::GetPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType)
 {
 	return false;
 }
@@ -119,9 +125,9 @@ bool IRender::GetCrossHairPoint( double& x, double& y, const PlaneType& planeTyp
 	return m_dataMan.GetCrossHairPoint(x, y, planeType);
 }
 
-bool IRender::TransferImage2Object(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType)
+bool IRender::TransferImage2Voxel(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType)
 {
-	return m_dataMan.TransferImage2Object(x, y, z, xImage, yImage, planeType);
+	return m_dataMan.TransferImage2Voxel(x, y, z, xImage, yImage, planeType);
 }
 
 bool IRender::GetCrossHairPoint3D( Point3d& pt )
@@ -225,3 +231,22 @@ bool IRender::SetObjectAlpha(float fAlpha, unsigned char nLabel)
 	return m_dataMan.SetObjectAlpha(fAlpha, nLabel);
 }
 
+bool IRender::SetCPRLinePatient(std::vector<Point3d> cprLine)
+{
+	return m_dataMan.SetCPRLinePatient(cprLine);
+}
+
+bool IRender::SetCPRLineVoxel(std::vector<Point3d> cprLine)
+{
+	return m_dataMan.SetCPRLineVoxel(cprLine);
+}
+
+std::vector<Point3d> IRender::GetCPRLineVoxel()
+{
+	return m_dataMan.GetCPRLineVoxel();
+}
+
+bool IRender::RotateCPR(float angle, PlaneType planeType)
+{
+	return m_dataMan.RotateCPR(angle, planeType);
+}
