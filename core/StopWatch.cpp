@@ -21,12 +21,39 @@
 // SOFTWARE.
 
 #include "StopWatch.h"
-#include <sys/time.h>
 #include "Logger.h"
-#include "log4cplus/log4cplus.h"
+#if defined(WIN64) || defined(WIN32) 
+#include <time.h>
+#include <stdarg.h>
+#include <chrono>
+
+struct timeval
+{
+	__int64 tv_sec;
+	__int64 tv_usec;
+};
+
+struct timezone{
+	int tz_minuteswest; /*和Greenwich 时间差了多少分钟*/
+	int tz_dsttime; /*日光节约时间的状态*/
+};
+
+void gettimeofday(struct timeval* tv, struct timezone* tz)
+{
+	auto time_now = std::chrono::system_clock::now();
+	std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
+	auto duration_in_s = std::chrono::duration_cast<std::chrono::seconds>(time_now.time_since_epoch()).count();
+	auto duration_in_us = std::chrono::duration_cast<std::chrono::microseconds>(time_now.time_since_epoch()).count();
+	tv->tv_sec = duration_in_s;
+	tv->tv_usec = duration_in_us;
+};
+
+#else
+	#include <sys/time.h>
+    #include "log4cplus/log4cplus.h"
+#endif
 
 using namespace MonkeyGL;
-
 
 StopWatch::StopWatch(const char * format, ...)
 {
