@@ -324,15 +324,14 @@ __device__ float4 tracing(
 	float3 pos,
 	float4 col,
 	float3 dirLight,
-	float3 f3Spacing,
 	float3 f3Nor,
 	bool invertZ
 )
 {
 	float3 N;
-	N.x = (tex3D<float>(volumeText, pos.x+f3Nor.x, pos.y, pos.z) - tex3D<float>(volumeText, pos.x-f3Nor.x, pos.y, pos.z))*f3Spacing.x;
-	N.y = (tex3D<float>(volumeText, pos.x, pos.y+f3Nor.y, pos.z) - tex3D<float>(volumeText, pos.x, pos.y-f3Nor.y, pos.z))*f3Spacing.y;
-	N.z = (tex3D<float>(volumeText, pos.x, pos.y, pos.z+f3Nor.z) - tex3D<float>(volumeText, pos.x, pos.y, pos.z-f3Nor.z))*f3Spacing.z;
+	N.x = tex3D<float>(volumeText, pos.x+f3Nor.x, pos.y, pos.z) - tex3D<float>(volumeText, pos.x-f3Nor.x, pos.y, pos.z);
+	N.y = tex3D<float>(volumeText, pos.x, pos.y+f3Nor.y, pos.z) - tex3D<float>(volumeText, pos.x, pos.y-f3Nor.y, pos.z);
+	N.z = tex3D<float>(volumeText, pos.x, pos.y, pos.z+f3Nor.z) - tex3D<float>(volumeText, pos.x, pos.y, pos.z-f3Nor.z);
 	if (invertZ){
 		N.z = -N.z;
 	}
@@ -344,9 +343,9 @@ __device__ float4 tracing(
 	float4 f4Temp = make_float4(0.0f);
 	if ( diffuse > 0.0f )
 	{
-		f4Temp = col * (diffuse*0.6f + 0.16f*(pow(diffuse, 8.0f)));
+		f4Temp = col * (diffuse*0.8f + 0.16f*(pow(diffuse, 8.0f)));
 	}
-	clrLight += (f4Temp);
+	clrLight += f4Temp;
 
 	diffuse = (1.0f - alphaAccObject) * col.w;
 	return (sum + diffuse * clrLight);
@@ -519,7 +518,7 @@ __global__ void d_render(
 			col.w = fAlphaTemp;
 
 			if (col.w > 0.0005f && alphaAccObject[label] < alphawwwl.x){
-				sum = tracing(sum, alphaAcc, volumeText, pos, col, dirLight, f3Spacing, f3Nor, invertZ);
+				sum = tracing(sum, alphaAcc, volumeText, pos, col, dirLight, f3Nor, invertZ);
 				alphaAccObject[label] += (1.0f - alphaAcc) * col.w;
 				alphaAcc += (1.0f - alphaAcc) * col.w;
 			}
