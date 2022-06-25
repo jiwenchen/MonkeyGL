@@ -175,14 +175,14 @@ void cu_copyMaskData( unsigned char* h_maskData)
 	cudaTextureDesc texDescr;
 	memset(&texDescr, 0, sizeof(cudaTextureDesc));
 
-	texDescr.normalizedCoords = true;  // access with normalized texture coordinates
-	texDescr.filterMode = cudaFilterModeLinear;  // linear interpolation
+	texDescr.normalizedCoords = false;
+	texDescr.filterMode = cudaFilterModePoint; 
 
-	texDescr.addressMode[0] = cudaAddressModeClamp;  // clamp texture coordinates
+	texDescr.addressMode[0] = cudaAddressModeClamp;
 	texDescr.addressMode[1] = cudaAddressModeClamp;
 	texDescr.addressMode[2] = cudaAddressModeClamp;
 
-	texDescr.readMode = cudaReadModeNormalizedFloat;
+	texDescr.readMode = cudaReadModeElementType;
 		
 	checkCudaErrors( cudaCreateTextureObject(&maskText, &texRes, &texDescr, NULL) );
 }
@@ -362,7 +362,6 @@ __device__ unsigned char getMaskLabel( float val)
 	return label;
 }
 
-
 __device__ bool getNextStep(
 	float& fAlphaTemp,
 	float& fStepTemp,
@@ -451,8 +450,6 @@ __global__ void d_render(
 		float fStepTemp = fStepL1;
 
 		float temp = 0.0f;
-		float mask = 0.0f;
-
 		float3 pos;
 
 		float alphaAccObject[MAXOBJECTCOUNT+1];
@@ -499,8 +496,7 @@ __global__ void d_render(
 				label = 0;
 			}
 			else {
-				mask = 255*tex3D<float>(maskText, pos.x, pos.y, pos.z);
-				label = getMaskLabel(mask);
+				label = tex3D<unsigned char>(maskText, nxIdx, nyIdx, nzIdx);
 			}
 			alphawwwl = constAlphaAndWWWL[label];
 

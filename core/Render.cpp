@@ -557,13 +557,16 @@ bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 
 void Render::testcuda()
 {
-#if 0
+#if 1
 	int nWidth = 512;
 	int nHeight = 512;
 	int nDepth = 200;
 	short* pData = new short[nWidth*nHeight*nDepth];
-	for(int i=0; i<nWidth*nHeight*nDepth; i++){
-		pData[i] = i;
+	for(int i=0; i<nDepth; i++)
+	{
+		for(int j=0; j<nWidth*nHeight; j++){
+			pData[i*nHeight*nWidth + j] = j+i;
+		}
 	}
 	m_VolumeSize.width = nWidth;
 	m_VolumeSize.height = nHeight;

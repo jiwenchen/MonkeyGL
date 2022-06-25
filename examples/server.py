@@ -180,16 +180,6 @@ def set_volume_type(
         hm.SetObjectAlpha(0, 0)
         hm.SetTransferFunc(tf0)
 
-        label1 = hm.AddNewObjectMaskArray(npmaskdatat)
-        tf1 = {}
-        tf1[5] = mk.RGBA(0.8, 0, 0, 0)
-        tf1[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
-        ww1 = 500
-        wl1 = 100
-        hm.SetVRWWWL(ww1, wl1, 1)
-        hm.SetObjectAlpha(1, 1)
-        hm.SetTransferFunc(tf1)
-
         label2 = hm.AddNewObjectMaskArray(npmaskdatat2)
         tf1 = {}
         tf1[5] = mk.RGBA(0.8, 0, 0, 0)
@@ -197,7 +187,17 @@ def set_volume_type(
         ww1 = 500
         wl1 = 100
         hm.SetVRWWWL(ww1, wl1, label2)
-        hm.SetObjectAlpha(0.5, label2)
+        hm.SetObjectAlpha(0.4, label2)
+        hm.SetTransferFunc(tf1)
+
+        label1 = hm.AddNewObjectMaskArray(npmaskdatat)
+        tf1 = {}
+        tf1[5] = mk.RGBA(0.8, 0, 0, 0)
+        tf1[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
+        ww1 = 500
+        wl1 = 100
+        hm.SetVRWWWL(ww1, wl1, label1)
+        hm.SetObjectAlpha(1, label1)
         hm.SetTransferFunc(tf1)
     
     hm.SetSpacing(spacing[0], spacing[1], spacing[2])

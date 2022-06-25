@@ -36,7 +36,8 @@ __global__ void transformKernel(float* output,
 	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
 	const int y = __umul24(blockIdx.y, blockDim.y) + threadIdx.y;
 
-    output[y * width + x] = tex3D<float>(texObj, 1.0*x/width, 0, 0)*32768;
+    output[y * width + x] = tex3D<short>(texObj, x, y, 15);
+    // output[y * width + x] = tex3D<float>(texObj, 1.0*x/width, 0, 0)*32768;
 }
 
 extern "C" 
@@ -68,16 +69,16 @@ void cu_test_3d( VolumeType* h_volumeData, cudaExtent volumeSize)
     cudaTextureDesc texDescr;
     memset(&texDescr, 0, sizeof(cudaTextureDesc));
 
-    texDescr.normalizedCoords = true;
-    // texDescr.filterMode = cudaFilterModePoint;
-    texDescr.filterMode = cudaFilterModeLinear;
+    texDescr.normalizedCoords = false;
+    texDescr.filterMode = cudaFilterModePoint;
+    // texDescr.filterMode = cudaFilterModeLinear;
 
     texDescr.addressMode[0] = cudaAddressModeClamp;  // clamp texture coordinates
     texDescr.addressMode[1] = cudaAddressModeClamp;
     texDescr.addressMode[2] = cudaAddressModeClamp;
 
-    // texDescr.readMode = cudaReadModeElementType;
-    texDescr.readMode = cudaReadModeNormalizedFloat;
+    texDescr.readMode = cudaReadModeElementType;
+    // texDescr.readMode = cudaReadModeNormalizedFloat;
 
     checkCudaErrors(
         cudaCreateTextureObject(&texObject_test, &texRes, &texDescr, NULL)
@@ -92,7 +93,7 @@ void cu_test_3d( VolumeType* h_volumeData, cudaExtent volumeSize)
 
     float* pOut = (float*)malloc(volumeSize.width * volumeSize.height * sizeof(float));
 
-    cudaMemcpy( pOut, result_arr, volumeSize.width * volumeSize.height * sizeof(VolumeType), cudaMemcpyDeviceToHost );
+    cudaMemcpy( pOut, result_arr, volumeSize.width * volumeSize.height * sizeof(float), cudaMemcpyDeviceToHost );
 
     for (int i=0; i<volumeSize.width; i++){
         printf("%.0f ", pOut[i]);
