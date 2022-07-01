@@ -48,8 +48,11 @@ namespace MonkeyGL {
 
     private:
         bool UpdateCPRInfo(); 
-        float GetRadius(){
-            return m_Radius;
+        float GetStretchedRadius(){
+            return m_StretchedRadius;
+        }
+        float GetStraightenedRadius(){
+            return m_StraightenedRadius;
         }
 
         bool GetCPRInfoStretched(Point3d*& pPoints, Direction3d*& pDirs, int& len);
@@ -58,10 +61,12 @@ namespace MonkeyGL {
         static Direction3d FirstDirectionProjection(Point3d pt, Direction3d dirN);
 
     private:
-        double m_Radius;
+        double m_StretchedRadius;
+        double m_StraightenedRadius;
         std::vector<Point3d> m_cprLineVoxel;
         Direction3d m_dirStretchedCPR;
         Point3d m_ptOriginStrechedCPR;
+        Point3d m_ptOriginStraightenedCPR;
         double m_angleStrechedCPR;
         double m_angleStraightenedCPR;
         double m_spacing;

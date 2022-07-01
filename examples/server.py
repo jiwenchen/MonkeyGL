@@ -7597,7 +7597,7 @@ def get_stretched_cpr(
 
 
 @app.get('/rotatestraightenedcpr')
-def get_stretched_cpr(
+def get_straightened_cpr(
     angle: float,
 ):
     hm.RotateCPR(angle, mk.PlaneStraightenedCPR)
