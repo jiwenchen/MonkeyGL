@@ -29,12 +29,21 @@
   <label><input name="MPR Type" type="radio" id="minipMPR" value="" />MinIP</label>
 
   Thickness:
-  <button id="addThickness" type="button" class="btn btn-default">⬆</button>
-  <button id="subThickness" type="button" class="btn btn-default">⬇</button>
+  <button id="addThickness" type="button" class="btn btn-default">+</button>
+  <button id="subThickness" type="button" class="btn btn-default">-</button>
+
+  <br>
+  CPR:
+  <button id="showCPR" type="button" class="btn btn-default">Show Line</button>
+  <label for="l1"><input id="l1" value="1" type="radio" class="radio-line" name="line"/>line1</label>
+  <label for="l2"><input id="l2" value="2" type="radio" class="radio-line" name="line"/>line2</label>
 
   <br>
     <div class="bm-wrap" id="vr"></div>
     <div class="bm-wrap" id="origin"></div>
+    <br />
+    <div class="bm-wrap" id="stretchedcpr"></div>
+    <div class="bm-wrap" id="straightenedcpr"></div>
     <br />
     <div class="bm-wrap" id="axial"></div>
     <div class="bm-wrap" id="sagittal"></div>
@@ -71,25 +80,69 @@
           });
       });
 
-      let rotating = false;
+      $(".radio-line").change((e) => {
+        let val = e.target.value;
+        let url = `${host}/lineindex`;
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ line_index: +val }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            rotateVR(0, 0);
+          });
+      });
+
+      let vrRending = false;
       let totalDeltaX = 0;
       let totalDeltaY = 0;
       function rotateVRAPI(x_angle, y_angle){
         totalDeltaX += x_angle;
         totalDeltaY += y_angle;
-        if (!rotating){
+        if (!vrRending){
           rotateVR(totalDeltaX, totalDeltaY);
           totalDeltaX = 0;
           totalDeltaY = 0;
         }
-        else{
-        }
       }
 
       function rotateVR(x_angle, y_angle){
-          rotating = true;
-          let url = `${host}/vrdata?x_angle=` + String(x_angle) + "&y_angle=" + String(y_angle);
+          vrRending = true;
+          let url = `${host}/rotatevr?x_angle=` + String(x_angle) + "&y_angle=" + String(y_angle);
           displayVR(url);
+      }
+
+      function panVRAPI(x_shift, y_shift){
+        totalDeltaX += x_shift;
+        totalDeltaY += y_shift;
+        if (!vrRending){
+          panVR(totalDeltaX, totalDeltaY);
+          totalDeltaX = 0;
+          totalDeltaY = 0;
+        }
+      }
+
+      function panVR(x_shift, y_shift){
+          vrRending = true;
+          let url = `${host}/panvr?x_shift=` + String(x_shift) + "&y_shift=" + String(y_shift);
+          displayVR(url);
+      }
+
+      let zoomDelta = 1.0;
+      function zoomVRAPI(delta){
+        zoomDelta *= delta;
+        if (!vrRending){
+          zoomVR(zoomDelta);
+          zoomDelta = 1.0;
+        }
+      }
+
+      function zoomVR(delta){
+        let url = `${host}/zoomvr?delta=${delta}`;
+        displayVR(url);
       }
 
         document.getElementById('addThickness').addEventListener('click', function (e) {
@@ -97,6 +150,14 @@
         });
         document.getElementById('subThickness').addEventListener('click', function (e) {
             updateThickness(-1);
+        });
+
+
+        let enableCPR = false;
+        document.getElementById('showCPR').addEventListener('click', function (e) {
+            enableCPR = !enableCPR;
+            let url = `${host}/vrenablecprline?enableCPR=${enableCPR}`;
+            displayVR(url);
         });
 
         document.getElementById('averageMPR').addEventListener('click', function (e) {
@@ -157,6 +218,50 @@
                 });
         }
 
+        function rotateStretchedCRP(angle){
+          let url = `${host}/rotatestretchedcpr?angle=` + String(angle);
+          fetch(url, { credentials: "same-origin" })
+                .then((response) => response.json())
+                .then((buffer) => {
+                    let cornerstoneMetaData = decodeMPR(buffer);
+                    showStretchedCPR(cornerstoneMetaData);
+                    cprRending = false;
+                });
+        }
+
+        let cprRending = false;
+        let totalCPRDeltaX = 0;
+        function rotateStretchedCRPAPI(x_angle){
+          totalCPRDeltaX += x_angle;
+          if (!cprRending){
+            rotateStretchedCRP(totalCPRDeltaX);
+            cprRending = true;
+            totalCPRDeltaX = 0;
+          }
+        }
+
+        function rotateStraightenedCRP(angle){
+          let url = `${host}/rotatestraightenedcpr?angle=` + String(angle);
+          fetch(url, { credentials: "same-origin" })
+                .then((response) => response.json())
+                .then((buffer) => {
+                    let cornerstoneMetaData = decodeMPR(buffer);
+                    showStraightenedCPR(cornerstoneMetaData);
+                    straightenedCPRRending = false;
+                });
+        }
+
+        let straightenedCPRRending = false;
+        let totalStraightenedCPRDeltaX = 0;
+        function rotateStraightenedCRPAPI(x_angle){
+          totalStraightenedCPRDeltaX += x_angle;
+          if (!straightenedCPRRending){
+            rotateStraightenedCRP(totalStraightenedCPRDeltaX);
+            straightenedCPRRending = true;
+            totalStraightenedCPRDeltaX = 0;
+          }
+        }
+
         let thickness = 1.0;
         function updateThickness(delta){
             thickness = thickness + delta;
@@ -192,7 +297,7 @@
             if(result.message === "successful"){
               let cornerstoneMetaData = decodeVR(result);
               showVR(cornerstoneMetaData);
-              rotating = false;
+              vrRending = false;
             } else {
               alert("displayVR error!");
             }
@@ -218,6 +323,7 @@
             if (mouseButton === 1) {
               rotateVRAPI(deltaX, deltaY);
             } else if (mouseButton === 2) {
+              panVRAPI(deltaX, deltaY)
             } else if (mouseButton === 3) {
             }
         }
@@ -227,6 +333,16 @@
         }
         document.addEventListener('mousemove', mouseMoveHandler);
         document.addEventListener('mouseup', mouseUpHandler);
+      });
+      element_vr.addEventListener('mousewheel', function (e) {
+        e.preventDefault();
+        let delta = event.detail || -event.wheelDelta;
+        if (delta > 0){
+          zoomVRAPI(1.05);
+        }
+        else{
+          zoomVRAPI(0.95);
+        }
       });
 
 
@@ -244,6 +360,80 @@
         }
         else{
           browseOrigin(-1);
+        }
+      });
+
+      const element_cpr_stretched = document.getElementById("stretchedcpr");
+      cornerstone.enable(element_cpr_stretched);
+      function showStretchedCPR(image) {
+        cornerstone.displayImage(element_cpr_stretched, image);
+        cornerstone.updateImage(element_cpr_stretched, true);
+      }
+      element_cpr_stretched.addEventListener('mousedown', function (e) {
+        let lastX = e.pageX;
+        const mouseButton = e.which;
+
+        function mouseMoveHandler(e) {
+            const deltaX = e.pageX - lastX;
+            lastX = e.pageX;
+            if (mouseButton === 1) {
+              rotateStretchedCRPAPI(deltaX);
+            } else if (mouseButton === 2) {
+            } else if (mouseButton === 3) {
+            }
+        }
+        function mouseUpHandler() {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        }
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+      });
+      element_cpr_stretched.addEventListener('mousewheel', function (e) {
+        e.preventDefault();
+        let delta = event.detail || -event.wheelDelta;
+        if (delta > 0){
+          rotateStretchedCRP(1);
+        }
+        else{
+          rotateStretchedCRP(-1);
+        }
+      });
+
+      const element_cpr_straightened = document.getElementById("straightenedcpr");
+      cornerstone.enable(element_cpr_straightened);
+      function showStraightenedCPR(image) {
+        cornerstone.displayImage(element_cpr_straightened, image);
+        cornerstone.updateImage(element_cpr_straightened, true);
+      }
+      element_cpr_straightened.addEventListener('mousedown', function (e) {
+        let lastX = e.pageX;
+        const mouseButton = e.which;
+
+        function mouseMoveHandler(e) {
+            const deltaX = e.pageX - lastX;
+            lastX = e.pageX;
+            if (mouseButton === 1) {
+              rotateStraightenedCRPAPI(deltaX);
+            } else if (mouseButton === 2) {
+            } else if (mouseButton === 3) {
+            }
+        }
+        function mouseUpHandler() {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        }
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+      });
+      element_cpr_straightened.addEventListener('mousewheel', function (e) {
+        e.preventDefault();
+        let delta = event.detail || -event.wheelDelta;
+        if (delta > 0){
+          rotateStraightenedCRP(1);
+        }
+        else{
+          rotateStraightenedCRP(-1);
         }
       });
 
