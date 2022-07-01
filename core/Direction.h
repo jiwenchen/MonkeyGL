@@ -108,6 +108,18 @@ namespace MonkeyGL{
             return dirOutput;
         }
 
+        Direction<dim> negative(){
+            Direction<dim> dirOutput;
+            if(dim == 3)
+            {
+                double x = -this->x();
+                double y = -this->y();
+                double z = -this->z();
+                dirOutput = Direction<dim>(x, y, z);
+            }
+            return dirOutput;
+        }
+
         double dot(Direction<dim> dir){
             double v = 0;
             v += this->x() * dir.x();
@@ -117,6 +129,15 @@ namespace MonkeyGL{
                 v += this->z() * dir.z();
             }
             return v;
+        }
+
+        double Length()
+        {
+            if (dim == 2)
+                return sqrt(m_Coords[0]*m_Coords[0]+m_Coords[1]*m_Coords[1]);
+            else if (dim == 3)
+                return sqrt(m_Coords[0]*m_Coords[0]+m_Coords[1]*m_Coords[1]+m_Coords[2]*m_Coords[2]);
+            return 1;
         }
 
     private:
@@ -130,14 +151,6 @@ namespace MonkeyGL{
             m_Coords[1] /= n;
             if (dim == 3)
                 m_Coords[2] /= n;
-        }
-        double Length()
-        {
-            if (dim == 2)
-                return sqrt(m_Coords[0]*m_Coords[0]+m_Coords[1]*m_Coords[1]);
-            else if (dim == 3)
-                return sqrt(m_Coords[0]*m_Coords[0]+m_Coords[1]*m_Coords[1]+m_Coords[2]*m_Coords[2]);
-            return 1;
         }
 
     private:

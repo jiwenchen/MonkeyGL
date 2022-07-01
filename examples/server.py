@@ -130,22 +130,22 @@ def set_volume_type(
 
         tf0 = {}
         tf0[10] = mk.RGBA(1.0, 1.0, 1.0, 0)
-        tf0[50] = mk.RGBA(1.0, 1.0, 1.0, 0)
-        tf0[90] = mk.RGBA(1.0, 1.0, 1.0, 0)
+        tf0[50] = mk.RGBA(1.0, 1.0, 1.0, 0.5)
+        tf0[90] = mk.RGBA(1.0, 1.0, 1.0, 0.8)
         ww0 = 300
         wl0 = 250
         hm.SetVRWWWL(ww0, wl0)
-        hm.SetObjectAlpha(0.6, 0)
+        hm.SetObjectAlpha(0.4, 0)
         hm.SetTransferFunc(tf0)
 
         hm.AddNewObjectMaskArray(npmaskdatat)
         tf1 = {}
-        tf1[1] = mk.RGBA(1.0, 1.0, 1.0, 1)
-        tf1[99] = mk.RGBA(1.0, 1.0, 1.0, 1)
+        tf1[5] = mk.RGBA(0.8, 0, 0, 0)
+        tf1[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
         ww1 = 500
-        wl1 = 150
+        wl1 = 100
         hm.SetVRWWWL(ww1, wl1)
-        hm.SetObjectAlpha(0.7, 1)
+        hm.SetObjectAlpha(1, 1)
         hm.SetTransferFunc(tf1)
 
     elif vol_type == 5:
@@ -7587,6 +7587,21 @@ def get_stretched_cpr(
 ):
     hm.RotateCPR(angle, mk.PlaneStretchedCPR)
     b64str = hm.GetPlaneData_pngString(mk.PlaneStretchedCPR)
+
+    return {
+        'data': {
+            'image': b64str
+        },
+        'message': 'successful'
+    }
+
+
+@app.get('/rotatestraightenedcpr')
+def get_stretched_cpr(
+    angle: float,
+):
+    hm.RotateCPR(angle, mk.PlaneStraightenedCPR)
+    b64str = hm.GetPlaneData_pngString(mk.PlaneStraightenedCPR)
 
     return {
         'data': {

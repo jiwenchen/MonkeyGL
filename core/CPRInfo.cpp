@@ -106,30 +106,37 @@ bool CPRInfo::GetCPRInfoStretched(Point3d*& pPoints, Direction3d*& pDirs, int& l
 
 bool CPRInfo::GetCPRInfoStraightened(Point3d*& pPoints, Direction3d*& pDirs, int& len)
 {
-	Point3d ptStart = m_cprLineVoxel.front();
-	for (int i=1; i<m_cprLineVoxel.size(); i++){
-		Point3d pt = m_cprLineVoxel[i];
-		Direction3d dir(ptStart, pt);
-		ptStart = pt;
-	}
-	Point3d ptRotate = Methods::RotatePoint3D(m_ptOriginStrechedCPR, m_dirStretchedCPR, ptStart, m_angleStrechedCPR*PI/180.0);
-    Direction3d dir = Direction3d(ptRotate, ptStart);
+	len = m_cprLineVoxel.size();
 	pPoints = new Point3d[len];
 	pDirs = new Direction3d[len];
 	
-	pPoints[0] = Methods::Projection_Point2Plane(ptStart, dir, ptRotate);
+	Point3d ptStart = m_cprLineVoxel.front();
+	Direction3d dirPath(ptStart, m_cprLineVoxel[1]);
+	Point3d ptRotate = Methods::RotatePoint3D(m_ptOriginStrechedCPR, dirPath, ptStart, m_angleStrechedCPR*PI/180.0);
+	Direction3d dir(ptRotate, ptStart);
+	pPoints[0] = ptRotate;
 	pDirs[0] = dir;
-	int idx = 0;
-	Point3d ptPre = pPoints[0];
-	Point3d ptCur;
-	for(size_t i=1; i<len; i++){
-		ptCur = Methods::Projection_Point2Plane(m_cprLineVoxel[i], dir, ptRotate);
-		if (ptCur.DistanceTo(ptPre) >= m_spacing){
-			ptPre = ptCur;
-			idx++;
-			pPoints[idx] = ptPre;
-			pDirs[idx] = dir;
-		}
+	double r = ptRotate.DistanceTo(ptStart);
+
+	for (int i=1; i<m_cprLineVoxel.size()-1; i++){
+		Point3d ptPre = m_cprLineVoxel[i-1];
+		Point3d ptCur = m_cprLineVoxel[i];
+		Point3d ptNxt = m_cprLineVoxel[i+1];
+
+		Direction3d dir1 = pDirs[i-1];
+		Direction3d dir2(ptPre, ptCur);
+		Direction3d dir3(ptCur, ptNxt);
+
+		Direction3d dirTemp = dir1.cross(dir2);
+		Direction3d dir = dir3.cross(dirTemp);
+		if (dir.Length() < 0.99f)
+			dir = dir1;
+		if (dir.dot(dir1) < 0)
+			dir = dir.negative();
+
+		pDirs[i] = dir;
+
+		pPoints[i] = ptCur - pDirs[i]*r;
 	}
 	return true;
 }
@@ -199,11 +206,12 @@ bool CPRInfo::UpdateCPRInfo()
 		if (r > m_Radius)
 			m_Radius = r;
 	}
-	m_Radius += 100;
+	m_Radius = 50;
 
 	Direction3d dirStart = CPRInfo::FirstDirectionProjection(ptStart, m_dirStretchedCPR);
 	m_ptOriginStrechedCPR = ptStart + dirStart * GetRadius();
 	m_angleStrechedCPR = 0;
+	m_angleStraightenedCPR = 0;
 	return true;
 }
 
