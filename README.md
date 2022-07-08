@@ -6,7 +6,10 @@
 ## requirements (so far)
 > ubuntu 20.04 LTS  
 > cuda 11.6.0  
-> intel cpu
+> intel cpu  
+> g++ (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0  
+> Python 3.9.5
+
 
 ## install cuda
 ### linux (tested in Ubuntu)
