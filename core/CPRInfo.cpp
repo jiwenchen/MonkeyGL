@@ -85,6 +85,9 @@ bool CPRInfo::GetCPRInfo(Point3d *&pPoints, Direction3d *&pDirs, int& nWidth, in
 
 bool CPRInfo::GetCPRInfoStretched(Point3d *&pPoints, Direction3d *&pDirs, int& nWidth, int& nHeight)
 {
+	if (m_cprLineVoxel.size() < 2){
+		return false;
+	}
 	nWidth = GetStretchedRadius() * 2.0 + 1;
 	if (nWidth % 2){
 		nWidth += 1;
@@ -118,6 +121,9 @@ bool CPRInfo::GetCPRInfoStretched(Point3d *&pPoints, Direction3d *&pDirs, int& n
 
 bool CPRInfo::GetCPRInfoStraightened(Point3d *&pPoints, Direction3d *&pDirs, int& nWidth, int& nHeight)
 {
+	if (m_cprLineVoxel.size() < 2){
+		return false;
+	}
 	nWidth = GetStraightenedRadius() * 2.0 + 1;
 	if (nWidth % 2){
 		nWidth += 1;

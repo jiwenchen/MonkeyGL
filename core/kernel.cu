@@ -50,7 +50,6 @@ cudaExtent m_volumeSize;
 
 __constant__ float3x3 constTransposeTransformMatrix;
 __constant__ float3x3 constTransformMatrix;
-__constant__ Lightparams constLightPara;
 
 unsigned char* d_pVR = 0;
 int nWidth_VR = 0;
@@ -269,17 +268,6 @@ void cu_copyOperatorMatrix( float *pTransformMatrix, float *pTransposeTransformM
 {
 	checkCudaErrors( cudaMemcpyToSymbol(constTransformMatrix, pTransformMatrix, sizeof(float3)*3) );
 	checkCudaErrors( cudaMemcpyToSymbol(constTransposeTransformMatrix, pTransposeTransformMatrix, sizeof(float3)*3) );
-}
-
-extern "C"
-void cu_copyLightPara( float *pLightPara, int nLen)
-{
-	int nBytes = nLen * sizeof(float);
-
-	if (nBytes>sizeof(Lightparams) )
-		nBytes = sizeof(Lightparams);
-
-	checkCudaErrors( cudaMemcpyToSymbol(constLightPara, pLightPara, nBytes ) );
 }
 
 extern "C"

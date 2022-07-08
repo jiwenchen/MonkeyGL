@@ -209,22 +209,6 @@ void Render::CopyAlphaWWWL2Device()
 	cu_copyAlphaAndWWWL((float*)m_AlphaAndWWWL);
 }
 
-void Render::InitLights()
-{
-	float m[9] = {1,0,0,0,1,0,0,0,1};
-	cu_copyOperatorMatrix(m, m);
-
-	float light[11];
-	light[0] = 0.7f;//ka
-	light[1] = 0.4f;//ks
-	light[2] = 0.6f;//kd
-	//lightColor
-	light[3] = 0.4f; light[4] = 0.0f; light[5] = 0.0f; light[6] = 0.0f;
-	//globalAmbient
-	light[7] = 0.5f; light[8] = 0.0f; light[9] = 0.0f; light[10] = 0.0f;
-	cu_copyLightPara(light, 11);
-}
-
 bool Render::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
 {
 	if (!IRender::SetVolumeData(pData, nWidth, nHeight, nDepth))
@@ -235,8 +219,6 @@ bool Render::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight,
 	m_VolumeSize.depth = m_dataMan.GetDim(2);
 
 	cu_copyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize);
-
-	InitLights();
 
 	return true;
 }
@@ -273,8 +255,6 @@ void Render::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDe
 	m_VolumeSize.depth = m_dataMan.GetDim(2);
 
 	cu_copyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize);
-
-	InitLights();
 }
 
 void Render::NormalizeVOI()
