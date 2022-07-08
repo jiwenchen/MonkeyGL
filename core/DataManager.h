@@ -110,7 +110,7 @@ namespace MonkeyGL {
         bool SetCPRLineVoxel(std::vector<Point3d> cprLine);
         std::vector<Point3d> GetCPRLineVoxel();
         bool RotateCPR(float angle, PlaneType planeType);
-        bool GetCPRInfo(Point3d*& pPoints, Direction3d*& pDirs, int& len, PlaneType planeType);
+        bool GetCPRInfo(Point3d*& pPoints, Direction3d*& pDirs, int& nWidth, int& nHeight, PlaneType planeType);
 
         Point3d Patient2Voxel(Point3d ptPatient){
             return m_volInfo.Patient2Voxel(ptPatient);

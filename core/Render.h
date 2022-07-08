@@ -85,8 +85,8 @@ namespace MonkeyGL {
         void CopyAlphaWWWL2Device();
         void NormalizeVOI();
 
-        bool GetMPRPlaneData(std::shared_ptr<short> pData, int nWidth, int nHeight, const PlaneType& planeType);
-        bool GetCPRPlaneData(std::shared_ptr<short> pData, int nWidth, int nHeight, const PlaneType& planeType);
+        bool GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType);
+        bool GetCPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType);
 
         void testcuda();
 

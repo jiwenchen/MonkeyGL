@@ -94,6 +94,14 @@ namespace MonkeyGL{
             return sqrt(ds);
         }
 
+        double PatientDistanceTo(Point<T, dim> pt, Point<T, dim> spacing){
+            double ds = (x()-pt.x())*(x()-pt.x())*spacing.x()*spacing.x() + 
+                (y()-pt.y())*(y()-pt.y())*spacing.y()*spacing.y();
+            if (dim == 3)
+                ds += (z()-pt.z())*(z()-pt.z())*spacing.z()*spacing.z();
+            return sqrt(ds);
+        }
+
         Point<T, dim> operator+=(Point<T, dim> pt){
             SetX(x()+pt.x());
             SetY(y()+pt.y());

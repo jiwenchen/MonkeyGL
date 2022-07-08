@@ -295,15 +295,6 @@ void Render::SetSpacing( double x, double y, double z )
 
 bool Render::GetPlaneData( std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType)
 {
-	if (!m_dataMan.GetPlaneSize(nWidth, nHeight, planeType))
-		return false;
-
-	if (nWidth % 2) // just for fpng
-	{
-		nWidth += 1;
-	}
-	pData.reset(new short[nWidth*nHeight]);
-
 	if (
 		PlaneAxial == planeType ||
 		PlaneAxialOblique == planeType ||
@@ -323,10 +314,16 @@ bool Render::GetPlaneData( std::shared_ptr<short>& pData, int& nWidth, int& nHei
 	return false;
 }
 
-bool Render::GetMPRPlaneData(std::shared_ptr<short> pData, int nWidth, int nHeight, const PlaneType& planeType)
+bool Render::GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType)
 {
-	if (!pData || nWidth<=0 || nHeight<=0)
+	if (!m_dataMan.GetPlaneSize(nWidth, nHeight, planeType))
 		return false;
+
+	if (nWidth % 2) // just for fpng
+	{
+		nWidth += 1;
+	}
+	pData.reset(new short[nWidth*nHeight]);
 
 	PlaneInfo info;
 	if (!m_dataMan.GetPlaneInfo(planeType, info))
@@ -388,20 +385,17 @@ bool Render::GetMPRPlaneData(std::shared_ptr<short> pData, int nWidth, int nHeig
 	}
 	return false;
 }
-bool Render::GetCPRPlaneData(std::shared_ptr<short> pData, int nWidth, int nHeight, const PlaneType& planeType)
+bool Render::GetCPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType)
 {
 	StopWatch sw("Render::GetCPRPlaneData: PlaneType[%s]", PlaneTypeName(planeType).c_str());
 
-	if (!pData || nWidth<=0 || nHeight<=0)
-		return false;
-
 	Point3d* pPoints = NULL;
 	Direction3d* pDirs = NULL;
-	int len = 0;
-	if (!m_dataMan.GetCPRInfo(pPoints, pDirs, len, planeType))
+
+	if (!m_dataMan.GetCPRInfo(pPoints, pDirs, nWidth, nHeight, planeType))
 		return false;
-	if (len != nHeight)
-		return false;
+
+	pData.reset(new short[nWidth*nHeight]);
 
 	cu_renderCPR(pData.get(), nWidth, nHeight, (double*)pPoints, (double*)pDirs, m_dataMan.Need2InvertZ());
 

@@ -166,7 +166,7 @@ void DataManager::SetDirection(Direction3d dirX, Direction3d dirY, Direction3d d
 void DataManager::SetSpacing( double x, double y, double z )
 {
 	m_volInfo.SetSpacing(x, y, z);
-	m_cprInfo.SetSpacing(m_volInfo.GetMinSpacing());
+	m_cprInfo.SetSpacing(Point3d(x, y, z));
 	m_mprInfo.ResetPlaneInfos();
 }
 
@@ -216,9 +216,9 @@ bool DataManager::RotateCPR(float angle, PlaneType planeType)
 	return m_cprInfo.RotateCPR(angle, planeType);
 }
 
-bool DataManager::GetCPRInfo(Point3d*& pPoints, Direction3d*& pDirs, int& len, PlaneType planeType)
+bool DataManager::GetCPRInfo(Point3d*& pPoints, Direction3d*& pDirs, int& nWidth, int& nHeight, PlaneType planeType)
 {
-	return m_cprInfo.GetCPRInfo(pPoints, pDirs, len, planeType);
+	return m_cprInfo.GetCPRInfo(pPoints, pDirs, nWidth, nHeight, planeType);
 }
 
 int DataManager::GetDim( int index )
@@ -378,11 +378,7 @@ double DataManager::GetPixelSpacing( PlaneType planeType )
 
 bool DataManager::GetPlaneSize( int& nWidth, int& nHeight, const PlaneType& planeType )
 {
-	if (PlaneStretchedCPR==planeType || PlaneStraightenedCPR==planeType)
-	{
-		return m_cprInfo.GetPlaneSize(nWidth, nHeight, planeType);
-	}
-	else if (planeType >= PlaneAxial && planeType <= PlaneCoronalOblique)
+	if (planeType >= PlaneAxial && planeType <= PlaneCoronalOblique)
 	{
 		return m_mprInfo.GetPlaneSize(nWidth, nHeight, planeType);
 	}

@@ -38,13 +38,12 @@ namespace MonkeyGL {
 
     public:
         void SetDataManager(DataManager* pDataManager);
-        void SetSpacing(float spacing);
+        void SetSpacing(Point3d spacing);
         bool SetCPRLinePatient(std::vector<Point3d> cprLine);
         bool SetCPRLineVoxel(std::vector<Point3d> cprLine);
         std::vector<Point3d> GetCPRLineVoxel();
         bool RotateCPR(float angle, PlaneType planeType);
-        bool GetCPRInfo(Point3d*& pPoints, Direction3d*& pDirs, int& len, PlaneType planeType);
-        bool GetPlaneSize( int& nWidth, int& nHeight, const PlaneType& planeType );
+        bool GetCPRInfo(Point3d*& pPoints, Direction3d*& pDirs, int& nWidth, int &nHeight, PlaneType planeType);
 
     private:
         bool UpdateCPRInfo(); 
@@ -55,8 +54,8 @@ namespace MonkeyGL {
             return m_StraightenedRadius;
         }
 
-        bool GetCPRInfoStretched(Point3d*& pPoints, Direction3d*& pDirs, int& len);
-        bool GetCPRInfoStraightened(Point3d*& pPoints, Direction3d*& pDirs, int& len);
+        bool GetCPRInfoStretched(Point3d*& pPoints, Direction3d*& pDirs, int& nWidth, int& nHeight);
+        bool GetCPRInfoStraightened(Point3d*& pPoints, Direction3d*& pDirs, int& nWidth, int& nHeight);
 
         static Direction3d FirstDirectionProjection(Point3d pt, Direction3d dirN);
 
@@ -69,7 +68,8 @@ namespace MonkeyGL {
         Point3d m_ptOriginStraightenedCPR;
         double m_angleStrechedCPR;
         double m_angleStraightenedCPR;
-        double m_spacing;
+        Point3d m_spacing;
+        double m_minSpacing;
         DataManager* m_pDataManager;
     };
 }
