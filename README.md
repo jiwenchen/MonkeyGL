@@ -3,6 +3,11 @@
 >All the calculations are based on the cuda (@Nvidia company).  
 >Totally independent of the OpenGL context.
 
+## requirements (so far)
+> ubuntu 20.04 LTS  
+> cuda 11.6.0  
+> intel cpu
+
 ## install cuda
 ### linux (tested in Ubuntu)
 >./install/cuda_install_ubuntu.sh
@@ -21,19 +26,24 @@
 >size: 512 x 512 x 361  
 >spacing: 0.351 x 0.351 x 0.3  
 >direction: [1, 0, 0; 0, 1, 0; 0, 0, -1]  
->render performance(no sampling): 35 fps  
+>render performance(no sampling): 25 fps  
 ![picture: Volume Render of Cardiac](./pics/cardiac_vr.png)
 ### body.raw
 >size: 512 x 512 x 1559  
 >spacing: 0.7422 x 0.7422 x 1.0  
 >direction: [1, 0, 0; 0, 1, 0; 0, 0, -1]  
->render performance(no sampling): 20 fps  
+>render performance(no sampling): 25 fps  
 ![picture: Volume Render of Body](./pics/body_vr.png)
 
-### multi volume
->size: 512 x 512 x 256  
->spacing: 0.458983 x 0.458983 x 0.625  
->direction: [1, 0, 0; 0, 1, 0; 0, 0, -1]  
->alpha: aorta - 1.0, heart - 0.4  
->render performance(no sampling): 25 fps  
-![picture: Volume Render of Body](./pics/multivol.png)
+### multi volume rendering with the different alpha value
+>![picture: Volume Render of Body](./pics/multivol_0.4.png)
+![picture: Volume Render of Body](./pics/multivol_0.8.png)
+
+### MPR
+>![picture: Volume Render of Body](./pics/axial.png)
+![picture: Volume Render of Body](./pics/sagittal.png)
+![picture: Volume Render of Body](./pics/coronal.png)
+
+### CPR
+>![picture: Volume Render of Body](./pics/stretched.png)
+![picture: Volume Render of Body](./pics/straightened.png)
