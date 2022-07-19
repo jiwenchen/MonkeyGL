@@ -1,6 +1,7 @@
 import SimpleITK as sitk
 from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from enum import Enum
 import uvicorn
 from fastapi import FastAPI
@@ -33,7 +34,6 @@ app.add_middleware(
 )
 
 
-from fastapi.staticfiles import StaticFiles
 app.mount("/static", StaticFiles(directory="html"), name="static")
 
 
