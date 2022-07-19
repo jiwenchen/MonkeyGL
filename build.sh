@@ -16,76 +16,76 @@ makesure_folder(){
 }
 
 build_zlib() {
-    makesure_folder ${build_path}
-    cd ${build_path}
-    if [ ${build_type} == "Clean" ]; then
+    makesure_folder "${build_path}"
+    cd "${build_path}" || exit
+    if [ "${build_type}" == "Clean" ]; then
       printf "clean zlib build"
       rm -rf ./zlib-1.2.11
     else
       if [ ! -d "./zlib-1.2.11" ];then
         tar -xvzf ../ThirdPartyDownloads/zlib-1.2.11.tar.gz
       fi
-      cd ./zlib-1.2.11
+      cd ./zlib-1.2.11 || exit
 
       if [ ! -d "./build" ];then
         mkdir build
-        cd ./build
-        cmake ../ -DCMAKE_BUILD_TYPE=${build_type}
+        cd ./build || exit
+        cmake ../ -DCMAKE_BUILD_TYPE="${build_type}"
         make DESTDIR=./install install
       fi
     fi
 }
 
 build_webp() {
-    makesure_folder ${build_path}
-    cd ${build_path}
-    if [ ${build_type} == "Clean" ]; then
+    makesure_folder "${build_path}"
+    cd "${build_path}" || exit
+    if [ "${build_type}" == "Clean" ]; then
       printf "clean webp build"
       rm -rf ./libwebp-1.2.2
     else
       if [ ! -d "./libwebp-1.2.2" ];then
         tar -xvzf ../ThirdPartyDownloads/libwebp-1.2.2.tar.gz
       fi
-      cd ./libwebp-1.2.2
+      cd ./libwebp-1.2.2 || exit
 
       if [ ! -d "./build" ];then
         mkdir build
-        cd ./build
-        cmake ../ -DCMAKE_BUILD_TYPE=${build_type} -DBUILD_SHARED_LIBS=true
+        cd ./build || exit
+        cmake ../ -DCMAKE_BUILD_TYPE="${build_type}" -DBUILD_SHARED_LIBS=true
         make DESTDIR=./install install
       fi
     fi
 }
 
 build_log_lib() {
-    makesure_folder ${build_path}
-    cd ${build_path}
-    if [ ${build_type} == "Clean" ]; then
+    makesure_folder "${build_path}"
+    cd "${build_path}" || exit
+    if [ "${build_type}" == "Clean" ]; then
       printf "clean log build"
       rm -rf ./log4cplus-2.0.7
     else
       if [ ! -d "./log4cplus-2.0.7" ];then
         unzip ../ThirdPartyDownloads/log4cplus-2.0.7.zip
       fi
-      cd ./log4cplus-2.0.7
+      cd ./log4cplus-2.0.7 || exit
 
       if [ ! -d "./build" ];then
         mkdir build
-        cd ./build
-        cmake ../ -DCMAKE_BUILD_TYPE=${build_type}
+        cd ./build || exit
+        cmake ../ -DCMAKE_BUILD_TYPE="${build_type}"
         make DESTDIR=./install install
       fi
     fi
 }
 
 build_cpp_lib() {
-    makesure_folder ${build_path}
-    cd ${build_path}
-    if [ ${build_type} == "Clean" ]; then
+    makesure_folder "${build_path}"
+    cd "${build_path}" || exit
+    if [ "${build_type}" == "Clean" ]; then
       printf "clean cpp build"
       rm -rf ./*
     else
-      cmake ../ -DCMAKE_BUILD_TYPE=${build_type} -DSSE=1
+      cmake ../ -DCMAKE_BUILD_TYPE="${build_type}" -DSSE=1
       make
     fi
 }
@@ -96,17 +96,17 @@ build_cpp() {
 }
 
 build_pybind() {
-    cd ${py_source_path}
+    cd "${py_source_path}" || exit
     if [ ! -d "./pybind11" ];then
       tar -xvzf ../ThirdPartyDownloads/pybind11.tar.gz ./
     fi
-    makesure_folder ${py_build_path}
-    cd ${py_build_path}
-    if [ ${build_type} == "Clean" ]; then
+    makesure_folder "${py_build_path}"
+    cd "${py_build_path}" || exit
+    if [ "${build_type}" == "Clean" ]; then
       printf "clean pybind build"
       rm -rf ./*
     else
-      cmake ../ -DCMAKE_BUILD_TYPE=${build_type}
+      cmake ../ -DCMAKE_BUILD_TYPE="${build_type}"
       make
     fi
 }
