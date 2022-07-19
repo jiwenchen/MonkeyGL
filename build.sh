@@ -1,4 +1,5 @@
-argNum=$#
+#! /bin/bash
+
 source_path=$(pwd)
 
 build_path=${source_path}"/build"
@@ -9,15 +10,8 @@ py_build_path=${source_path}"/pybind11_interface/build"
 build_type=$2
 
 makesure_folder(){
-  if [ ! -d $1 ];then
-    mkdir $1
-  fi
-}
-
-remove_folder(){
-  if [ -d $1 ];then
-    echo "remove folder: " $1
-    rm -rf $1
+  if [ ! -d "$1" ];then
+    mkdir "$1"
   fi
 }
 
@@ -25,7 +19,7 @@ build_zlib() {
     makesure_folder ${build_path}
     cd ${build_path}
     if [ ${build_type} == "Clean" ]; then
-      echo "clean zlib build"
+      printf "clean zlib build"
       rm -rf ./zlib-1.2.11
     else
       if [ ! -d "./zlib-1.2.11" ];then
@@ -46,7 +40,7 @@ build_webp() {
     makesure_folder ${build_path}
     cd ${build_path}
     if [ ${build_type} == "Clean" ]; then
-      echo "clean webp build"
+      printf "clean webp build"
       rm -rf ./libwebp-1.2.2
     else
       if [ ! -d "./libwebp-1.2.2" ];then
@@ -67,7 +61,7 @@ build_log_lib() {
     makesure_folder ${build_path}
     cd ${build_path}
     if [ ${build_type} == "Clean" ]; then
-      echo "clean log build"
+      printf "clean log build"
       rm -rf ./log4cplus-2.0.7
     else
       if [ ! -d "./log4cplus-2.0.7" ];then
@@ -88,7 +82,7 @@ build_cpp_lib() {
     makesure_folder ${build_path}
     cd ${build_path}
     if [ ${build_type} == "Clean" ]; then
-      echo "clean cpp build"
+      printf "clean cpp build"
       rm -rf ./*
     else
       cmake ../ -DCMAKE_BUILD_TYPE=${build_type} -DSSE=1
@@ -109,7 +103,7 @@ build_pybind() {
     makesure_folder ${py_build_path}
     cd ${py_build_path}
     if [ ${build_type} == "Clean" ]; then
-      echo "clean pybind build"
+      printf "clean pybind build"
       rm -rf ./*
     else
       cmake ../ -DCMAKE_BUILD_TYPE=${build_type}
@@ -117,15 +111,15 @@ build_pybind() {
     fi
 }
 
-if [ $1 == "cpp" ]; then
+if [ "$1" == "cpp" ]; then
     build_cpp
-elif [ $1 == "log" ]; then
+elif [ "$1" == "log" ]; then
     build_log
-elif [ $1 == "pybind" ]; then
+elif [ "$1" == "pybind" ]; then
     build_pybind
-elif [ $1 == "all" ]; then
+elif [ "$1" == "all" ]; then
     build_cpp
     build_pybind
 else
-    echo "invalid project"
+    printf "invalid project"
 fi
