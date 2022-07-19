@@ -9,6 +9,7 @@
 > intel cpu  
 > g++ (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0  
 > Python 3.9.5
+> python3-dev python3.9-dev
 
 
 ## install cuda
