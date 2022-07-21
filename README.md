@@ -39,14 +39,14 @@
 ![picture: Volume Render of Body](./pics/body_vr.png)
 
 ### multi volume rendering with the different alpha value
->![picture: Volume Render of Body](./pics/multivol_0.4.png)
-![picture: Volume Render of Body](./pics/multivol_0.8.png)
+>![picture: Multi-Volume Render with alpla as 0.4 of BG](./pics/multivol_0.4.png)
+![picture: Multi-Volume Render with alpla as 0.8 of BG](./pics/multivol_0.8.png)
 
 ### MPR
->![picture: Volume Render of Body](./pics/axial.png)
-![picture: Volume Render of Body](./pics/sagittal.png)
-![picture: Volume Render of Body](./pics/coronal.png)
+>![picture: Axial](./pics/axial.png)
+![picture: Sagittal](./pics/sagittal.png)
+![picture: Coronal](./pics/coronal.png)
 
 ### CPR
->![picture: Volume Render of Body](./pics/stretched.png)
-![picture: Volume Render of Body](./pics/straightened.png)
+>![picture: Stretched CPR](./pics/stretched.png)
+![picture: Straightened CPR](./pics/straightened.png)

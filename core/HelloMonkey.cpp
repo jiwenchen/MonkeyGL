@@ -35,9 +35,6 @@ std::shared_ptr<IRender> _pRender;
 
 HelloMonkey::HelloMonkey()
 {
-	_pRender.reset(new Render());
-	m_bShowCPRLineInVR = false;
-
 	Logger::Init();
 
 	Logger::Info("MonkeyGL has started....");
@@ -49,6 +46,9 @@ HelloMonkey::HelloMonkey()
 	else {
 		Logger::Error("fpng cpu not supports sse41");
 	}
+
+	_pRender.reset(new Render());
+	m_bShowCPRLineInVR = false;
 }
 
 HelloMonkey::~HelloMonkey(void)
@@ -99,12 +99,12 @@ void HelloMonkey::SetColorBackground(RGBA clrBG)
 	_pRender->SetColorBackground(clrBG);
 }
 
-void HelloMonkey::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
+void HelloMonkey::LoadVolumeFile( const char* szFile )
 {
 	if (!_pRender)
 		return;
 
-	_pRender->SetVolumeFile(szFile, nWidth, nHeight, nDepth);
+	_pRender->LoadVolumeFile(szFile);
 }
 
 void HelloMonkey::SetDirection( Direction3d dirX, Direction3d dirY, Direction3d dirZ )

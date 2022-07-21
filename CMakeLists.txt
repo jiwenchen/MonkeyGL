@@ -26,14 +26,29 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/cuda_common
   ${CUDA_TOOLKIT_PATH}/include
   ${PROJECT_SOURCE_DIR}/build/log4cplus-2.0.7/build/install/usr/local/include
+  ${PROJECT_SOURCE_DIR}/build/ITK-5.2.1/build/install/include/ITK-5.2
 )
 
 link_directories(
   ${CUDA_TOOLKIT_PATH}/lib64
   ${PROJECT_SOURCE_DIR}/build/log4cplus-2.0.7/build/install/usr/local/lib
+  ${PROJECT_SOURCE_DIR}/build/ITK-5.2.1/build/lib # Cannot use lib files in ./install/lib, since some files not found while linking. Don't know why.
 )
 
 link_libraries(log4cplus)
+link_libraries(itkv3p_netlib-5.2)
+link_libraries(itkdouble-conversion-5.2)
+link_libraries(itkvnl-5.2)
+link_libraries(itkvnl_algo-5.2)
+link_libraries(itkzlib-5.2)
+link_libraries(ITKCommon-5.2)
+link_libraries(itksys-5.2)
+link_libraries(ITKIOImageBase-5.2)
+link_libraries(ITKIONRRD-5.2)
+link_libraries(ITKNrrdIO-5.2)
+link_libraries(ITKniftiio-5.2)
+link_libraries(ITKIONIFTI-5.2)
+link_libraries(ITKIOMeta-5.2)
 
 set(SRC_LIST
   ./core/fpng/fpng.cpp
@@ -49,6 +64,7 @@ set(SRC_LIST
   ./core/Logger.cpp
   ./core/Methods.cpp
   ./core/MPRInfo.cpp
+  ./core/ImageReader.cpp
   ./core/ObjectInfo.cpp
   ./core/PlaneInfo.cpp
   ./core/Point.cpp

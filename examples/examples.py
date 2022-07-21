@@ -133,8 +133,28 @@ def test_set_data():
     hm.GetPlaneData_pngString(mk.PlaneStretchedCPR)
 
 
+def test_load_nrrd():
+    hm = mk.HelloMonkey()
+    tf = {}
+    tf[0] = mk.RGBA(0.8, 0, 0, 0)
+    tf[10] = mk.RGBA(0.8, 0, 0, 0.3)
+    tf[40] = mk.RGBA(0.8, 0.8, 0, 0)
+    tf[99] = mk.RGBA(1, 0.8, 1, 1)
+    ww = 500
+    wl = 250
+    hm.LoadVolumeFile(f'{file_path}/cardiac.mhd')
+    hm.SetVRWWWL(ww, wl)
+    hm.SetTransferFunc(tf)
+
+    # hm.SaveVR2Png(f'{file_path}/a.png', 512, 512)
+
+    vr = hm.GetVRArray(768, 768)
+    b64str = hm.GetVRData_pngString(512, 512)
+
+
 if __name__ == "__main__":
     # test_objs()
-    test_set_data()
+    # test_set_data()
+    test_load_nrrd()
 
 
