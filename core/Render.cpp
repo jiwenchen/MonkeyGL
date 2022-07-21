@@ -244,17 +244,18 @@ bool Render::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, i
 	return true;
 }
 
-void Render::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
+void Render::LoadVolumeFile( const char* szFile )
 {
 	Logger::Info("load volume file: %s", szFile);
 	
-	IRender::SetVolumeFile(szFile, nWidth, nHeight, nDepth);
+	IRender::LoadVolumeFile(szFile);
 
 	m_VolumeSize.width = m_dataMan.GetDim(0);
 	m_VolumeSize.height = m_dataMan.GetDim(1);
 	m_VolumeSize.depth = m_dataMan.GetDim(2);
 
 	cu_copyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize);
+	cu_InitCommon(m_dataMan.GetSpacing(0), m_dataMan.GetSpacing(1), m_dataMan.GetSpacing(2));
 }
 
 void Render::NormalizeVOI()

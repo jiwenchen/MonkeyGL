@@ -54,18 +54,9 @@ def set_volume_type(
     volume["vol_type"] = vol_type
 
     file_path = f'{sys.path[0]}/../data'
-    vol_file = 'cardiac.raw'
-    width = 512
-    height = 512
-    depth = 361
-    spacing = (0.3510, 0.3510, 0.3)
-    dirX = mk.Direction3d(1., 0., 0.)
-    dirY = mk.Direction3d(0., 1., 0.)
-    dirZ = mk.Direction3d(0., 0., -1.)
+    vol_file = 'cardiac.mhd'
 
     tf = {}
-    ww = 400
-    wl = 40
     hm.SetColorBackground(mk.RGBA(0., 0.1, 0.1, 1.0))
 
     if vol_type == 1:
@@ -75,31 +66,41 @@ def set_volume_type(
         tf[99] = mk.RGBA(1, 0.8, 1, 1)
         ww = 500
         wl = 250
-        hm.SetVolumeFile(f'{file_path}/{vol_file}', width, height, depth)
+        hm.LoadVolumeFile(f'{file_path}/{vol_file}')
         hm.SetVRWWWL(ww, wl)
         hm.SetTransferFunc(tf)
-        hm.SetDirection(dirX, dirY, dirZ)
     elif vol_type == 2:
-        if 1:
+        if 0:
             tf[0] = mk.RGBA(0.8, 0, 0, 0)
             tf[28] = mk.RGBA(0.8, 0.8, 0, 0.7)
             tf[99] = mk.RGBA(1, 0.8, 1, 1)
             ww = 420
             wl = 290
-            depth = 1559
         else:
-            tf[10] = mk.RGBA(0.3, 0.3, 0.8, 0)
-            tf[20] = mk.RGBA(0.3, 0.6, 1, 0.3)
+            tf[10] = mk.RGBA(0.3, 0.3, 0.4, 0)
+            tf[20] = mk.RGBA(0.3, 0.8, 1, 0.5)
             tf[35] = mk.RGBA(0.3, 0.7, 0.8, 0)
-            ww = 2000
-            wl = 0
-            depth = 559
-        vol_file = 'body.raw'
-        hm.SetVolumeFile(f'{file_path}/{vol_file}', width, height, depth)
+            ww = 1200
+            wl = -300
+
+        vol_file = 'body.mhd'
+        hm.LoadVolumeFile(f'{file_path}/{vol_file}')
         hm.SetVRWWWL(ww, wl)
         hm.SetTransferFunc(tf)
-        spacing = (0.7422, 0.7422, 1.0)
-        hm.SetDirection(dirX, dirY, dirZ)
+
+        npmaskdatat = np.zeros((1559, 512, 512))
+        npmaskdatat[200:225, 200:240, 150:180] = 1
+
+        hm.AddNewObjectMaskArray(npmaskdatat)
+        tf1 = {}
+        tf1[5] = mk.RGBA(0.8, 0, 0, 0)
+        tf1[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
+        ww1 = 500
+        wl1 = -500
+        hm.SetVRWWWL(ww1, wl1)
+        hm.SetObjectAlpha(1, 1)
+        hm.SetTransferFunc(tf1)
+
     elif vol_type == 3:
         tf[0] = mk.RGBA(0.8, 0, 0, 0)
         tf[10] = mk.RGBA(0.8, 0, 0, 0.3)
@@ -107,33 +108,16 @@ def set_volume_type(
         tf[99] = mk.RGBA(1, 0.8, 1, 1)
         ww = 500
         wl = 250
-        vol_file = 'rib.raw'
-        depth = 521
-        dirZ = mk.Direction3d(0., 0., 1.)
-        hm.SetDirection(dirX, dirY, dirZ)
-        hm.SetVolumeFile(f'{file_path}/{vol_file}', width, height, depth)
+        vol_file = 'rib.mhd'
+        hm.LoadVolumeFile(f'{file_path}/{vol_file}')
         hm.SetVRWWWL(ww, wl)
         hm.SetTransferFunc(tf)
-        spacing = (0.8496089, 0.8496089, 0.625)
     elif vol_type == 4:
-        itk_img = sitk.ReadImage(f'{file_path}/neckcta.nrrd')
-        dir = itk_img.GetDirection()
-        dirX = mk.Direction3d(dir[0], dir[1], dir[2])
-        dirY = mk.Direction3d(dir[3], dir[4], dir[5])
-        dirZ = mk.Direction3d(dir[6], dir[7], dir[8])
-        spacing = itk_img.GetSpacing()
-        origin = mk.Point3d(itk_img.GetOrigin()[0], itk_img.GetOrigin()[1], itk_img.GetOrigin()[2])
-        depth = itk_img.GetDepth()
-        npdata = sitk.GetArrayFromImage(itk_img)
-        npdatat = npdata.swapaxes(2, 0)
-
         itk_mask = sitk.ReadImage(f'{file_path}/neckcta_mask.nii.gz')
         npmaskdata = sitk.GetArrayFromImage(itk_mask)
         npmaskdatat = npmaskdata.swapaxes(2, 0)
 
-        hm.SetDirection(dirX, dirY, dirZ)
-        hm.SetOrigin(origin)
-        hm.SetVolumeArray(npdatat)
+        hm.LoadVolumeFile(f'{file_path}/neckcta.nrrd')
 
         tf0 = {}
         tf0[10] = mk.RGBA(1.0, 1.0, 1.0, 0)
@@ -156,17 +140,6 @@ def set_volume_type(
         hm.SetTransferFunc(tf1)
 
     elif vol_type == 5:
-        itk_img = sitk.ReadImage(f'{file_path}/corocta.nrrd')
-        dir = itk_img.GetDirection()
-        dirX = mk.Direction3d(dir[0], dir[1], dir[2])
-        dirY = mk.Direction3d(dir[3], dir[4], dir[5])
-        dirZ = mk.Direction3d(dir[6], dir[7], dir[8])
-        spacing = itk_img.GetSpacing()
-        depth = itk_img.GetDepth()
-        origin = mk.Point3d(itk_img.GetOrigin()[0], itk_img.GetOrigin()[1], itk_img.GetOrigin()[2])
-        npdata = sitk.GetArrayFromImage(itk_img)
-        npdatat = npdata.swapaxes(2, 0)
-
         itk_mask = sitk.ReadImage(f'{file_path}/corocta_vessel_mask.nii.gz')
         npmaskdata = sitk.GetArrayFromImage(itk_mask)
         npmaskdatat = npmaskdata.swapaxes(2, 0)
@@ -175,9 +148,7 @@ def set_volume_type(
         npmaskdata2 = sitk.GetArrayFromImage(itk_mask2)
         npmaskdatat2 = npmaskdata2.swapaxes(2, 0)
 
-        hm.SetDirection(dirX, dirY, dirZ)
-        hm.SetOrigin(origin)
-        hm.SetVolumeArray(npdatat)
+        hm.LoadVolumeFile(f'{file_path}/corocta.nrrd')
         tf0 = {}
         tf0[5] = mk.RGBA(0.8, 0.8, 0.8, 0)
         tf0[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
@@ -206,8 +177,6 @@ def set_volume_type(
         hm.SetVRWWWL(ww1, wl1, label1)
         hm.SetObjectAlpha(1, label1)
         hm.SetTransferFunc(tf1)
-
-    hm.SetSpacing(spacing[0], spacing[1], spacing[2])
 
     return {
         'message': 'successful'

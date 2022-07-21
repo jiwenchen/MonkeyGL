@@ -39,7 +39,7 @@ namespace MonkeyGL {
 
     public:
         virtual void SetLogLevel(LogLevel level);
-        virtual void SetVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
+        virtual void LoadVolumeFile(const char* szFile);
         virtual void SetDirection(Direction3d dirX, Direction3d dirY, Direction3d dirZ);
         virtual void SetSpacing(double x, double y, double z);
         virtual void SetOrigin(Point3d pt);

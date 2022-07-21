@@ -45,10 +45,11 @@ void DataManager::ClearAndReset()
 	m_volInfo.Clear();
 }
 
-bool DataManager::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
+bool DataManager::LoadVolumeFile( const char* szFile )
 {
 	ClearAndReset();
-	bool res = m_volInfo.LoadVolumeFile(szFile, nWidth, nHeight, nDepth);
+	bool res = m_volInfo.LoadVolumeFile(szFile);
+	m_cprInfo.SetSpacing(Point3d(m_volInfo.GetSpacing(0), m_volInfo.GetSpacing(1), m_volInfo.GetSpacing(2)));
 	m_mprInfo.ResetPlaneInfos();
 	m_activeLabel = 0;
 	m_objectInfos[0] = ObjectInfo();

@@ -78,6 +78,28 @@ build_log_lib() {
     fi
 }
 
+build_itk_lib() {
+    makesure_folder ${build_path}
+    cd ${build_path}
+    if [ ${build_type} == "Clean" ]; then
+      echo "clean itk build"
+      rm -rf ./ITK-5.2.1
+    else
+      if [ ! -d "./ITK-5.2.1" ];then
+        unzip ../ThirdPartyDownloads/ITK-5.2.1.zip
+      fi
+      cd ./ITK-5.2.1
+
+      if [ ! -d "./build" ];then
+        mkdir build
+        cd ./build
+        cmake ../ -DCMAKE_BUILD_TYPE:STRING=${build_type} -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX="./install"
+        mkdir install
+        make -j 8 install ./install
+      fi
+    fi
+}
+
 build_cpp_lib() {
     makesure_folder "${build_path}"
     cd "${build_path}" || exit
@@ -92,6 +114,7 @@ build_cpp_lib() {
 
 build_cpp() {
     build_log_lib
+    build_itk_lib
     build_cpp_lib
 }
 
@@ -113,8 +136,10 @@ build_pybind() {
 
 if [ "$1" == "cpp" ]; then
     build_cpp
+elif [ "$1" == "itk" ]; then
+    build_itk_lib
 elif [ "$1" == "log" ]; then
-    build_log
+    build_log_lib
 elif [ "$1" == "pybind" ]; then
     build_pybind
 elif [ "$1" == "all" ]; then

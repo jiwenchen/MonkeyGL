@@ -36,7 +36,7 @@ namespace MonkeyGL {
         ~VolumeInfo(void);
 
     public:
-        bool LoadVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
+        bool LoadVolumeFile(const char* szFile);
         bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
         bool AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
         bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
@@ -66,10 +66,6 @@ namespace MonkeyGL {
             return GetVolumeSize()*sizeof(short);
         }
         void SetSpacing(double x, double y, double z);
-        
-        void SetSliceThickness(double sliceTh){
-            m_fSliceThickness = sliceTh;
-        }
 
         void SetOrigin(Point3d pt){
             m_ptOriginPatient = pt;
@@ -108,7 +104,6 @@ namespace MonkeyGL {
         std::shared_ptr<short> m_pVolume;
         bool m_bVolumeHasInverted;
         std::shared_ptr<unsigned char> m_pMask;
-        double m_fSliceThickness; //mm
         int m_Dims[3];
         double m_Spacing[3];
         Point3d m_ptOriginPatient;

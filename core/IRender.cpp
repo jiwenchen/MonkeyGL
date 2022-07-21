@@ -49,9 +49,9 @@ bool IRender::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, 
 	return m_dataMan.UpdateObjectMask(pData, nWidth, nHeight, nDepth, nLabel);
 }
 
-void IRender::SetVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
+void IRender::LoadVolumeFile( const char* szFile )
 {
-	m_dataMan.LoadVolumeFile(szFile, nWidth, nHeight, nDepth);
+	m_dataMan.LoadVolumeFile(szFile);
 }
 
 void IRender::SetDirection( Direction3d dirX, Direction3d dirY, Direction3d dirZ )

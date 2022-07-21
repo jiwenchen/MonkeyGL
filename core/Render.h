@@ -40,7 +40,7 @@ namespace MonkeyGL {
         virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
         virtual unsigned char AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
         virtual bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
-        virtual void SetVolumeFile(const char* szFile, int nWidth, int nHeight, int nDepth);
+        virtual void LoadVolumeFile(const char* szFile);
         virtual void SetSpacing(double x, double y, double z);
         
         virtual bool TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeight, Point3d ptVoxel);

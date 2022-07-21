@@ -27,6 +27,7 @@
 #include "StopWatch.h"
 #include "Logger.h"
 #include "Methods.h"
+#include "ImageReader.h"
 
 using namespace MonkeyGL;
 
@@ -35,7 +36,6 @@ VolumeInfo::VolumeInfo( void )
 	m_pVolume.reset();
 	m_pMask.reset();
 	m_bVolumeHasInverted = false;
-	m_fSliceThickness = 1.0;
 	memset(m_Dims, 0, 3*sizeof(int));
 	m_Spacing[0] = 1.0;
 	m_Spacing[1] = 1.0;
@@ -55,24 +55,24 @@ void VolumeInfo::Clear(){
 	m_bVolumeHasInverted = false;
 }
 
-bool VolumeInfo::LoadVolumeFile( const char* szFile, int nWidth, int nHeight, int nDepth )
+bool VolumeInfo::LoadVolumeFile( const char* szFile)
 {
 	StopWatch sw("VolumeInfo::LoadVolumeFile");
-
-	if (nWidth<=0 || nHeight<=0 || nDepth<=0)
+	if (!ImageReader::Read(
+			szFile,
+			m_pVolume,
+			m_Dims,
+			m_Spacing,
+			m_ptOriginPatient,
+			m_dirX,
+			m_dirY,
+			m_dirZ
+		)
+	){
 		return false;
-	FILE* fp = fopen(szFile, "rb");
-	if (NULL == fp)
-		return false;
-	m_Dims[0] = nWidth;
-	m_Dims[1] = nHeight;
-	m_Dims[2] = nDepth;
-	m_pVolume.reset(new short[GetVolumeSize()]);
-	fread(m_pVolume.get(), GetVolumeBytes(), 1, fp);
-	fclose(fp);
+	}
 
 	m_pMask.reset();
-	// NormVolumeData();
 
 	return true;
 }
@@ -89,14 +89,11 @@ bool VolumeInfo::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHei
 	m_pVolume = pData;
 	m_pMask.reset();
 
-	// NormVolumeData();
-
 	return true;
 }
 
 bool VolumeInfo::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
 {
-	// pData = CheckAndNormMaskData(pData, nWidth, nHeight, nDepth);
 	if (!pData){
 		return false;
 	}
@@ -121,7 +118,6 @@ bool VolumeInfo::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidt
 
 bool VolumeInfo::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
 {
-	// pData = CheckAndNormMaskData(pData, nWidth, nHeight, nDepth);
 	if (!pData || !m_pMask){
 		return false;
 	}
