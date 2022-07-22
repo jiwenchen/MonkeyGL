@@ -1,5 +1,9 @@
 import sys
-sys.path.append(f'{sys.path[0]}/../pybind11_interface/build')
+from pathlib import Path
+
+base_path = Path(__file__).resolve().parent.parent
+
+sys.path.append(str(base_path / "pybind11_interface" / "build"))
 
 import pyMonkeyGL as mk
 import numpy as np
@@ -7,7 +11,7 @@ import time
 import SimpleITK as sitk
 
 
-file_path = f'{sys.path[0]}/../data'
+file_path = str(base_path / "data")
 
 def test_objs():
     e = mk.PlaneNotDefined

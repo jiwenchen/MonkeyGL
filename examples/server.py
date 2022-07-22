@@ -1,20 +1,21 @@
 import SimpleITK as sitk
 from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from enum import Enum
 import uvicorn
 from fastapi import FastAPI
 from typing import Optional
-import imp
 import sys
 import numpy as np
 import base64
 import io
+from pathlib import Path
 
-print(sys.path[0])
-sys.path.append(f'{sys.path[0]}/../pybind11_interface/build')
+base_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(base_path / "pybind11_interface" / "build"))
+
 import pyMonkeyGL as mk
-
 
 app = FastAPI()
 
@@ -32,16 +33,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+app.mount("/static", StaticFiles(directory="html"), name="static")
+
+
 volume = {"vol_type": 0}
+
 
 @app.on_event('startup')
 def init_data():
     volume["vol_type"] = 1
     return volume
 
+
 @app.post('/volumetype')
 def set_volume_type(
-    data: dict
+        data: dict
 ):
     vol_type = data.get('vol_type', 0)
     volume["vol_type"] = vol_type
@@ -175,9 +182,10 @@ def set_volume_type(
         'message': 'successful'
     }
 
+
 @app.post('/lineindex')
 def set_line_index(
-    data: dict
+        data: dict
 ):
     line_index = data.get('line_index', 0)
     vol_type = volume.get("vol_type", 0)
@@ -7469,8 +7477,8 @@ def set_line_index(
 
 @app.get('/rotatevr')
 def get_vr_data(
-    x_angle: float,
-    y_angle: float
+        x_angle: float,
+        y_angle: float
 ):
     width = 512
     height = 512
@@ -7487,8 +7495,8 @@ def get_vr_data(
 
 @app.get('/panvr')
 def get_vr_data(
-    x_shift: float,
-    y_shift: float
+        x_shift: float,
+        y_shift: float
 ):
     width = 512
     height = 512
@@ -7505,7 +7513,7 @@ def get_vr_data(
 
 @app.get('/zoomvr')
 def zoom_vr(
-    delta: float
+        delta: float
 ):
     width = 512
     height = 512
@@ -7522,7 +7530,7 @@ def zoom_vr(
 
 @app.get('/vrenablecprline')
 def vrenablecprline(
-    enableCPR: bool
+        enableCPR: bool
 ):
     width = 512
     height = 512
@@ -7539,7 +7547,7 @@ def vrenablecprline(
 
 @app.get('/mprdata')
 def get_mpr_data(
-    plane_type: int
+        plane_type: int
 ):
     b64str = hm.GetPlaneData_pngString(mk.PlaneType(plane_type))
 
@@ -7550,9 +7558,10 @@ def get_mpr_data(
         'message': 'successful'
     }
 
+
 @app.get('/rotatestretchedcpr')
 def get_stretched_cpr(
-    angle: float,
+        angle: float,
 ):
     hm.RotateCPR(angle, mk.PlaneStretchedCPR)
     b64str = hm.GetPlaneData_pngString(mk.PlaneStretchedCPR)
@@ -7567,7 +7576,7 @@ def get_stretched_cpr(
 
 @app.get('/rotatestraightenedcpr')
 def get_straightened_cpr(
-    angle: float,
+        angle: float,
 ):
     hm.RotateCPR(angle, mk.PlaneStraightenedCPR)
     b64str = hm.GetPlaneData_pngString(mk.PlaneStraightenedCPR)
@@ -7582,8 +7591,8 @@ def get_straightened_cpr(
 
 @app.get('/mprbrowse')
 def browse_mpr_data(
-    plane_type: int,
-    delta: float
+        plane_type: int,
+        delta: float
 ):
     hm.Browse(delta, mk.PlaneType(plane_type))
     b64str = hm.GetPlaneData_pngString(mk.PlaneType(plane_type))
@@ -7598,7 +7607,7 @@ def browse_mpr_data(
 
 @app.get('/originbrowse')
 def browse_origin_data(
-    slice: int
+        slice: int
 ):
     b64str = hm.GetOriginData_pngString(slice)
 
@@ -7612,7 +7621,7 @@ def browse_origin_data(
 
 @app.get('/updatethickness')
 def update_thickness(
-    thickness: float
+        thickness: float
 ):
     hm.UpdateThickness(thickness)
 
@@ -7623,7 +7632,7 @@ def update_thickness(
 
 @app.get('/updatemprtype')
 def update_mpr_type(
-    mpr_type: int
+        mpr_type: int
 ):
     hm.SetMPRType(mk.MPRType(mpr_type))
 

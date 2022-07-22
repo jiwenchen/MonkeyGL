@@ -58,11 +58,10 @@
   <script src="utils.js"></script>
   <script>
     window.onload = function () {
-        let host = "http://127.0.0.1:7788";
 
       $(".radio-volume").change((e) => {
         let val = e.target.value;
-        let url = `${host}/volumetype`;
+        let url = `/volumetype`;
         fetch(url, {
           method: "POST",
           headers: {
@@ -82,7 +81,7 @@
 
       $(".radio-line").change((e) => {
         let val = e.target.value;
-        let url = `${host}/lineindex`;
+        let url = `/lineindex`;
         fetch(url, {
           method: "POST",
           headers: {
@@ -111,7 +110,7 @@
 
       function rotateVR(x_angle, y_angle){
           vrRending = true;
-          let url = `${host}/rotatevr?x_angle=` + String(x_angle) + "&y_angle=" + String(y_angle);
+          let url = `/rotatevr?x_angle=` + String(x_angle) + "&y_angle=" + String(y_angle);
           displayVR(url);
       }
 
@@ -127,7 +126,7 @@
 
       function panVR(x_shift, y_shift){
           vrRending = true;
-          let url = `${host}/panvr?x_shift=` + String(x_shift) + "&y_shift=" + String(y_shift);
+          let url = `/panvr?x_shift=` + String(x_shift) + "&y_shift=" + String(y_shift);
           displayVR(url);
       }
 
@@ -141,7 +140,7 @@
       }
 
       function zoomVR(delta){
-        let url = `${host}/zoomvr?delta=${delta}`;
+        let url = `/zoomvr?delta=${delta}`;
         displayVR(url);
       }
 
@@ -156,7 +155,7 @@
         let enableCPR = false;
         document.getElementById('showCPR').addEventListener('click', function (e) {
             enableCPR = !enableCPR;
-            let url = `${host}/vrenablecprline?enableCPR=${enableCPR}`;
+            let url = `/vrenablecprline?enableCPR=${enableCPR}`;
             displayVR(url);
         });
 
@@ -171,7 +170,7 @@
         });
 
         function getMPR(plane_type){
-            let url = `${host}/mprdata?plane_type=` + String(plane_type);
+            let url = `/mprdata?plane_type=` + String(plane_type);
             fetch(url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -189,7 +188,7 @@
         }
 
         function browseMPR(plane_type, delta){
-            let url = `${host}/mprbrowse?plane_type=${String(plane_type)}&delta=${delta}`;
+            let url = `/mprbrowse?plane_type=${String(plane_type)}&delta=${delta}`;
             fetch(url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -209,7 +208,7 @@
         let slice = 0;
         function browseOrigin(delta){
             slice = slice + delta;
-            let url = `${host}/originbrowse?slice=` + String(slice);
+            let url = `/originbrowse?slice=` + String(slice);
             fetch(url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -219,7 +218,7 @@
         }
 
         function rotateStretchedCRP(angle){
-          let url = `${host}/rotatestretchedcpr?angle=` + String(angle);
+          let url = `/rotatestretchedcpr?angle=` + String(angle);
           fetch(url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -241,7 +240,7 @@
         }
 
         function rotateStraightenedCRP(angle){
-          let url = `${host}/rotatestraightenedcpr?angle=` + String(angle);
+          let url = `/rotatestraightenedcpr?angle=` + String(angle);
           fetch(url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -265,7 +264,7 @@
         let thickness = 1.0;
         function updateThickness(delta){
             thickness = thickness + delta;
-            let url = `${host}/updatethickness?thickness=` + String(thickness);
+            let url = `/updatethickness?thickness=` + String(thickness);
             fetch(url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -276,7 +275,7 @@
         }
 
         function updateMPRType(mpr_type){
-            let url = `${host}/updatemprtype?mpr_type=` + String(mpr_type);
+            let url = `/updatemprtype?mpr_type=` + String(mpr_type);
             fetch(url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
