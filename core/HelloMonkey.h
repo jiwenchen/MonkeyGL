@@ -47,6 +47,7 @@ namespace MonkeyGL {
         virtual void SetColorBackground(RGBA clrBG);
         virtual bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
         virtual unsigned char AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
+        virtual unsigned char AddObjectMaskFile(const char* szFile);
         virtual bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
 
     // output

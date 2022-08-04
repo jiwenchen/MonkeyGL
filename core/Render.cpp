@@ -234,6 +234,17 @@ unsigned char Render::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int 
 	return nLabel;
 }
 
+unsigned char Render::AddObjectMaskFile(const char* szFile)
+{
+	unsigned char nLabel = IRender::AddObjectMaskFile(szFile);
+	if (nLabel == 0)
+		return 0;
+
+	cu_copyMaskData(m_dataMan.GetMaskData().get());
+
+	return nLabel;
+}
+
 bool Render::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
 {
 	if (!IRender::AddNewObjectMask(pData, nWidth, nHeight, nDepth))

@@ -149,6 +149,13 @@ unsigned char HelloMonkey::AddNewObjectMask(std::shared_ptr<unsigned char>pData,
 	return _pRender->AddNewObjectMask(pData, nWidth, nHeight, nDepth);
 }
 
+unsigned char HelloMonkey::AddObjectMaskFile(const char* szFile)
+{
+	if (!_pRender)
+		return 0;
+	return _pRender->AddObjectMaskFile(szFile);
+}
+
 bool HelloMonkey::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
 {
 	if (!_pRender)

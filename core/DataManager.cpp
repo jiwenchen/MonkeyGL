@@ -23,6 +23,7 @@
 #include "DataManager.h"
 #include "Logger.h"
 #include "Methods.h"
+#include "ImageReader.h"
 
 using namespace MonkeyGL;
 
@@ -66,8 +67,29 @@ bool DataManager::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHe
 	return res;
 }
 
+unsigned char DataManager::AddObjectMaskFile(const char* szFile)
+{
+	std::shared_ptr<unsigned char> pData;
+	int nWidth=0, nHeight=0, nDepth=0;
+	if (!ImageReader::ReadMask(
+			szFile,
+			pData,
+			nWidth,
+			nHeight,
+			nDepth
+		)
+	){
+		Logger::Error("failed to read mask file[%s]", szFile);
+		return -1;
+	}
+
+	return AddNewObjectMask(pData, nWidth, nHeight, nDepth);
+}
+
+
 unsigned char DataManager::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth)
 {
+	Logger::Info("add new mask, size[w:%d, h:%d, d:%d]", nWidth, nHeight, nDepth);
 	unsigned char nLabel = 0;
 	if (m_objectInfos.size() <= 0) {
 		m_objectInfos[0] = ObjectInfo();

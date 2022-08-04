@@ -202,6 +202,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetLogLevel", &pyHelloMonkey::SetLogLevel)
         .def("LoadVolumeFile", &pyHelloMonkey::LoadVolumeFile)
         .def("SetVolumeArray", &pyHelloMonkey::SetVolumeArray)
+        .def("AddObjectMaskFile", &pyHelloMonkey::AddObjectMaskFile)
         .def("AddNewObjectMaskArray", &pyHelloMonkey::AddNewObjectMaskArray)
         .def("UpdateMaskArray", &pyHelloMonkey::UpdateMaskArray)
         .def("SetSpacing", &pyHelloMonkey::SetSpacing)

@@ -44,6 +44,13 @@ namespace MonkeyGL{
             Direction3d& dirY,
             Direction3d& dirZ
         );
+        static bool ReadMask(
+            const char* szFile,
+            std::shared_ptr<unsigned char>& pData,
+            int& nWidth,
+            int& nHeight,
+            int& nDepth
+        );
     };
     
 }

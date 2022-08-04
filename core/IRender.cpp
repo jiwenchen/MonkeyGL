@@ -44,6 +44,11 @@ unsigned char IRender::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int
 	return m_dataMan.AddNewObjectMask(pData, nWidth, nHeight, nDepth);
 }
 
+unsigned char IRender::AddObjectMaskFile( const char* szFile )
+{
+	return m_dataMan.AddObjectMaskFile(szFile);
+}
+
 bool IRender::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
 {
 	return m_dataMan.UpdateObjectMask(pData, nWidth, nHeight, nDepth, nLabel);

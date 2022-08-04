@@ -141,13 +141,13 @@ def set_volume_type(
         hm.SetTransferFunc(tf1)
 
     elif vol_type == 5:
-        itk_mask = sitk.ReadImage(f'{file_path}/corocta_vessel_mask.nii.gz')
-        npmaskdata = sitk.GetArrayFromImage(itk_mask)
-        npmaskdatat = npmaskdata.swapaxes(2, 0)
+        # itk_mask = sitk.ReadImage(f'{file_path}/corocta_vessel_mask.nii.gz')
+        # npmaskdata = sitk.GetArrayFromImage(itk_mask)
+        # npmaskdatat = npmaskdata.swapaxes(2, 0)
 
-        itk_mask2 = sitk.ReadImage(f'{file_path}/corocta_heart_mask.nii.gz')
-        npmaskdata2 = sitk.GetArrayFromImage(itk_mask2)
-        npmaskdatat2 = npmaskdata2.swapaxes(2, 0)
+        # itk_mask2 = sitk.ReadImage(f'{file_path}/corocta_heart_mask.nii.gz')
+        # npmaskdata2 = sitk.GetArrayFromImage(itk_mask2)
+        # npmaskdatat2 = npmaskdata2.swapaxes(2, 0)
 
         hm.LoadVolumeFile(f'{file_path}/corocta.nrrd')
         tf0 = {}
@@ -159,7 +159,8 @@ def set_volume_type(
         hm.SetObjectAlpha(0, 0)
         hm.SetTransferFunc(tf0)
 
-        label2 = hm.AddNewObjectMaskArray(npmaskdatat2)
+        # label2 = hm.AddNewObjectMaskArray(npmaskdatat2)
+        label2 = hm.AddObjectMaskFile(f'{file_path}/corocta_heart_mask.nii.gz')
         tf1 = {}
         tf1[5] = mk.RGBA(0.8, 0, 0, 0)
         tf1[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
@@ -169,7 +170,8 @@ def set_volume_type(
         hm.SetObjectAlpha(0.4, label2)
         hm.SetTransferFunc(tf1)
 
-        label1 = hm.AddNewObjectMaskArray(npmaskdatat)
+        # label1 = hm.AddNewObjectMaskArray(npmaskdatat)
+        label1 = hm.AddObjectMaskFile(f'{file_path}/corocta_vessel_mask.nii.gz')
         tf1 = {}
         tf1[5] = mk.RGBA(0.8, 0, 0, 0)
         tf1[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)

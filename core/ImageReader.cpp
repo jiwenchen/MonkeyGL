@@ -94,6 +94,53 @@ bool ImageReader::Read(
         return false;
     }
 
-
     return true;
+}
+
+
+bool ImageReader::ReadMask(
+    const char* szFile,
+    std::shared_ptr<unsigned char>& pData,
+    int& nWidth,
+    int& nHeight,
+    int& nDepth
+)
+{
+    itk::NrrdImageIOFactory::RegisterOneFactory();
+    itk::NiftiImageIOFactory::RegisterOneFactory();
+    itk::MetaImageIOFactory::RegisterOneFactory();
+
+    using PixelType = unsigned char;
+    constexpr unsigned int Dimension = 3;
+    using ImageType = itk::Image<PixelType, Dimension>;
+
+    using ReaderType = itk::ImageFileReader<ImageType>;
+    ReaderType::Pointer reader = ReaderType::New();
+    reader->SetFileName(szFile);
+
+    try
+    {
+        reader->Update();
+        ImageType::Pointer output = reader->GetOutput();
+
+        const ImageType::SpacingType& spc = output->GetSpacing();
+        const ImageType::SizeType size = output->GetLargestPossibleRegion().GetSize();
+
+        nWidth = size[0];
+        nHeight = size[1];
+        nDepth = size[2];
+
+        PixelType* pBuffer = output->GetBufferPointer();
+
+        pData.reset(new unsigned char[ nWidth*nHeight*nDepth ]);
+        memcpy(pData.get(), pBuffer, nWidth*nHeight*nDepth*sizeof(unsigned char));
+    }
+    catch (const itk::ExceptionObject & err)
+    {
+        Logger::Error("Failed to read file[%s], error[%s]", szFile, err.what());
+        return false;
+    }
+    
+    return true;
+    
 }

@@ -42,6 +42,7 @@ namespace MonkeyGL {
     public:
         bool LoadVolumeFile(const char* szFile);
         bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
+        unsigned char AddObjectMaskFile(const char* szFile);
         unsigned char AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
         bool UpdateActiveObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
         bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
