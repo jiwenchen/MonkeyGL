@@ -2,6 +2,7 @@ argNum=$#
 source_path=$(pwd)
 
 build_path=${source_path}"/build"
+install_path=${source_path}"/install"
 
 py_source_path=${source_path}"/pybind11_interface" 
 py_build_path=${source_path}"/pybind11_interface/build"
@@ -140,6 +141,45 @@ build_pybind() {
     fi
 }
 
+install() {
+    makesure_folder ${install_path}
+    cd ${install_path}
+    makesure_folder ${install_path}/"lib"
+    cd ${install_path}/"lib"
+    rm -rf ./*
+    cp ${build_path}"/ITK-5.2.1/build/lib/libITKCommon-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libitkdouble-conversion-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libITKIOImageBase-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libITKIONIFTI-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libITKIONRRD-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libITKMetaIO-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libITKniftiio-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libITKNrrdIO-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libitksys-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libitkv3p_netlib-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libitkzlib-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libitkvnl_algo-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libITKznz-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libitkvnl-5.2.so.1" ./
+    cp ${build_path}"/ITK-5.2.1/build/lib/libITKIOMeta-5.2.so.1" ./
+    cp ${build_path}"/log4cplus-2.0.7/build/install/usr/local/lib/liblog4cplus.so.3" ./
+    cp ${build_path}"/libMonkeyGL.so" ./
+    cp ${py_build_path}"/pyMonkeyGL.so" ./
+
+    cd ..
+    makesure_folder ${install_path}/"include"
+    cd ${install_path}/"include"
+    rm -rf ./*
+    cp -r ${build_path}"/ITK-5.2.1/build/install/include/ITK-5.2" ./
+    cp -r ${build_path}"/log4cplus-2.0.7/build/install/usr/local/include/log4cplus" ./
+    cp ${source_path}"/core/Defines.h" ./
+    cp ${source_path}"/core/DeviceInfo.h" ./
+    cp ${source_path}"/core/Direction.h" ./
+    cp ${source_path}"/core/HelloMonkey.h" ./
+    cp ${source_path}"/core/PlaneInfo.h" ./
+    cp ${source_path}"/core/Point.h" ./
+}
+
 if [ $1 == "cpp" ]; then
     build_cpp
 elif [ $1 == "itk" ]; then
@@ -151,6 +191,8 @@ elif [ $1 == "pybind" ]; then
 elif [ $1 == "all" ]; then
     build_cpp
     build_pybind
+elif [ $1 == "install" ]; then
+    install
 else
     echo "invalid project"
 fi

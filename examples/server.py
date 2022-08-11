@@ -35,7 +35,7 @@ app.add_middleware(
 
 
 html_path = str(base_path / "examples" / "html")
-app.mount("/static", StaticFiles(directory=html_path), name="static")
+app.mount("/hm", StaticFiles(directory=html_path), name="hm")
 
 
 volume = {"vol_type": 0}
