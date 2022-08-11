@@ -39,5 +39,6 @@ install/
 *.raw
 *.nrrd
 *.nii.gz
+data/*.json
 *.pyc
 *.DS_Store
