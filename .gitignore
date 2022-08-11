@@ -38,5 +38,6 @@ install/
 *.mhd
 *.raw
 *.nrrd
+*.nii.gz
 *.pyc
 *.DS_Store
