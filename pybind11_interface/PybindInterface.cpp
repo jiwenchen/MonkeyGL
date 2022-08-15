@@ -234,6 +234,8 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetVRWWWL", static_cast<bool (pyHelloMonkey::*)(float, float, unsigned char)>(&pyHelloMonkey::SetVRWWWL))
         .def("SetObjectAlpha", static_cast<bool (pyHelloMonkey::*)(float)>(&pyHelloMonkey::SetObjectAlpha))
         .def("SetObjectAlpha", static_cast<bool (pyHelloMonkey::*)(float, unsigned char)>(&pyHelloMonkey::SetObjectAlpha))
+        .def("EnableVR", &pyHelloMonkey::EnableVR)
+        .def("EnableMIP", &pyHelloMonkey::EnableMIP)
         .def("Rotate", &pyHelloMonkey::Rotate)
         .def("Browse", &pyHelloMonkey::Browse)
         .def("Pan", &pyHelloMonkey::Pan)

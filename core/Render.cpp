@@ -47,7 +47,7 @@ extern "C"
 void cu_copyAlphaAndWWWL(float *pAlphaAndWWWL);
 
 extern "C"
-void cu_render(unsigned char* pVR, int nWidth, int nHeight, float fxTranslate, float fyTranslate, float fScale, bool invertZ, RGBA colorBG);
+void cu_render(unsigned char* pVR, int nWidth, int nHeight, float fxTranslate, float fyTranslate, float fScale, bool invertZ, RGBA colorBG, bool bMIP);
 
 extern "C"
 void cu_renderAxial(short* pData, int nWidth, int nHeight, float fDepth);
@@ -82,6 +82,7 @@ cudaExtent m_VolumeSize;
 
 Render::Render(void)
 {
+	m_bRenderMIP = false;
 	Init();
 
 	// testcuda();
@@ -535,7 +536,7 @@ bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 	NormalizeVOI();
 	cu_setVOI(m_voi_Normalize);
 
-	cu_render(pVR, nWidth, nHeight, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale, m_dataMan.Need2InvertZ(), m_dataMan.GetColorBackground());
+	cu_render(pVR, nWidth, nHeight, m_fTotalXTranslate, m_fTotalYTranslate, m_fTotalScale, m_dataMan.Need2InvertZ(), m_dataMan.GetColorBackground(), m_bRenderMIP);
 
 	return true;
 }

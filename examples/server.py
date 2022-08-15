@@ -283,6 +283,25 @@ def reset():
         'message': 'successful'
     }
 
+@app.get('/switchvrmip')
+def switchvrmip(
+    vrmip: bool
+):
+    width = 512
+    height = 512
+    if vrmip:
+        hm.EnableVR()
+    else:
+        hm.EnableMIP()
+    b64str = hm.GetVRData_pngString(width, height)
+
+    return {
+        'data': {
+            'image': b64str
+        },
+        'message': 'successful'
+    }
+
 @app.get('/orientation')
 def orientation(
     dir: int

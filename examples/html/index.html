@@ -27,6 +27,7 @@
   <button id="right" type="button" class="btn btn-default">Right</button>
   <button id="head" type="button" class="btn btn-default">Head</button>
   <button id="foot" type="button" class="btn btn-default">Foot</button>
+  <button id="switchvrmip" type="button" class="btn btn-default">VR / MIP</button>
 
   <br>
   MPR:
@@ -179,6 +180,10 @@
           orientation_vr(5);
         });
 
+        document.getElementById('switchvrmip').addEventListener('click', function (e) {
+          switchvrmip();
+        });
+
 
         let enableCPR = false;
         document.getElementById('showCPR').addEventListener('click', function (e) {
@@ -310,6 +315,13 @@
         function orientation_vr(orient){
           let url = `/orientation?dir=` + String(orient);
           displayVR(url);
+        }
+
+        let vrmip = false;
+        function switchvrmip(){
+          let url = `/switchvrmip?vrmip=` + String(vrmip);
+          displayVR(url);
+          vrmip = !vrmip;
         }
 
         function updateMPRType(mpr_type){

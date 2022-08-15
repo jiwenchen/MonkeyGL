@@ -86,6 +86,8 @@ namespace MonkeyGL {
         virtual void Head();
         virtual void Foot();
 
+        virtual void EnableVR();
+        virtual void EnableMIP();
         virtual void Rotate(float fxRotate, float fyRotate);
         virtual void Zoom(float ratio);
         virtual void Pan(float fxShift, float fyShift);
