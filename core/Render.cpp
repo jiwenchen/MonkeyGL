@@ -82,33 +82,32 @@ cudaExtent m_VolumeSize;
 
 Render::Render(void)
 {
-	m_fTotalXTranslate = 0.0f;
-	m_fTotalYTranslate = 0.0f;
-	m_fTotalScale = 1.0f;
-
-	m_pRotateMatrix = new float[9];
-	Methods::SetSeg(m_pRotateMatrix,3);
-	m_pTransposRotateMatrix = new float[9];
-	Methods::SetSeg(m_pTransposRotateMatrix,3);
-	m_pTransformMatrix = new float[9];
-	Methods::SetSeg(m_pTransformMatrix,3);
-	m_pTransposeTransformMatrix = new float[9];
-	Methods::SetSeg(m_pTransposeTransformMatrix,3);
+	Init();
 
 	// testcuda();
 }
 
-
 Render::~Render(void)
 {
-	if (NULL != m_pRotateMatrix)
-		delete [] m_pRotateMatrix;
-	if (NULL != m_pTransposRotateMatrix)
-		delete [] m_pTransposRotateMatrix;
-	if (NULL != m_pTransformMatrix)
-		delete [] m_pTransformMatrix;
-	if (NULL != m_pTransposeTransformMatrix)
-		delete [] m_pTransposeTransformMatrix;
+}
+
+void Render::Init()
+{
+	m_fTotalXTranslate = 0.0f;
+	m_fTotalYTranslate = 0.0f;
+	m_fTotalScale = 1.0f;
+
+	Methods::SetSeg(m_pRotateMatrix,3);
+	Methods::SetSeg(m_pTransposRotateMatrix,3);
+	Methods::SetSeg(m_pTransformMatrix,3);
+	Methods::SetSeg(m_pTransposeTransformMatrix,3);
+}
+
+void Render::Reset()
+{
+	IRender::Reset();
+	Init();
+	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }
 
 bool Render::SetTransferFunc( std::map<int, RGBA> ctrlPoints )

@@ -151,6 +151,10 @@
             updateThickness(-1);
         });
 
+        document.getElementById('reset').addEventListener('click', function (e) {
+          reset();
+        });
+
 
         let enableCPR = false;
         document.getElementById('showCPR').addEventListener('click', function (e) {
@@ -272,6 +276,11 @@
                     getMPR(1);
                     getMPR(2);
                 });
+        }
+
+        function reset(){
+            let url = `/reset`;
+            displayVR(url);
         }
 
         function updateMPRType(mpr_type){

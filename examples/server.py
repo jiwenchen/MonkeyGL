@@ -269,6 +269,20 @@ def zoom_vr(
         'message': 'successful'
     }
 
+@app.get('/reset')
+def reset():
+    width = 512
+    height = 512
+    hm.Reset()
+    b64str = hm.GetVRData_pngString(width, height)
+
+    return {
+        'data': {
+            'image': b64str
+        },
+        'message': 'successful'
+    }
+
 
 @app.get('/vrenablecprline')
 def vrenablecprline(

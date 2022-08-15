@@ -43,6 +43,7 @@ namespace MonkeyGL {
         virtual bool UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel);
         virtual void LoadVolumeFile(const char* szFile);
         virtual void SetSpacing(double x, double y, double z);
+        virtual void Reset();
         
         virtual bool TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeight, Point3d ptVoxel);
 
@@ -81,7 +82,7 @@ namespace MonkeyGL {
         virtual bool SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts, unsigned char nLabel);
 
     private:
-        void InitLights();
+        void Init();
         void CopyTransferFunc2Device();
         void CopyAlphaWWWL2Device();
         void NormalizeVOI();
@@ -105,10 +106,10 @@ namespace MonkeyGL {
         float m_fTotalScale;
 
         AlphaAndWWWL m_AlphaAndWWWL[MAXOBJECTCOUNT+1];
-        float* m_pRotateMatrix;
-        float* m_pTransposRotateMatrix;
-        float* m_pTransformMatrix;
-        float* m_pTransposeTransformMatrix;
+        float m_pRotateMatrix[9];
+        float m_pTransposRotateMatrix[9];
+        float m_pTransformMatrix[9];
+        float m_pTransposeTransformMatrix[9];
     };
 }
 
