@@ -125,6 +125,17 @@ namespace MonkeyGL{
             wl = l;
         }
     };
+
+    enum Orientation
+    {
+        OrientationNotDefined = -1,
+        OrientationAnterior,
+        OrientationPosterior,
+        OrientationLeft,
+        OrientationRight,
+        OrientationHead,
+        OrientationFoot
+    };
     
     enum PlaneType
     {

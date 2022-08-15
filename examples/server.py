@@ -283,6 +283,33 @@ def reset():
         'message': 'successful'
     }
 
+@app.get('/orientation')
+def orientation(
+    dir: int
+):
+    width = 512
+    height = 512
+    if mk.OrientationAnterior == dir:
+        hm.Anterior()
+    elif mk.OrientationPosterior == dir:
+        hm.Posterior()
+    elif mk.OrientationLeft == dir:
+        hm.Left()
+    elif mk.OrientationRight == dir:
+        hm.Right()
+    elif mk.OrientationHead == dir:
+        hm.Head()
+    elif mk.OrientationFoot == dir:
+        hm.Foot()
+    b64str = hm.GetVRData_pngString(width, height)
+
+    return {
+        'data': {
+            'image': b64str
+        },
+        'message': 'successful'
+    }
+
 
 @app.get('/vrenablecprline')
 def vrenablecprline(

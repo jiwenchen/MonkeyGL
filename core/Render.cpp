@@ -690,60 +690,42 @@ bool Render::GetPlaneRotateMatrix( float* pMatirx, PlaneType planeType )
 
 void Render::Anterior()
 {
-	Methods::SetSeg(m_pRotateMatrix, 3);
-	Methods::SetSeg(m_pTransposRotateMatrix, 3);
-	Methods::SetSeg(m_pTransformMatrix, 3);
-	Methods::SetSeg(m_pTransposeTransformMatrix, 3);
+	Init();
 	Methods::ComputeTransformMatrix(m_pRotateMatrix, m_pTransposRotateMatrix, m_pTransformMatrix, m_pTransposeTransformMatrix, 0.0f, 0.0f, m_fTotalScale);
 	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }
 
 void Render::Posterior()
 {
-	Methods::SetSeg(m_pRotateMatrix, 3);
-	Methods::SetSeg(m_pTransposRotateMatrix, 3);
-	Methods::SetSeg(m_pTransformMatrix, 3);
-	Methods::SetSeg(m_pTransposeTransformMatrix, 3);
+	Init();
 	Methods::ComputeTransformMatrix(m_pRotateMatrix, m_pTransposRotateMatrix, m_pTransformMatrix, m_pTransposeTransformMatrix, 0.0f, 180.0f, m_fTotalScale);
 	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }
 
 void Render::Left()
 {
-	Methods::SetSeg(m_pRotateMatrix, 3);
-	Methods::SetSeg(m_pTransposRotateMatrix, 3);
-	Methods::SetSeg(m_pTransformMatrix, 3);
-	Methods::SetSeg(m_pTransposeTransformMatrix, 3);
+	Init();
 	Methods::ComputeTransformMatrix(m_pRotateMatrix, m_pTransposRotateMatrix, m_pTransformMatrix, m_pTransposeTransformMatrix, 0.0f, -90.0f, m_fTotalScale);
 	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }
 
 void Render::Right()
 {
-	Methods::SetSeg(m_pRotateMatrix, 3);
-	Methods::SetSeg(m_pTransposRotateMatrix, 3);
-	Methods::SetSeg(m_pTransformMatrix, 3);
-	Methods::SetSeg(m_pTransposeTransformMatrix, 3);
+	Init();
 	Methods::ComputeTransformMatrix(m_pRotateMatrix, m_pTransposRotateMatrix, m_pTransformMatrix, m_pTransposeTransformMatrix, 0.0f, 90.0f, m_fTotalScale);
 	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }
 
 void Render::Head()
 {
-	Methods::SetSeg(m_pRotateMatrix, 3);
-	Methods::SetSeg(m_pTransposRotateMatrix, 3);
-	Methods::SetSeg(m_pTransformMatrix, 3);
-	Methods::SetSeg(m_pTransposeTransformMatrix, 3);
+	Init();
 	Methods::ComputeTransformMatrix(m_pRotateMatrix, m_pTransposRotateMatrix, m_pTransformMatrix, m_pTransposeTransformMatrix, 90.0f, 180.0f, m_fTotalScale);
 	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }
 
 void Render::Foot()
 {
-	Methods::SetSeg(m_pRotateMatrix, 3);
-	Methods::SetSeg(m_pTransposRotateMatrix, 3);
-	Methods::SetSeg(m_pTransformMatrix, 3);
-	Methods::SetSeg(m_pTransposeTransformMatrix, 3);
+	Init();
 	Methods::ComputeTransformMatrix(m_pRotateMatrix, m_pTransposRotateMatrix, m_pTransformMatrix, m_pTransposeTransformMatrix, -90.0f, 0.0f, m_fTotalScale);
 	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }

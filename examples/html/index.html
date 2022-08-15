@@ -21,6 +21,12 @@
   <label for="v5"><input id="v5" value="5" type="radio" class="radio-volume" name="volume"/>corocta</label>
 
   <button id="reset" type="button" class="btn btn-default">Reset</button>
+  <button id="anterior" type="button" class="btn btn-default">Anterior</button>
+  <button id="posterior" type="button" class="btn btn-default">Posterior</button>
+  <button id="left" type="button" class="btn btn-default">Left</button>
+  <button id="right" type="button" class="btn btn-default">Right</button>
+  <button id="head" type="button" class="btn btn-default">Head</button>
+  <button id="foot" type="button" class="btn btn-default">Foot</button>
 
   <br>
   MPR:
@@ -154,6 +160,24 @@
         document.getElementById('reset').addEventListener('click', function (e) {
           reset();
         });
+        document.getElementById('anterior').addEventListener('click', function (e) {
+          orientation_vr(0);
+        });
+        document.getElementById('posterior').addEventListener('click', function (e) {
+          orientation_vr(1);
+        });
+        document.getElementById('left').addEventListener('click', function (e) {
+          orientation_vr(2);
+        });
+        document.getElementById('right').addEventListener('click', function (e) {
+          orientation_vr(3);
+        });
+        document.getElementById('head').addEventListener('click', function (e) {
+          orientation_vr(4);
+        });
+        document.getElementById('foot').addEventListener('click', function (e) {
+          orientation_vr(5);
+        });
 
 
         let enableCPR = false;
@@ -281,6 +305,11 @@
         function reset(){
             let url = `/reset`;
             displayVR(url);
+        }
+
+        function orientation_vr(orient){
+          let url = `/orientation?dir=` + String(orient);
+          displayVR(url);
         }
 
         function updateMPRType(mpr_type){

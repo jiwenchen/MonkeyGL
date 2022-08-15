@@ -173,6 +173,16 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .value("PlaneStraightenedCPR", PlaneType::PlaneStraightenedCPR)
         .export_values();
 
+    py::enum_<Orientation>(m, "Orientation")
+        .value("OrientationNotDefined", Orientation::OrientationNotDefined)
+        .value("OrientationAnterior", Orientation::OrientationAnterior)
+        .value("OrientationPosterior", Orientation::OrientationPosterior)
+        .value("OrientationLeft", Orientation::OrientationLeft)
+        .value("OrientationRight", Orientation::OrientationRight)
+        .value("OrientationHead", Orientation::OrientationHead)
+        .value("OrientationFoot", Orientation::OrientationFoot)
+        .export_values();
+
     py::enum_<MPRType>(m, "MPRType")
         .value("MPRTypeNotDefined", MPRType::MPRTypeNotDefined)
         .value("MPRTypeAverage", MPRType::MPRTypeAverage)
@@ -214,6 +224,12 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>, std::map<int, float>, unsigned char)>(&pyHelloMonkey::SetTransferFunc))
         .def("SetColorBackground", &pyHelloMonkey::SetColorBackground)
         .def("Reset", &pyHelloMonkey::Reset)
+        .def("Anterior", &pyHelloMonkey::Anterior)
+        .def("Posterior", &pyHelloMonkey::Posterior)
+        .def("Left", &pyHelloMonkey::Left)
+        .def("Right", &pyHelloMonkey::Right)
+        .def("Head", &pyHelloMonkey::Head)
+        .def("Foot", &pyHelloMonkey::Foot)
         .def("SetVRWWWL", static_cast<bool (pyHelloMonkey::*)(float, float)>(&pyHelloMonkey::SetVRWWWL))
         .def("SetVRWWWL", static_cast<bool (pyHelloMonkey::*)(float, float, unsigned char)>(&pyHelloMonkey::SetVRWWWL))
         .def("SetObjectAlpha", static_cast<bool (pyHelloMonkey::*)(float)>(&pyHelloMonkey::SetObjectAlpha))
