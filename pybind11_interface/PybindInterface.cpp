@@ -222,6 +222,8 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>, unsigned char)>(&pyHelloMonkey::SetTransferFunc))
         .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>, std::map<int, float>)>(&pyHelloMonkey::SetTransferFunc))
         .def("SetTransferFunc", static_cast<bool (pyHelloMonkey::*)(std::map<int, RGBA>, std::map<int, float>, unsigned char)>(&pyHelloMonkey::SetTransferFunc))
+        .def("LoadTransferFunction", &pyHelloMonkey::LoadTransferFunction)
+        .def("SaveTransferFunction", &pyHelloMonkey::SaveTransferFunction)
         .def("SetColorBackground", &pyHelloMonkey::SetColorBackground)
         .def("Reset", &pyHelloMonkey::Reset)
         .def("Anterior", &pyHelloMonkey::Anterior)

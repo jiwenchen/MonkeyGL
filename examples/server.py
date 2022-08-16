@@ -284,6 +284,36 @@ def reset():
         'message': 'successful'
     }
 
+@app.get('/loadtf')
+def loadtf():
+    width = 512
+    height = 512
+    hm.LoadTransferFunction(f'{base_path}/trfns/coro.txt')
+
+    b64str = hm.GetVRData_pngString(width, height)
+
+    return {
+        'data': {
+            'image': b64str
+        },
+        'message': 'successful'
+    }
+
+@app.get('/savetf')
+def savetf():
+    width = 512
+    height = 512
+    hm.SaveTransferFunction(f'{base_path}/trfns/test.txt')
+    
+    b64str = hm.GetVRData_pngString(width, height)
+
+    return {
+        'data': {
+            'image': b64str
+        },
+        'message': 'successful'
+    }
+
 @app.get('/switchvrmip')
 def switchvrmip(
     vrmip: bool

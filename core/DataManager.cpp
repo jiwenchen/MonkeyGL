@@ -166,6 +166,31 @@ bool DataManager::SetControlPoints_TF( std::map<int, RGBA> rgbPts, std::map<int,
 	return true;
 }
 
+bool DataManager::LoadTransferFunction(const char* szFile) 
+{
+	ObjectInfo info;
+	ObjectInfo::ReadFile(szFile, info);
+	info.Print();
+	
+	return (
+		SetVRWWWL(info.ww, info.wl) 
+		&& SetControlPoints_TF(info.idx2rgba, info.idx2alpha)
+	);
+}
+
+bool DataManager::SaveTransferFunction(const char* szFile) 
+{
+	if (m_activeLabel < 0){
+		return false;
+	}
+	if (m_objectInfos.size() <= 0){
+		return false;
+	}
+
+	ObjectInfo::WriteFile(szFile, m_objectInfos[m_activeLabel]);
+	return true;
+}
+
 std::map<unsigned char, ObjectInfo> DataManager::GetObjectInfos()
 {
 	return m_objectInfos;

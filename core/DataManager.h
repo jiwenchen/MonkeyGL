@@ -62,6 +62,8 @@ namespace MonkeyGL {
         bool SetControlPoints_TF(std::map<int, RGBA> ctrlPts, unsigned char nLabel);
         bool SetControlPoints_TF(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts);
         bool SetControlPoints_TF(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts, unsigned char nLabel);
+        bool LoadTransferFunction(const char* szFile);
+        bool SaveTransferFunction(const char* szFile);
         std::map<unsigned char, ObjectInfo> GetObjectInfos();
 
         void Reset();

@@ -100,6 +100,16 @@ bool IRender::SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> a
 	return m_dataMan.SetControlPoints_TF(rgbPts, alphaPts, nLabel);
 }
 
+bool IRender::LoadTransferFunction(const char* szFile)
+{
+	return m_dataMan.LoadTransferFunction(szFile);
+}
+
+bool IRender::SaveTransferFunction(const char* szFile)
+{
+	return m_dataMan.SaveTransferFunction(szFile);
+}
+
 void IRender::SetColorBackground(RGBA clrBG)
 {
 	m_dataMan.SetColorBackground(clrBG);

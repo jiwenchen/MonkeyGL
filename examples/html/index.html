@@ -20,6 +20,7 @@
   <label for="v4"><input id="v4" value="4" type="radio" class="radio-volume" name="volume"/>neckcta</label>
   <label for="v5"><input id="v5" value="5" type="radio" class="radio-volume" name="volume"/>corocta</label>
 
+  <br>
   <button id="reset" type="button" class="btn btn-default">Reset</button>
   <button id="anterior" type="button" class="btn btn-default">Anterior</button>
   <button id="posterior" type="button" class="btn btn-default">Posterior</button>
@@ -28,6 +29,8 @@
   <button id="head" type="button" class="btn btn-default">Head</button>
   <button id="foot" type="button" class="btn btn-default">Foot</button>
   <button id="switchvrmip" type="button" class="btn btn-default">VR / MIP</button>
+  <button id="loadtf" type="button" class="btn btn-default">Load TF</button>
+  <button id="savetf" type="button" class="btn btn-default">Save TF</button>
 
   <br>
   MPR:
@@ -179,9 +182,14 @@
         document.getElementById('foot').addEventListener('click', function (e) {
           orientation_vr(5);
         });
-
         document.getElementById('switchvrmip').addEventListener('click', function (e) {
           switchvrmip();
+        });
+        document.getElementById('loadtf').addEventListener('click', function (e) {
+          loadtf();
+        });
+        document.getElementById('savetf').addEventListener('click', function (e) {
+          savetf();
         });
 
 
@@ -314,6 +322,16 @@
 
         function orientation_vr(orient){
           let url = `/orientation?dir=` + String(orient);
+          displayVR(url);
+        }
+
+        function loadtf(){
+          let url = `/loadtf`;
+          displayVR(url);
+        }
+
+        function savetf(){
+          let url = `/savetf`;
           displayVR(url);
         }
 

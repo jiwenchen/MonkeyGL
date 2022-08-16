@@ -91,6 +91,22 @@ bool HelloMonkey::SetTransferFunc( std::map<int, RGBA> rgbPoints, std::map<int, 
 	return _pRender->SetTransferFunc(rgbPoints, alphaPoints, nLabel);
 }
 
+bool HelloMonkey::LoadTransferFunction(const char* szFile)
+{
+	if (!_pRender)
+		return false;
+
+	return _pRender->LoadTransferFunction(szFile);
+}
+
+bool HelloMonkey::SaveTransferFunction(const char* szFile)
+{
+	if (!_pRender)
+		return false;
+
+	return _pRender->SaveTransferFunction(szFile);
+}
+
 void HelloMonkey::SetColorBackground(RGBA clrBG)
 {
 	if (!_pRender)

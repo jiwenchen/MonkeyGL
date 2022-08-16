@@ -100,6 +100,8 @@ namespace MonkeyGL {
         virtual bool SetTransferFunc(std::map<int, RGBA> ctrlPoints, unsigned char nLabel);
         virtual bool SetTransferFunc(std::map<int, RGBA> rgbPoints, std::map<int, float> alphaPoints);
         virtual bool SetTransferFunc(std::map<int, RGBA> rgbPoints, std::map<int, float> alphaPoints, unsigned char nLabel);
+        virtual bool LoadTransferFunction(const char* szFile);
+        virtual bool SaveTransferFunction(const char* szFile);
 
         virtual void Browse(float fDelta, PlaneType planeType);	
         virtual void PanCrossHair(int nx, int ny, PlaneType planeType);

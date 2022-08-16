@@ -147,6 +147,15 @@ bool Render::SetTransferFunc(std::map<int, RGBA> rgbPoints, std::map<int, float>
 	return true;
 }
 
+bool Render::LoadTransferFunction(const char* szFile)
+{
+	if (!IRender::LoadTransferFunction(szFile)){
+		return false;
+	}
+	CopyTransferFunc2Device();
+	return true;
+}
+
 void Render::CopyTransferFunc2Device()
 {
 	std::shared_ptr<RGBA> ptfBuffer(NULL);
