@@ -473,6 +473,18 @@ def update_mpr_type(
         'message': 'successful'
     }
 
+@app.get('/panmpr')
+def pan_mpr(
+        plane_type: int,
+        x: int,
+        y:int
+):
+    hm.PanCrossHair(x, y, mk.PlaneType(plane_type))
+
+    return {
+        'message': 'successful'
+    }
+
 
 if __name__ == "__main__":
     uvicorn.run(app='server:app', host="0.0.0.0",
