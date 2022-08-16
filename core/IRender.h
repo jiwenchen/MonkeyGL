@@ -96,7 +96,8 @@ namespace MonkeyGL{
         virtual void EnableVR() = 0;
         virtual void EnableMIP() = 0;
         virtual void Rotate(float fxRotate, float fyRotate) = 0;
-        virtual void Zoom(float ratio) = 0;
+        virtual float Zoom(float ratio) = 0;
+        virtual float GetZoomRatio() = 0;
         virtual void Pan(float fxShift, float fyShift) = 0;
         virtual bool SetVRWWWL(float fWW, float fWL);
         virtual bool SetVRWWWL(float fWW, float fWL, unsigned char nLabel);

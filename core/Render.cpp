@@ -737,11 +737,17 @@ void Render::Rotate( float fxRotate, float fyRotate )
 	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }
 
-void Render::Zoom( float ratio)
+float Render::Zoom( float ratio)
 {
 	m_fTotalScale *= ratio;
 	Methods::ComputeTransformMatrix(m_pRotateMatrix, m_pTransposRotateMatrix, m_pTransformMatrix, m_pTransposeTransformMatrix, 0.0f, 0.0f, ratio);
 	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
+	return m_fTotalScale;
+}
+
+float Render::GetZoomRatio()
+{
+	return m_fTotalScale;
 }
 
 void Render::Pan(float fxShift, float fyShift)

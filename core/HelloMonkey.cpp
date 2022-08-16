@@ -482,11 +482,18 @@ void HelloMonkey::Rotate( float fxRotate, float fyRotate )
 	_pRender->Rotate(fxRotate, fyRotate);
 }
 
-void HelloMonkey::Zoom( float ratio )
+float HelloMonkey::Zoom( float ratio )
 {
 	if (!_pRender)
-		return;
-	_pRender->Zoom(ratio);
+		return 0.0f;
+	return _pRender->Zoom(ratio);
+}
+
+float HelloMonkey::GetZoomRatio()
+{
+	if (!_pRender)
+		return 0.0f;
+	return _pRender->GetZoomRatio();
 }
 
 void HelloMonkey::Pan( float fxShift, float fyShift )

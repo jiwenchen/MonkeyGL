@@ -259,7 +259,8 @@ def zoom_vr(
 ):
     width = 512
     height = 512
-    hm.Zoom(delta)
+    print(hm.Zoom(delta))
+    print(hm.GetZoomRatio())
     b64str = hm.GetVRData_pngString(width, height)
 
     return {
