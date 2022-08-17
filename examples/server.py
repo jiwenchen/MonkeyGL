@@ -430,6 +430,8 @@ def browse_mpr_data(
     hm.Browse(delta, mk.PlaneType(plane_type))
     b64str = hm.GetPlaneData_pngString(mk.PlaneType(plane_type))
 
+    print( hm.GetPlaneCurrentIndex(mk.PlaneType(plane_type)), hm.GetPlaneTotalNumber(mk.PlaneType(plane_type)))
+
     return {
         'data': {
             'image': b64str

@@ -149,6 +149,18 @@ public:
         return SetCPRLineVoxel(cprLine);
     }
 
+    virtual int GetPlaneCurrentIndex(PlaneType planeType){
+        int index = -1;
+        GetPlaneIndex(index, planeType);
+        return index;
+    }
+
+    virtual int GetPlaneTotalNumber(PlaneType planeType){
+        int nTotalNum = 0;
+        GetPlaneNumber(nTotalNum, planeType);
+        return nTotalNum;
+    }
+
 };
 
 PYBIND11_MODULE(pyMonkeyGL, m) {
@@ -252,6 +264,8 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("ShowCPRLineInVR", &pyHelloMonkey::ShowCPRLineInVR)
 
         .def("GetZoomRatio", &pyHelloMonkey::GetZoomRatio)
+        .def("GetPlaneCurrentIndex", &pyHelloMonkey::GetPlaneCurrentIndex)
+        .def("GetPlaneTotalNumber", &pyHelloMonkey::GetPlaneTotalNumber)
         .def("GetVolumeArray", &pyHelloMonkey::GetVolumeArray)
         .def("GetVRArray", &pyHelloMonkey::GetVRArray)
         .def("GetVRData_pngString", &pyHelloMonkey::GetVRData_pngString)
