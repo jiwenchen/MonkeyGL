@@ -9,6 +9,7 @@
         height: 384px;
         border: 1px solid #ccc;
         display: inline-block;
+        overflow: hidden;
       }
     </style>
   </head>
@@ -34,13 +35,15 @@
 
   <br>
   MPR:
-  <label><input name="MPR Type" type="radio" id="averageMPR" value="" />Average</label>
-  <label><input name="MPR Type" type="radio" id="mipMPR" value="" />MIP</label>
-  <label><input name="MPR Type" type="radio" id="minipMPR" value="" />MinIP</label>
+  <label><input name="MPR Type" type="radio" id="averageMPR" value="Average" />Average</label>
+  <label><input name="MPR Type" type="radio" id="mipMPR" value="MIP" />MIP</label>
+  <label><input name="MPR Type" type="radio" id="minipMPR" value="MinIP" />MinIP</label>
 
   Thickness:
   <button id="addThickness" type="button" class="btn btn-default">+</button>
   <button id="subThickness" type="button" class="btn btn-default">-</button>
+  &nbsp;
+  <label><input name="MPR Type" type="checkbox" id="crosshairs" checked/>CrosshairsTool</label>
 
   <br>
   CPR:
@@ -60,19 +63,28 @@
     <div class="bm-wrap" id="coronal"></div>
 
   </body>
-  <script src="js/jquery.js"></script>
-  <script src="js/pako.js"></script>
-  <script src="js/zlib.js"></script>
-  <script src="js/png.js"></script>
-  <script src="js/cornerstone.js"></script>
-  <script src="utils.js"></script>
+  <script src="js/libs/jquery.js"></script>
+  <script src="js/libs/pako.js"></script>
+  <script src="js/libs/zlib.js"></script>
+  <script src="js/libs/png.js"></script>
+
+  <script src="js/libs/hammer.js"></script>
+  <script src="js/libs/lodash@4.17.10.js"></script>
+  <script src="js/libs/cornerstoneMath@0.1.6.js"></script>
+  <script src="js/libs/cornerstone@0.12.2.js"></script>
+  <!-- development version, includes helpful console warnings -->
+  <script src="js/libs/cornerstoneTools@0.7.9.js"></script>
+  <script src="js/utils.js"></script>
+  <!-- <script src="js/mock/base64.js"></script> -->
   <script>
+    const href = window.location.href;
+    const apiPrefix =  (href.includes("127.0.0.1") || href.includes("localhost")) ? "http://192.168.6.41:7788": ""
     window.onload = function () {
 
       $(".radio-volume").change((e) => {
         let val = e.target.value;
         let url = `/volumetype`;
-        fetch(url, {
+        fetch(apiPrefix + url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -92,7 +104,7 @@
       $(".radio-line").change((e) => {
         let val = e.target.value;
         let url = `/lineindex`;
-        fetch(url, {
+        fetch(apiPrefix + url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -212,7 +224,7 @@
 
         function getMPR(plane_type){
             let url = `/mprdata?plane_type=` + String(plane_type);
-            fetch(url, { credentials: "same-origin" })
+            fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
                     let cornerstoneMetaData = decodeMPR(buffer);
@@ -228,9 +240,10 @@
                 });
         }
 
-        function browseMPR(plane_type, delta){
-            let url = `/mprbrowse?plane_type=${String(plane_type)}&delta=${delta}`;
-            fetch(url, { credentials: "same-origin" })
+        let browseMPR = _.throttle(_browseMPR, 100);
+        function _browseMPR(plane_type, delta){
+          let url = `/mprbrowse?plane_type=${String(plane_type)}&delta=${delta}`;
+            fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
                     let cornerstoneMetaData = decodeMPR(buffer);
@@ -250,7 +263,7 @@
         function browseOrigin(delta){
             slice = slice + delta;
             let url = `/originbrowse?slice=` + String(slice);
-            fetch(url, { credentials: "same-origin" })
+            fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
                     let cornerstoneMetaData = decodeMPR(buffer);
@@ -260,7 +273,7 @@
 
         function rotateStretchedCRP(angle){
           let url = `/rotatestretchedcpr?angle=` + String(angle);
-          fetch(url, { credentials: "same-origin" })
+          fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
                     let cornerstoneMetaData = decodeMPR(buffer);
@@ -282,7 +295,7 @@
 
         function rotateStraightenedCRP(angle){
           let url = `/rotatestraightenedcpr?angle=` + String(angle);
-          fetch(url, { credentials: "same-origin" })
+          fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
                     let cornerstoneMetaData = decodeMPR(buffer);
@@ -306,7 +319,7 @@
         function updateThickness(delta){
             thickness = thickness + delta;
             let url = `/updatethickness?thickness=` + String(thickness);
-            fetch(url, { credentials: "same-origin" })
+            fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
                     getMPR(0);
@@ -344,7 +357,7 @@
 
         function updateMPRType(mpr_type){
             let url = `/updatemprtype?mpr_type=` + String(mpr_type);
-            fetch(url, { credentials: "same-origin" })
+            fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
                     getMPR(0);
@@ -355,7 +368,7 @@
 
         function panMPR(plane_type, x, y){
           let url = `/panmpr?plane_type=` + String(plane_type) + `&x=` + String(x) + `&y=` + String(y);
-          fetch(url, { credentials: "same-origin" })
+          fetch(apiPrefix + url, { credentials: "same-origin" })
               .then((response) => response.json())
               .then((buffer) => {
                 if (plane_type == 0){
@@ -378,7 +391,7 @@
        * 加载文件跨域 需要启动live server
        */
       function displayVR(url) {
-        fetch(url, { credentials: "same-origin" })
+        fetch(apiPrefix + url, { credentials: "same-origin" })
           .then((response) => response.json())
           .then((result) => {
             if(result.message === "successful"){
@@ -529,6 +542,7 @@
       function showAxial(image) {
         cornerstone.displayImage(element_axial, image);
         cornerstone.updateImage(element_axial, true);
+        initCrosshairs('axial');
       }
       element_axial.addEventListener('mousewheel', function (e) {
         e.preventDefault();
@@ -546,10 +560,11 @@
       function showSagittal(image) {
         cornerstone.displayImage(element_sagittal, image);
         cornerstone.updateImage(element_sagittal, true);
+        initCrosshairs('sagittal');
       }
       element_sagittal.addEventListener('mousewheel', function (e) {
         e.preventDefault();
-        let delta = event.detail || -event.wheelDelta;
+        let delta = e.detail || -e.wheelDelta;
         if (delta > 0){
           browseMPR(1, 1);
         }
@@ -563,6 +578,7 @@
       function showCoronal(image) {
         cornerstone.displayImage(element_coronal, image);
         cornerstone.updateImage(element_coronal, true);
+        initCrosshairs('coronal');
       }
       element_coronal.addEventListener('mousewheel', function (e) {
         e.preventDefault();
@@ -580,13 +596,10 @@
         const mouseButton = e.which;
 
         function mouseMoveHandler(e) {
-            const deltaX = e.pageX - lastX;
-            const deltaY = e.pageY - lastY;
             lastX = e.pageX;
             lastY = e.pageY;
             if (mouseButton === 1) {
             } else if (mouseButton === 2) {
-              console.log(e.offsetX, e.offsetY);
               panMPR(2, e.offsetX, e.offsetY);
             } else if (mouseButton === 3) {
             }
@@ -599,6 +612,25 @@
         document.addEventListener('mouseup', mouseUpHandler);
       });
 
+      window.updateMprImage = function (imageObj) {
+        let metaData = decodeMPR(imageObj);
+        switch (imageObj.plane_type) {
+          case 0:
+            showAxial(metaData);
+            break;
+          case 1:
+            showSagittal(metaData);
+            break;
+          case 2:
+            showCoronal(metaData);
+            break;
+            default:
+              console.log(`imageObj.plane_type error: ${imageObj.plane_type}`)
+        }
+      };
+
     };
   </script>
+
+  <script src="js/mprline.js"></script>
 </html>
