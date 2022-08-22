@@ -550,7 +550,6 @@
         // Turn off image smooth/interpolation if pixelReplication is set in the viewport
         if (enabledElement.viewport.pixelReplication === true) {
           context.imageSmoothingEnabled = false;
-          context.webkitImageSmoothingEnabled = false;
           context.mozImageSmoothingEnabled = false; // Firefox doesn't support imageSmoothingEnabled yet
         } else {
           context.imageSmoothingEnabled = true;
@@ -610,7 +609,6 @@
 
         if (layer.viewport.pixelReplication === true) {
           context.imageSmoothingEnabled = false;
-            context.webkitImageSmoothingEnabled = false;
           context.mozImageSmoothingEnabled = false;
         } else {
           context.imageSmoothingEnabled = true;
