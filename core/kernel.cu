@@ -905,7 +905,7 @@ void cu_renderPlane_MinIP(short* pData, int width, int height, float3 dirH, floa
 	cudaError_t t = cudaMemcpy( pData, d_pMPR, width*height*sizeof(short), cudaMemcpyDeviceToHost );
 }
 
-__global__ void d_renderPlane_Average(short* pData, cudaTextureObject_t volumeText, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum, float3 f3Spacing, cudaExtent volumeSize)
+__global__ void d_renderPlane_Average(short* pData, cudaTextureObject_t volumeText, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float3 fPixelSpacing, bool invertZ, float halfNum, float3 f3Spacing, cudaExtent volumeSize)
 {
 	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
 	const int y = __umul24(blockIdx.y, blockDim.y) + threadIdx.y;
@@ -917,13 +917,12 @@ __global__ void d_renderPlane_Average(short* pData, cudaTextureObject_t volumeTe
 		double fSum = 0;
 		for (float t=-halfNum; t<=halfNum; t+=1)
 		{
-			float fLength = t*fPixelSpacing;
-			float pt_x = ptLeftTop.x + fLength*dirN.x;
-			float pt_y = ptLeftTop.y + fLength*dirN.y;
-			float pt_z = ptLeftTop.z + fLength*dirN.z;
-			float fx = (pt_x + x*fPixelSpacing*dirH.x + y*fPixelSpacing*dirV.x)/(f3Spacing.x*volumeSize.width);
-			float fy = (pt_y + x*fPixelSpacing*dirH.y + y*fPixelSpacing*dirV.y)/(f3Spacing.y*volumeSize.height);
-			float fz = (pt_z + x*fPixelSpacing*dirH.z + y*fPixelSpacing*dirV.z)/(f3Spacing.z*volumeSize.depth);
+			float pt_x = ptLeftTop.x + t*fPixelSpacing.x*dirN.x;
+			float pt_y = ptLeftTop.y + t*fPixelSpacing.y*dirN.y;
+			float pt_z = ptLeftTop.z + t*fPixelSpacing.z*dirN.z;
+			float fx = (pt_x + x*fPixelSpacing.x*dirH.x + y*fPixelSpacing.x*dirV.x)/(f3Spacing.x*volumeSize.width);
+			float fy = (pt_y + x*fPixelSpacing.y*dirH.y + y*fPixelSpacing.y*dirV.y)/(f3Spacing.y*volumeSize.height);
+			float fz = (pt_z + x*fPixelSpacing.z*dirH.z + y*fPixelSpacing.z*dirV.z)/(f3Spacing.z*volumeSize.depth);
 			if (!invertZ)
 				fz = 1.0 - fz;
 
@@ -937,7 +936,7 @@ __global__ void d_renderPlane_Average(short* pData, cudaTextureObject_t volumeTe
 }
 
 extern "C"
-void cu_renderPlane_Average(short* pData, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum)
+void cu_renderPlane_Average(short* pData, int width, int height, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float3 fPixelSpacing, bool invertZ, float halfNum)
 {
 	if (width>nWidth_MPR || height>nHeight_MPR)
 	{

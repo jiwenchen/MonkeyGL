@@ -61,7 +61,7 @@ void cu_renderPlane_MIP(short* pData, int nWidth, int nHeight, float3 dirH, floa
 extern "C"
 void cu_renderPlane_MinIP(short* pData, int nWidth, int nHeight, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum);
 extern "C"
-void cu_renderPlane_Average(short* pData, int nWidth, int nHeight, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float fPixelSpacing, bool invertZ, float halfNum);
+void cu_renderPlane_Average(short* pData, int nWidth, int nHeight, float3 dirH, float3 dirV, float3 dirN, float3 ptLeftTop, float3 fPixelSpacing, bool invertZ, float halfNum);
 
 extern "C"
 void cu_renderCPR(short* pData, int width, int height, double* pPoints, double* pDirs, bool invertZ);
@@ -337,8 +337,22 @@ bool Render::GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nH
 	Point3d ptCenter = m_dataMan.GetCenterPointPlane(dirN);
 	Point3d ptLeftTop = ptCenter - dirH*(0.5*nWidth*fPixelSpacing);
 	ptLeftTop = ptLeftTop - dirV*(0.5*nHeight*fPixelSpacing);
-
-	double fSliceThickness = info.m_fSliceThickness;
+    double fSliceThickness = info.m_fSliceThickness;
+    float3 volSpacing;
+    if( planeType == PlaneAxial)
+    {
+        fPixelSpacing = m_dataMan.GetSpacing(2);
+        volSpacing.x = m_dataMan.GetSpacing(0);
+        volSpacing.y = m_dataMan.GetSpacing(1);
+        volSpacing.z = m_dataMan.GetSpacing(2);
+    }
+    else
+    {
+        fPixelSpacing = m_dataMan.GetMinSpacing();
+        volSpacing.x = fPixelSpacing;
+        volSpacing.y = fPixelSpacing;
+        volSpacing.z = fPixelSpacing;
+    }
 	int nSliceNum = fSliceThickness/fPixelSpacing;
 	nSliceNum = nSliceNum<1 ? 1:nSliceNum;
 	float halfNum = 1.0f*(nSliceNum-1)/2;
@@ -365,7 +379,7 @@ bool Render::GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nH
 	{
 	case MPRTypeAverage:
 		{
-			cu_renderPlane_Average(pData.get(), nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, info.m_fPixelSpacing, m_dataMan.Need2InvertZ(), halfNum);
+			cu_renderPlane_Average(pData.get(), nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, volSpacing, m_dataMan.Need2InvertZ(), halfNum);
 			return true;
 		}
 		break;
@@ -671,13 +685,17 @@ bool Render::GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInf
 		ptLeftTop_cu.x = ptLeftTop[0];
 		ptLeftTop_cu.y = ptLeftTop[1];
 		ptLeftTop_cu.z = ptLeftTop[2];
+        float3 volSpacing;
+        volSpacing.x = m_dataMan.GetSpacing(0);
+        volSpacing.y = m_dataMan.GetSpacing(1);
+        volSpacing.z = m_dataMan.GetSpacing(2);
 
 		short* pData = new short[nWidth*nHeight];
 		switch (batchInfo.m_MPRType)
 		{
 		case MPRTypeAverage:
 			{
-				cu_renderPlane_Average(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, batchInfo.m_fPixelSpacing, m_dataMan.Need2InvertZ(), halfNum);
+				cu_renderPlane_Average(pData, nWidth, nHeight, dirH_cu, dirV_cu, dirN_cu, ptLeftTop_cu, volSpacing, m_dataMan.Need2InvertZ(), halfNum);
 			}
 			break;
 		default:

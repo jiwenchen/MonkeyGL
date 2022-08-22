@@ -62,7 +62,7 @@ bool MPRInfo::GetPlaneInitSize(int& nWidth, int& nHeight, int& nNumber, int dim[
 		{
 			nWidth = dim[0]*spacing[0]/minSpacing;
 			nHeight = dim[1]*spacing[1]/minSpacing;
-			nNumber = dim[2]*spacing[2]/minSpacing;
+			nNumber = dim[2]*spacing[2]/spacing[2];
 			return true;
 		}
 		break;
@@ -320,7 +320,19 @@ bool MPRInfo::GetPlaneIndex( int& index, const PlaneType& planeType )
 	if (!GetPlaneInfo(planeType, info))
 		return false;
 	int nTotalNumber = m_planeInfos[planeType].m_nNumber;
-	double spacing = m_pDataManager->GetMinSpacing();
+	double spacing;
+    if (planeType == PlaneAxial)
+    {
+        spacing = m_pDataManager->GetSpacing(2);
+    }
+    if(planeType == PlaneSagittal)
+    {
+        spacing = m_pDataManager->GetSpacing(1);
+    }
+    if(planeType == PlaneCoronal)
+    {
+        spacing = m_pDataManager->GetSpacing(0);
+    }
 	double distCrossHair2Center = Methods::Distance_Point2Plane(m_ptCrossHair, info.m_dirH, info.m_dirV, m_ptCenter);
 	int nDeltaNum = distCrossHair2Center/spacing;
 	index = nDeltaNum + (nTotalNumber-1)/2;
@@ -334,7 +346,19 @@ void MPRInfo::SetPlaneIndex( int index, PlaneType planeType )
 	PlaneInfo& info = m_planeInfos[planeType];
 	Direction3d dirN = info.GetNormDirection();
 	int nTotalNum = info.m_nNumber;
-	double spacing = m_pDataManager->GetMinSpacing();
+	double spacing;
+    if (planeType == PlaneAxial)
+    {
+        spacing = m_pDataManager->GetSpacing(2);
+    }
+    if(planeType == PlaneSagittal)
+    {
+        spacing = m_pDataManager->GetSpacing(1);
+    }
+    if(planeType == PlaneCoronal)
+    {
+        spacing = m_pDataManager->GetSpacing(0);
+    }
 	double dist2Center = (index - (nTotalNum-1)/2) * spacing;
 	Point3d ptProj = Methods::Projection_Point2Plane(m_ptCrossHair, info.m_dirH, info.m_dirV, m_ptCenter);
 	m_ptCrossHair = ptProj + dirN*dist2Center;
@@ -364,6 +388,20 @@ void MPRInfo::Browse( float fDelta, PlaneType planeType )
 		return;
 	PlaneInfo& info = m_planeInfos[planeType];
 	Direction3d dirN = info.GetNormDirection();
+    float curSpacing;
+    if (planeType == PlaneAxial)
+    {
+        curSpacing = m_pDataManager->GetSpacing(2);
+    }
+    if(planeType == PlaneSagittal)
+    {
+        curSpacing = m_pDataManager->GetSpacing(1);
+    }
+    if(planeType == PlaneCoronal)
+    {
+        curSpacing = m_pDataManager->GetSpacing(0);
+    }
+    fDelta *= curSpacing;
 	m_ptCrossHair = m_ptCrossHair + dirN*fDelta;
 }
 void MPRInfo::PanCrossHair(int nx, int ny, PlaneType planeType)
