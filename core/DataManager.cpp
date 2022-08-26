@@ -225,7 +225,6 @@ void DataManager::SetOrigin(Point3d pt)
 
 void DataManager::Reset()
 {
-	ClearAndReset();
 	m_mprInfo.ResetPlaneInfos();
 }
 
