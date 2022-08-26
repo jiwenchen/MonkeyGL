@@ -456,9 +456,9 @@ void DataManager::Browse( float fDelta, PlaneType planeType )
 {
 	m_mprInfo.Browse(fDelta, planeType);
 }
-void DataManager::PanCrossHair(int nx, int ny, PlaneType planeType)
+void DataManager::PanCrossHair(float fx, float fy, PlaneType planeType)
 {
-	m_mprInfo.PanCrossHair(nx, ny, planeType);
+	m_mprInfo.PanCrossHair(fx, fy, planeType);
 }
 
 void  DataManager::RotateCrossHair( float fAngle, PlaneType planeType )

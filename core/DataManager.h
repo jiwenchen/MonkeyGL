@@ -96,7 +96,7 @@ namespace MonkeyGL {
         void SetPlaneIndex( int index, PlaneType planeType );
         bool GetPlaneRotateMatrix( float* pMatirx, PlaneType planeType );
         void Browse(float fDelta, PlaneType planeType);
-        void PanCrossHair(int nx, int ny, PlaneType planeType);
+        void PanCrossHair(float fx, float fy, PlaneType planeType);
         void RotateCrossHair( float fAngle, PlaneType planeType );
         bool GetCrossHairPoint(double& x, double& y, const PlaneType& planeType);
         bool TransferImage2Voxel(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType);

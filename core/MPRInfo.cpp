@@ -366,10 +366,10 @@ void MPRInfo::Browse( float fDelta, PlaneType planeType )
 	Direction3d dirN = info.GetNormDirection();
 	m_ptCrossHair = m_ptCrossHair + dirN*fDelta;
 }
-void MPRInfo::PanCrossHair(int nx, int ny, PlaneType planeType)
+void MPRInfo::PanCrossHair(float fx, float fy, PlaneType planeType)
 {
 	Point3d ptVoxel;
-	if (!TransferImage2Voxel(ptVoxel, nx, ny, planeType))
+	if (!TransferImage2Voxel(ptVoxel, fx, fy, planeType))
 		return;
 
 	m_ptCrossHair = ptVoxel;

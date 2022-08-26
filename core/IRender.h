@@ -53,7 +53,7 @@ namespace MonkeyGL{
 
         virtual void Browse(float fDelta, PlaneType planeType);
         virtual void SetPlaneIndex(int index, PlaneType planeType);
-        virtual void PanCrossHair(int nx, int ny, PlaneType planeType);
+        virtual void PanCrossHair(float fx, float fy, PlaneType planeType);
         virtual void RotateCrossHair(float fAngle, PlaneType planeType);
         virtual void UpdateThickness(double val);
         virtual void SetThickness(double val, PlaneType planeType);

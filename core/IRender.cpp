@@ -176,9 +176,9 @@ void IRender::SetPlaneIndex( int index, PlaneType planeType )
 	m_dataMan.SetPlaneIndex(index, planeType);
 }
 
-void IRender::PanCrossHair( int nx, int ny, PlaneType planeType )
+void IRender::PanCrossHair( float fx, float fy, PlaneType planeType )
 {
-	m_dataMan.PanCrossHair(nx, ny, planeType);
+	m_dataMan.PanCrossHair(fx, fy, planeType);
 }
 
 void IRender::RotateCrossHair( float fAngle, PlaneType planeType )

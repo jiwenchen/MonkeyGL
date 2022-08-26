@@ -441,7 +441,7 @@ bool Render::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType
 	return true;
 }
 
-void Render::PanCrossHair( int nx, int ny, PlaneType planeType )
+void Render::PanCrossHair( float fx, float fy, PlaneType planeType )
 {
 	if (PlaneVR == planeType)
 	{
@@ -531,7 +531,7 @@ void Render::PanCrossHair( int nx, int ny, PlaneType planeType )
 	}
 	else
 	{
-		m_dataMan.PanCrossHair(nx, ny, planeType);
+		m_dataMan.PanCrossHair(fx, fy, planeType);
 	}
 }
 

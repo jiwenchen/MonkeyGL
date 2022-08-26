@@ -52,7 +52,7 @@ namespace MonkeyGL {
         virtual bool GetPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType);
 
         virtual bool GetCrossHairPoint(double& x, double& y, const PlaneType& planeType);
-        virtual void PanCrossHair(int nx, int ny, PlaneType planeType);
+        virtual void PanCrossHair(float fx, float fy, PlaneType planeType);
 
         virtual bool GetVRData(unsigned char* pVR, int nWidth, int nHeight);
 

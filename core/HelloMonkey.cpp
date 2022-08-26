@@ -552,11 +552,11 @@ void HelloMonkey::Browse( float fDelta, PlaneType planeType )
 	_pRender->Browse(fDelta, planeType);
 }
 
-void HelloMonkey::PanCrossHair( int nx, int ny, PlaneType planeType )
+void HelloMonkey::PanCrossHair( float fx, float fy, PlaneType planeType )
 {
 	if (!_pRender)
 		return;
-	_pRender->PanCrossHair(nx, ny, planeType);
+	_pRender->PanCrossHair(fx, fy, planeType);
 }
 
 bool HelloMonkey::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType )
