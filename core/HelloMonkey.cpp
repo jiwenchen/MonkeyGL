@@ -588,6 +588,19 @@ bool HelloMonkey::GetCrossHairPoint( double& x, double& y, const PlaneType& plan
 	return _pRender->GetCrossHairPoint(x, y, planeType);
 }
 
+Point2d HelloMonkey::GetCrossHairPoint(const PlaneType& planeType)
+{
+	Point2d pt(-1, -1);
+
+	if (!_pRender)
+		return pt;
+	double x = -1, y = -1;
+	if (_pRender->GetCrossHairPoint(x, y, planeType)){
+		pt = Point2d(x, y);
+	}
+	return pt;
+}
+
 bool HelloMonkey::GetDirection( Direction2d& dirH, Direction2d& dirV, const PlaneType& planeType )
 {
 	if (!_pRender)

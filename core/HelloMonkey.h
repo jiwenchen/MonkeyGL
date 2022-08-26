@@ -60,6 +60,7 @@ namespace MonkeyGL {
         virtual std::string GetOriginData_pngString(int slice);
 
         virtual bool GetCrossHairPoint(double& x, double& y, const PlaneType& planeType);
+        virtual Point2d GetCrossHairPoint(const PlaneType& planeType);
         virtual bool TransferImage2Voxel(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType);
         virtual bool GetCrossHairPoint3D(Point3d& pt);
         virtual bool GetDirection(Direction2d& dirH, Direction2d& dirV, const PlaneType& planeType);

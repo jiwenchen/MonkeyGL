@@ -215,9 +215,23 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def(py::init<>())
         .def(py::init<double, double, double>());
 
+    py::class_<Point2d>(m, "Point2d")
+        .def(py::init<>())
+        .def(py::init<double, double>())
+        .def("x", &Point2d::x)
+        .def("y", &Point2d::y)
+        .def("SetX", &Point2d::SetX)
+        .def("SetY", &Point2d::SetY);
+
     py::class_<Point3d>(m, "Point3d")
         .def(py::init<>())
-        .def(py::init<double, double, double>());
+        .def(py::init<double, double, double>())
+        .def("x", &Point3d::x)
+        .def("y", &Point3d::y)
+        .def("z", &Point3d::z)
+        .def("SetX", &Point3d::SetX)
+        .def("SetY", &Point3d::SetY)
+        .def("SetZ", &Point3d::SetZ);
 
     py::class_<pyHelloMonkey>(m, "HelloMonkey")
         .def(py::init<>())
@@ -273,5 +287,6 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("GetVRData_png", &pyHelloMonkey::GetVRData_png)
         .def("SaveVR2Png", &pyHelloMonkey::SaveVR2Png)
         .def("GetPlaneData_pngString", &pyHelloMonkey::GetPlaneData_pngString)
-        .def("GetOriginData_pngString", &pyHelloMonkey::GetOriginData_pngString);
+        .def("GetOriginData_pngString", &pyHelloMonkey::GetOriginData_pngString)
+        .def("GetCrossHairPoint", static_cast<Point2d (pyHelloMonkey::*)(const PlaneType&)>(&pyHelloMonkey::GetCrossHairPoint));
 }
