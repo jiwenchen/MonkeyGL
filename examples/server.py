@@ -218,7 +218,7 @@ def set_line_index(
 
 
 @app.get('/rotatevr')
-def get_vr_data(
+def rotate_vr(
         x_angle: float,
         y_angle: float
 ):
@@ -236,7 +236,7 @@ def get_vr_data(
 
 
 @app.get('/panvr')
-def get_vr_data(
+def pan_vr(
         x_shift: float,
         y_shift: float
 ):
@@ -275,6 +275,36 @@ def reset():
     width = 512
     height = 512
     hm.Reset()
+    b64str = hm.GetVRData_pngString(width, height)
+
+    return {
+        'data': {
+            'image': b64str
+        },
+        'message': 'successful'
+    }
+
+@app.get('/vrdata')
+def get_vr_data():
+    width = 512
+    height = 512
+    b64str = hm.GetVRData_pngString(width, height)
+
+    return {
+        'data': {
+            'image': b64str
+        },
+        'message': 'successful'
+    }
+
+@app.get('/wwwl')
+def set_ww_wl(
+        ww: float,
+        wl: float
+):
+    width = 512
+    height = 512
+    hm.SetVRWWWL(ww, wl)
     b64str = hm.GetVRData_pngString(width, height)
 
     return {

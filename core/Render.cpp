@@ -102,13 +102,14 @@ void Render::Init()
 	Methods::SetSeg(m_pTransposRotateMatrix,3);
 	Methods::SetSeg(m_pTransformMatrix,3);
 	Methods::SetSeg(m_pTransposeTransformMatrix,3);
+	
+	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }
 
 void Render::Reset()
 {
 	IRender::Reset();
 	Init();
-	cu_copyOperatorMatrix( m_pTransformMatrix, m_pTransposeTransformMatrix );
 }
 
 bool Render::SetTransferFunc( std::map<int, RGBA> ctrlPoints )
