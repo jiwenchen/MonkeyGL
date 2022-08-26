@@ -93,7 +93,7 @@
         })
           .then((response) => response.json())
           .then((data) => {
-            rotateVR(0, 0);
+            getvrdata();
             browseOrigin(100);
             getMPR(0);
             getMPR(1);
@@ -130,11 +130,17 @@
         }
       }
 
-      function rotateVR(x_angle, y_angle){
+      function getvrdata(){
           vrRending = true;
-          let url = `/rotatevr?x_angle=` + String(x_angle) + "&y_angle=" + String(y_angle);
+          let url = `/vrdata`;
           displayVR(url);
       }
+
+      function rotateVR(x_angle, y_angle){
+        vrRending = true;
+        let url = `/rotatevr?x_angle=` + String(x_angle) + "&y_angle=" + String(y_angle);
+        displayVR(url);
+    }
 
       function panVRAPI(x_shift, y_shift){
         totalDeltaX += x_shift;
