@@ -629,6 +629,113 @@ __global__ void d_renderMIP(
 	}
 }
 
+__global__ void d_renderSurface(
+	unsigned char* pPixelData,
+	cudaTextureObject_t volumeText,
+	cudaTextureObject_t maskText,
+	int width,
+	int height,
+	float xTranslate,
+	float yTranslate,
+	float scale,
+	float3 f3maxper,
+	float3 f3Spacing,
+	float3 f3Nor,
+	VOI voi,
+	cudaExtent volumeSize,
+	bool invertZ,
+	float4 f4ColorBG
+)
+{
+	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
+	const int y = __umul24(blockIdx.y, blockDim.y) + threadIdx.y;
+
+	if ((x < width) && (y < height) && (x >= 0) && (y >= 0))
+	{
+		uint nIdx = __umul24(y, width) + x;
+
+		float u = 1.0f*(x-width/2.0f-xTranslate)/width;
+		float v = 1.0f*(y-height/2.0f-yTranslate)/height;
+
+		float4 sum = make_float4(0.0f);
+		float fStep = 1.0f/volumeSize.depth;
+		float temp = 0.0f;
+		float3 pos;
+
+		float alphaAcc = 0.0f;
+		float accuLength = 0.0f;
+
+		int nxIdx = 0;
+		int nyIdx = 0;
+		int nzIdx = 0;
+		float fy = 0;
+
+		unsigned char label = 0;
+		float3 alphawwwl = make_float3(0.0f, 0.0f, 0.0f);
+
+		float3 dirLight = make_float3(0.0f, 1.0f, 0.0f);
+		dirLight = normalize(mul(constTransformMatrix, dirLight));
+
+		float3 N;
+		float diffuse = 0;
+
+		while (accuLength < 1.732)
+		{
+			fy = (accuLength-0.866)*scale;
+
+			pos = make_float3(u, fy, v);
+			pos = mul(constTransformMatrix, pos);
+
+			pos.x = pos.x * f3maxper.x + 0.5f;
+			pos.y = pos.y * f3maxper.y + 0.5f;
+			pos.z = pos.z * f3maxper.z + 0.5f;
+			if (invertZ)
+				pos.z = 1.0f - pos.z;
+
+			nxIdx = pos.x * volumeSize.width;
+			nyIdx = pos.y * volumeSize.height;
+			nzIdx = pos.z * volumeSize.depth;
+			if (nxIdx<voi.left || nxIdx>voi.right || nyIdx<voi.posterior || nyIdx>voi.anterior || nzIdx<voi.head || nzIdx>voi.foot)
+			{
+				accuLength += fStep;
+				continue;
+			}
+
+			temp = 32768*tex3D<float>(volumeText, pos.x, pos.y, pos.z);
+			if (temp <= 500){
+				accuLength += fStep;
+				continue;
+			}
+
+			N.x = tex3D<float>(volumeText, pos.x+f3Nor.x, pos.y, pos.z) - tex3D<float>(volumeText, pos.x-f3Nor.x, pos.y, pos.z);
+			N.y = tex3D<float>(volumeText, pos.x, pos.y+f3Nor.y, pos.z) - tex3D<float>(volumeText, pos.x, pos.y-f3Nor.y, pos.z);
+			N.z = tex3D<float>(volumeText, pos.x, pos.y, pos.z+f3Nor.z) - tex3D<float>(volumeText, pos.x, pos.y, pos.z-f3Nor.z);
+			if (invertZ){
+				N.z = -N.z;
+			}
+			N = normalize(N);
+			alphaAcc = dot(N, dirLight);
+			if (alphaAcc > 0){
+				break;
+			}
+			accuLength += fStep;
+		}
+		
+		if (alphaAcc <= 0.0f){
+			sum = f4ColorBG;
+		}
+		else{
+			sum = make_float4(alphaAcc+0.05, 0.0f, 0.0f, 1.0f);
+		}
+
+		unsigned int result = rgbaFloatToInt(sum);
+
+		pPixelData[nIdx*3]	 = result & 0xFF; //R
+		pPixelData[nIdx*3+1] = (result>>8) & 0xFF; //G
+		pPixelData[nIdx*3+2] = (result>>16) & 0xFF; //B
+	}
+}
+
 extern "C"
 void cu_render(unsigned char* pVR, int width, int height, float xTranslate, float yTranslate, float scale, bool invertZ, RGBA colorBG, bool bMIP)
 {
