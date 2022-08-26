@@ -339,6 +339,9 @@ bool DataManager::SetVRWWWL(float fWW, float fWL, unsigned char nLabel)
 	if (nLabel < 0 || nLabel > MAXOBJECTCOUNT){
 		return false;
 	}
+	if (fWW <= 0){
+		fWW = 1.0;
+	}
 	m_objectInfos[nLabel].ww = fWW;
 	m_objectInfos[nLabel].wl = fWL;
 	return true;
