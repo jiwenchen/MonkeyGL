@@ -262,6 +262,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetCPRLineVoxelArray", &pyHelloMonkey::SetCPRLineVoxelArray)
         .def("RotateCPR", &pyHelloMonkey::RotateCPR)
         .def("ShowCPRLineInVR", &pyHelloMonkey::ShowCPRLineInVR)
+        .def("SetVRSize", &pyHelloMonkey::SetVRSize)
 
         .def("GetZoomRatio", &pyHelloMonkey::GetZoomRatio)
         .def("GetPlaneCurrentIndex", &pyHelloMonkey::GetPlaneCurrentIndex)

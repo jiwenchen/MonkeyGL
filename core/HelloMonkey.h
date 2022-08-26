@@ -68,8 +68,9 @@ namespace MonkeyGL {
 
         virtual double GetPixelSpacing(PlaneType planeType);
 
+        virtual bool SetVRSize(int nWidth, int nHeight);
         virtual bool GetVRData(unsigned char* pVR, int nWidth, int nHeight);
-        virtual std::string GetVRData_pngString(int nWidth, int nHeight);
+        virtual std::string GetVRData_pngString();
         virtual std::vector<uint8_t> GetVRData_png(int nWidth, int nHeight);
         virtual void SaveVR2Png(const char* szFile, int nWidth, int nHeight);
 
@@ -124,5 +125,7 @@ namespace MonkeyGL {
     private:
         bool m_bShowCPRLineInVR;
         std::shared_ptr<IRender> _pRender;
+        int m_nWidth_VR;
+        int m_nHeight_VR;
     };
 }

@@ -423,7 +423,7 @@ __global__ void d_render(
 	{
 		uint nIdx = __umul24(y, width) + x;
 
-		float u = 1.0f*(x-width/2.0f-xTranslate)/width;
+		float u = 1.0f*(x-width/2.0f-xTranslate)/height;
 		float v = 1.0f*(y-height/2.0f-yTranslate)/height;
 
 		float4 sum = make_float4(0.0f);
@@ -554,7 +554,7 @@ __global__ void d_renderMIP(
 	{
 		uint nIdx = __umul24(y, width) + x;
 
-		float u = 1.0f*(x-width/2.0f-xTranslate)/width;
+		float u = 1.0f*(x-width/2.0f-xTranslate)/height;
 		float v = 1.0f*(y-height/2.0f-yTranslate)/height;
 
 		float4 sum = make_float4(0.0f);
@@ -654,7 +654,7 @@ __global__ void d_renderSurface(
 	{
 		uint nIdx = __umul24(y, width) + x;
 
-		float u = 1.0f*(x-width/2.0f-xTranslate)/width;
+		float u = 1.0f*(x-width/2.0f-xTranslate)/height;
 		float v = 1.0f*(y-height/2.0f-yTranslate)/height;
 
 		float4 sum = make_float4(0.0f);
