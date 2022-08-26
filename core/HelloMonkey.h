@@ -31,6 +31,8 @@
 
 namespace MonkeyGL {
 
+    class IRender;
+
     class HelloMonkey
     {
     public:
@@ -121,5 +123,6 @@ namespace MonkeyGL {
 
     private:
         bool m_bShowCPRLineInVR;
+        std::shared_ptr<IRender> _pRender;
     };
 }

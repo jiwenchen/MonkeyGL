@@ -31,8 +31,6 @@
 
 using namespace MonkeyGL;
 
-std::shared_ptr<IRender> _pRender;
-
 HelloMonkey::HelloMonkey()
 {
 	Logger::Init();
