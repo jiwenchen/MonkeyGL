@@ -152,13 +152,29 @@ def test_load_nrrd():
 
     # hm.SaveVR2Png(f'{file_path}/a.png', 512, 512)
 
-    vr = hm.GetVRArray(768, 768)
-    b64str = hm.GetVRData_pngString(512, 512)
+    # vr = hm.GetVRArray(768, 768)
+    # b64str = hm.GetVRData_pngString(512, 512)
+
+    hm.GetPlaneData_pngString(mk.PlaneAxial)
+
+
+def test_instance():
+    hm1 = mk.HelloMonkey()
+    hm1.LoadVolumeFile(f'{file_path}/cardiac.mhd')
+    hm1.Zoom(0.9)
+    print(hm1.GetZoomRatio())
+    hm2 = mk.HelloMonkey()
+    hm2.LoadVolumeFile(f'{file_path}/body.mhd')
+    hm2.Zoom(1.5)
+    print(hm1.GetZoomRatio())
+    print(hm2.GetZoomRatio())
+    
 
 
 if __name__ == "__main__":
     # test_objs()
     # test_set_data()
-    test_load_nrrd()
+    # test_load_nrrd()
+    test_instance()
 
 

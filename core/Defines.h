@@ -124,7 +124,18 @@ namespace MonkeyGL{
             ww = w;
             wl = l;
         }
+        void Print(){
+            cout << "alpha[" << alpha << "], ww[" << ww << "], wl[" << wl << "]" << endl;
+        }
     };
+
+    typedef struct {
+        AlphaAndWWWL m[MAXOBJECTCOUNT+1];
+
+        AlphaAndWWWL& operator[](int idx){
+            return m[idx];
+        };
+    } AlphaAndWWWLInfo;
 
     enum Orientation
     {

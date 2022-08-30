@@ -55,6 +55,7 @@ set(SRC_LIST
   ./core/Base64.hpp
   ./core/BatchInfo.cpp
   ./core/CPRInfo.cpp
+  ./core/CuDataInfo.cpp
   ./core/DataManager.cpp
   ./core/DeviceInfo.cpp
   ./core/Defines.cpp
@@ -72,6 +73,7 @@ set(SRC_LIST
   ./core/StopWatch.cpp
   ./core/TransferFunction.cpp
   ./core/VolumeInfo.cpp
+  ./core/CuDataInfo.cu
   ./core/kernel.cu
   ./core/test.cu
 )

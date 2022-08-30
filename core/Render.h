@@ -26,6 +26,7 @@
 #include "VolumeInfo.h"
 #include "Methods.h"
 #include "IRender.h"
+#include "CuDataInfo.h"
 
 namespace MonkeyGL {
 
@@ -91,14 +92,30 @@ namespace MonkeyGL {
 
     private:
         void Init();
-        void CopyTransferFunc2Device();
-        void CopyAlphaWWWL2Device();
+        void UpdateTransferFunctions();
+        void UpdateAlphaWWWL();
         void NormalizeVOI();
 
         bool GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType);
         bool GetCPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType);
 
         void testcuda();
+
+        void InitCommon(float fxSpacing, float fySpacing, float fzSpacing, cudaExtent volumeSize){
+            m_f3Spacing.x = fxSpacing;
+            m_f3Spacing.y = fySpacing;
+            m_f3Spacing.z = fzSpacing;
+            m_f3SpacingVoxel.x = 1.0f / volumeSize.width;
+            m_f3SpacingVoxel.y = 1.0f / volumeSize.height;
+            m_f3SpacingVoxel.z = 1.0f / volumeSize.depth;
+
+            float fMaxSpacing = max(fxSpacing, max(fySpacing, fzSpacing));	
+
+            float fMaxLen = max(volumeSize.width*fxSpacing, max(volumeSize.height*fySpacing, volumeSize.depth*fzSpacing));
+            m_f3maxLenSpacing.x = 1.0f*fMaxLen/(volumeSize.width*fxSpacing);
+            m_f3maxLenSpacing.y = 1.0f*fMaxLen/(volumeSize.height*fySpacing);
+            m_f3maxLenSpacing.z = 1.0f*fMaxLen/(volumeSize.depth*fzSpacing);
+        }
 
     private:
         float m_fVOI_xStart;
@@ -115,11 +132,16 @@ namespace MonkeyGL {
         float m_fTotalYTranslate;
         float m_fTotalScale;
 
-        AlphaAndWWWL m_AlphaAndWWWL[MAXOBJECTCOUNT+1];
+        AlphaAndWWWLInfo m_AlphaAndWWWLInfo;
         float m_pRotateMatrix[9];
         float m_pTransposRotateMatrix[9];
         float m_pTransformMatrix[9];
         float m_pTransposeTransformMatrix[9];
+
+        CuDataInfo m_cuDataInfo;
+        float3 m_f3SpacingVoxel;
+        float3 m_f3Spacing;
+        float3 m_f3maxLenSpacing;
     };
 }
 
