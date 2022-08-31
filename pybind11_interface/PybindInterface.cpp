@@ -202,6 +202,13 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .value("MPRTypeMinIP", MPRType::MPRTypeMinIP)
         .export_values();
 
+    py::enum_<RenderType>(m, "RenderType")
+        .value("RenderTypeNotDefined", RenderType::RenderTypeNotDefined)
+        .value("RenderTypeVR", RenderType::RenderTypeVR)
+        .value("RenderTypeMIP", RenderType::RenderTypeMIP)
+        .value("RenderTypeSurface", RenderType::RenderTypeSurface)
+        .export_values();
+
     py::class_<DeviceInfo>(m, "DeviceInfo")
         .def(py::init<>())
         .def("GetCount", &DeviceInfo::GetCount);
@@ -262,8 +269,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetVRWWWL", static_cast<bool (pyHelloMonkey::*)(float, float, unsigned char)>(&pyHelloMonkey::SetVRWWWL))
         .def("SetObjectAlpha", static_cast<bool (pyHelloMonkey::*)(float)>(&pyHelloMonkey::SetObjectAlpha))
         .def("SetObjectAlpha", static_cast<bool (pyHelloMonkey::*)(float, unsigned char)>(&pyHelloMonkey::SetObjectAlpha))
-        .def("EnableVR", &pyHelloMonkey::EnableVR)
-        .def("EnableMIP", &pyHelloMonkey::EnableMIP)
+        .def("SetRenderType", &pyHelloMonkey::SetRenderType)
         .def("Rotate", &pyHelloMonkey::Rotate)
         .def("Pan", &pyHelloMonkey::Pan)
         .def("Zoom", &pyHelloMonkey::Zoom)

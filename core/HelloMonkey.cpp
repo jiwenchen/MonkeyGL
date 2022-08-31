@@ -497,18 +497,11 @@ void HelloMonkey::Foot()
 	_pRender->Foot();
 }
 
-void HelloMonkey::EnableVR()
+void HelloMonkey::SetRenderType(RenderType type)
 {
 	if (!_pRender)
 		return;
-	_pRender->EnableVR();
-}
-
-void HelloMonkey::EnableMIP()
-{
-	if (!_pRender)
-		return;
-	_pRender->EnableMIP();
+	_pRender->SetRenderType(type);
 }
 
 void HelloMonkey::Rotate( float fxRotate, float fyRotate )

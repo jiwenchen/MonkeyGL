@@ -101,14 +101,6 @@ namespace MonkeyGL{
         }
     };
 
-    struct Lightparams{
-        float ka;
-        float ks;
-        float kd;
-        float lightColor[4];
-        float globalAmbient[4];
-    };
-
     struct AlphaAndWWWL{
         float alpha;
         float ww;
@@ -209,6 +201,14 @@ namespace MonkeyGL{
 		MPRTypeMIP,
 		MPRTypeMinIP
 	};
+
+    enum RenderType
+    {
+        RenderTypeNotDefined = -1,
+        RenderTypeVR,
+        RenderTypeMIP,
+        RenderTypeSurface
+    };
 
     enum LogLevel
     {

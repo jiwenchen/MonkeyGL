@@ -330,14 +330,11 @@ def savetf():
         'message': 'successful'
     }
 
-@app.get('/switchvrmip')
-def switchvrmip(
-    vrmip: bool
+@app.get('/setrendertype')
+def set_render_type(
+    type: int
 ):
-    if vrmip:
-        hm.EnableVR()
-    else:
-        hm.EnableMIP()
+    hm.SetRenderType(mk.RenderType(type))
     b64str = hm.GetVRData_pngString()
 
     return {

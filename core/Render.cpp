@@ -49,7 +49,7 @@ void cu_render(
 	bool invertZ,
 	VOI m_voi, 
 	RGBA colorBG,
-	bool bMIP
+	RenderType type
 );
 
 extern "C"
@@ -126,7 +126,7 @@ cudaExtent m_VolumeSize;
 
 Render::Render(void)
 {
-	m_bRenderMIP = false;
+	m_renderType = RenderTypeVR;
 	Init();
 
 	// testcuda();
@@ -710,7 +710,7 @@ bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 		m_dataMan.Need2InvertZ(),
 		m_voi_Normalize, 
 		m_dataMan.GetColorBackground(), 
-		m_bRenderMIP
+		m_renderType
 	);
 
 	return true;

@@ -69,11 +69,8 @@ namespace MonkeyGL {
         virtual void Head();
         virtual void Foot();
 
-        virtual void EnableVR(){
-            m_bRenderMIP = false;
-        }
-        virtual void EnableMIP(){
-            m_bRenderMIP = true;
+        virtual void SetRenderType(RenderType type){
+            m_renderType = type;
         }
         virtual void Rotate(float fxRotate, float fyRotate);
         virtual float Zoom(float ratio);
@@ -126,7 +123,7 @@ namespace MonkeyGL {
         float m_fVOI_zEnd;
         VOI m_voi_Normalize;
 
-        bool m_bRenderMIP;
+        RenderType m_renderType;
 
         float m_fTotalXTranslate;
         float m_fTotalYTranslate;

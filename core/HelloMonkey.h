@@ -90,8 +90,7 @@ namespace MonkeyGL {
         virtual void Head();
         virtual void Foot();
 
-        virtual void EnableVR();
-        virtual void EnableMIP();
+        virtual void SetRenderType(RenderType type);
         virtual void Rotate(float fxRotate, float fyRotate);
         virtual float Zoom(float ratio);
         virtual float GetZoomRatio();
@@ -125,8 +124,8 @@ namespace MonkeyGL {
 
     private:
         bool m_bShowCPRLineInVR;
-        std::shared_ptr<IRender> _pRender;
         int m_nWidth_VR;
         int m_nHeight_VR;
+        std::shared_ptr<IRender> _pRender;
     };
 }

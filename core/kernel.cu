@@ -365,21 +365,21 @@ __global__ void d_renderMIP(
 
 __global__ void d_renderSurface(
 	unsigned char* pPixelData,
-	cudaTextureObject_t volumeText,
-	cudaTextureObject_t maskText,
 	int width,
 	int height,
-	float xTranslate,
-	float yTranslate,
-	float scale,
+	cudaTextureObject_t volumeTexture,
+	cudaExtent volumeSize,
+	cudaTextureObject_t maskTexture,
 	float3 f3maxLenSpacing,
 	float3 f3Spacing,
 	float3 f3SpacingVoxel,
-	VOI voi,
-	cudaExtent volumeSize,
+	float xTranslate,
+	float yTranslate,
+	float scale,
+	float3x3 transformMatrix,
 	bool invertZ,
-	float4 f4ColorBG,
-	float3x3 transformMatrix
+	VOI voi,
+	float4 f4ColorBG
 )
 {
 	const int x = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
@@ -432,15 +432,15 @@ __global__ void d_renderSurface(
 				continue;
 			}
 
-			temp = 32768*tex3D<float>(volumeText, pos.x, pos.y, pos.z);
+			temp = 32768*tex3D<float>(volumeTexture, pos.x, pos.y, pos.z);
 			if (temp <= 500){
 				accuLength += fStep;
 				continue;
 			}
 
-			N.x = tex3D<float>(volumeText, pos.x+f3SpacingVoxel.x, pos.y, pos.z) - tex3D<float>(volumeText, pos.x-f3SpacingVoxel.x, pos.y, pos.z);
-			N.y = tex3D<float>(volumeText, pos.x, pos.y+f3SpacingVoxel.y, pos.z) - tex3D<float>(volumeText, pos.x, pos.y-f3SpacingVoxel.y, pos.z);
-			N.z = tex3D<float>(volumeText, pos.x, pos.y, pos.z+f3SpacingVoxel.z) - tex3D<float>(volumeText, pos.x, pos.y, pos.z-f3SpacingVoxel.z);
+			N.x = tex3D<float>(volumeTexture, pos.x+f3SpacingVoxel.x, pos.y, pos.z) - tex3D<float>(volumeTexture, pos.x-f3SpacingVoxel.x, pos.y, pos.z);
+			N.y = tex3D<float>(volumeTexture, pos.x, pos.y+f3SpacingVoxel.y, pos.z) - tex3D<float>(volumeTexture, pos.x, pos.y-f3SpacingVoxel.y, pos.z);
+			N.z = tex3D<float>(volumeTexture, pos.x, pos.y, pos.z+f3SpacingVoxel.z) - tex3D<float>(volumeTexture, pos.x, pos.y, pos.z-f3SpacingVoxel.z);
 			if (invertZ){
 				N.z = -N.z;
 			}
@@ -487,7 +487,7 @@ void cu_render(
 	bool invertZ,
 	VOI voi, 
 	RGBA colorBG,
-	bool bMIP
+	RenderType type
 )
 {
 	unsigned char* d_pVR = 0;
@@ -498,7 +498,29 @@ void cu_render(
 
 	float4 clrBG = make_float4(colorBG.red, colorBG.green, colorBG.blue, colorBG.alpha);
 
-	if (bMIP){
+	if (RenderTypeVR == type){
+		d_render<<<gridSize, blockSize>>>(
+			d_pVR,
+			width,
+			height,
+			volumeTexture,
+			volumeSize,
+			maskTexture,
+			transferFuncTextures,
+			alphaAndWWWLInfo,
+			f3maxLenSpacing,
+			f3Spacing,
+			f3SpacingVoxel,
+			xTranslate,
+			yTranslate,
+			scale,
+			transformMatrix,
+			invertZ,
+			voi,
+			clrBG
+		);
+	}
+	else if (RenderTypeMIP == type){
 		d_renderMIP<<<gridSize, blockSize>>>(
 			d_pVR,
 			width,
@@ -519,16 +541,14 @@ void cu_render(
 			clrBG
 		);
 	}
-	else{
-		d_render<<<gridSize, blockSize>>>(
+	else if (RenderTypeSurface == type){
+		d_renderSurface<<<gridSize, blockSize>>>(
 			d_pVR,
 			width,
 			height,
 			volumeTexture,
 			volumeSize,
 			maskTexture,
-			transferFuncTextures,
-			alphaAndWWWLInfo,
 			f3maxLenSpacing,
 			f3Spacing,
 			f3SpacingVoxel,
