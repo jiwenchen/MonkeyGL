@@ -405,14 +405,10 @@ __global__ void d_renderSurface(
 		int nzIdx = 0;
 		float fy = 0;
 
-		unsigned char label = 0;
-		float3 alphawwwl = make_float3(0.0f, 0.0f, 0.0f);
-
 		float3 dirLight = make_float3(0.0f, 1.0f, 0.0f);
 		dirLight = normalize(mul(transformMatrix, dirLight));
 
 		float3 N;
-		float diffuse = 0;
 
 		while (accuLength < 1.732)
 		{
