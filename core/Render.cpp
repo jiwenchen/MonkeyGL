@@ -122,8 +122,6 @@ bool cu_set_1d( float* h_volumeData, int nLen, unsigned char nLabel );
 extern "C" 
 void cu_test_1d( int nLen,  unsigned char nLabel );
 
-cudaExtent m_VolumeSize;
-
 Render::Render(void)
 {
 	m_renderType = RenderTypeVR;

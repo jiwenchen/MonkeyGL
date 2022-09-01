@@ -139,6 +139,7 @@ namespace MonkeyGL {
         float3 m_f3SpacingVoxel;
         float3 m_f3Spacing;
         float3 m_f3maxLenSpacing;
+        cudaExtent m_VolumeSize;
     };
 }
 
