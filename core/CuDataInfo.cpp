@@ -34,9 +34,12 @@ bool cu_setTransferFunc( float* pTransferFunc, int nLenTransferFunc, cudaArray*&
 CuDataInfo::CuDataInfo()
 {
     m_d_volumeArray = 0;
+	m_h_volumeTexture = 0;
     m_d_maskArray = 0;
+	m_h_maskTexture = 0;
     for (int i=0; i<MAXOBJECTCOUNT; i++){
 		m_d_transferFuncArrays[i] = 0;
+		m_h_transferFuncTextures[i] = 0;
 	}
 }
 
@@ -46,17 +49,20 @@ CuDataInfo::~CuDataInfo()
 	{
 		checkCudaErrors(cudaFreeArray(m_d_volumeArray));
 		m_d_volumeArray = 0;
+		m_h_volumeTexture = 0;
 	}
 	if (m_d_maskArray != 0)
 	{
 		checkCudaErrors(cudaFreeArray(m_d_maskArray));
 		m_d_maskArray = 0;
+		m_h_maskTexture = 0;
 	}
     for (int i=0; i<MAXOBJECTCOUNT; i++){
 		if (m_d_transferFuncArrays[i] != 0)
 		{
 			checkCudaErrors(cudaFreeArray(m_d_transferFuncArrays[i]));
 			m_d_transferFuncArrays[i] = 0;
+			m_h_transferFuncTextures[i] = 0;
 		}
 	}
 }

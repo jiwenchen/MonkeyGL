@@ -159,15 +159,43 @@ def test_load_nrrd():
 
 
 def test_instance():
+
+    # info = mk.DeviceInfo()
+
+    tf = {}
+    tf[0] = mk.RGBA(0.8, 0, 0, 0)
+    tf[10] = mk.RGBA(0.8, 0, 0, 0.3)
+    tf[40] = mk.RGBA(0.8, 0.8, 0, 0)
+    tf[99] = mk.RGBA(1, 0.8, 1, 1)
+    ww = 500
+    wl = 250
+
     hm1 = mk.HelloMonkey()
     hm1.LoadVolumeFile(f'{file_path}/cardiac.mhd')
+    hm1.SetVRWWWL(ww, wl)
+    hm1.SetTransferFunc(tf)
+
     hm1.Zoom(0.9)
     print(hm1.GetZoomRatio())
+
     hm2 = mk.HelloMonkey()
     hm2.LoadVolumeFile(f'{file_path}/body.mhd')
+    hm2.SetVRWWWL(ww, wl)
+    hm2.SetTransferFunc(tf)
+
     hm2.Zoom(1.5)
+
     print(hm1.GetZoomRatio())
     print(hm2.GetZoomRatio())
+
+    for i in range(100):
+        b64str = hm1.GetVRData_pngString()
+        b64str = hm2.GetVRData_pngString()
+
+    hm1 = {}
+    hm2 = {}
+
+    pass
     
 
 
@@ -176,5 +204,9 @@ if __name__ == "__main__":
     # test_set_data()
     # test_load_nrrd()
     test_instance()
+
+    # for i in range(100):
+    #     time.sleep(1)
+    # pass
 
 
