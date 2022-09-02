@@ -216,9 +216,9 @@ void IRender::SetThickness(double val, PlaneType planeType)
 	m_dataMan.SetThickness(val, planeType);
 }
 
-bool IRender::GetThickness(double& val, PlaneType planeType)
+double IRender::GetThickness(PlaneType planeType)
 {
-	return m_dataMan.GetThickness(val, planeType);
+	return m_dataMan.GetThickness(planeType);
 }
 
 void IRender::SetMPRType(MPRType type)

@@ -54,7 +54,7 @@ def init_data():
 def init_server():
     uid = str(uuid.uuid4())
     monkeys[uid] = mk.HelloMonkey()
-    monkeys[uid].SetLogLevel(mk.LogLevelWarn)
+    # monkeys[uid].SetLogLevel(mk.LogLevelWarn)
     return {
         "uid": uid,
         'message': 'successful'
@@ -547,6 +547,19 @@ def update_thickness(
 ):
     hm = get_monkey_instance(uid)
     hm.UpdateThickness(thickness)
+
+    return {
+        'message': 'successful'
+    }
+
+@app.get('/setthickness')
+def set_thickness(
+        uid: str,
+        plane_type: int,
+        thickness: float
+):
+    hm = get_monkey_instance(uid)
+    hm.SetThickness(thickness, mk.PlaneType(plane_type))
 
     return {
         'message': 'successful'

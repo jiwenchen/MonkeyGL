@@ -416,9 +416,9 @@ void DataManager::SetThickness(double val, PlaneType planeType)
 	m_mprInfo.SetThickness(val, planeType);
 }
 
-bool DataManager::GetThickness(double& val, PlaneType planeType)
+double DataManager::GetThickness(PlaneType planeType)
 {
-	return m_mprInfo.GetThickness(val, planeType);
+	return m_mprInfo.GetThickness(planeType);
 }
 
 double DataManager::GetPixelSpacing( PlaneType planeType )

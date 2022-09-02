@@ -57,7 +57,7 @@ namespace MonkeyGL{
         virtual void RotateCrossHair(float fAngle, PlaneType planeType);
         virtual void UpdateThickness(double val);
         virtual void SetThickness(double val, PlaneType planeType);
-        virtual bool GetThickness(double& val, PlaneType planeType);
+        virtual double GetThickness(PlaneType planeType);
         virtual void SetMPRType(MPRType type);
 
         virtual bool TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeight, Point3d ptVoxel) = 0;

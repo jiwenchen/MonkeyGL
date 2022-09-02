@@ -274,6 +274,8 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("Pan", &pyHelloMonkey::Pan)
         .def("Zoom", &pyHelloMonkey::Zoom)
         .def("UpdateThickness", &pyHelloMonkey::UpdateThickness)
+        .def("SetThickness", &pyHelloMonkey::SetThickness)
+        .def("GetThickness", &pyHelloMonkey::GetThickness)
         .def("SetMPRType", &pyHelloMonkey::SetMPRType)
         .def("Browse", &pyHelloMonkey::Browse)
         .def("PanCrossHair", &pyHelloMonkey::PanCrossHair)

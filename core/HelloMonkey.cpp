@@ -664,11 +664,11 @@ void HelloMonkey::SetThickness(double val, PlaneType planeType)
 	return _pRender->SetThickness(val, planeType);
 }
 
-bool HelloMonkey::GetThickness(double& val, PlaneType planeType)
+double HelloMonkey::GetThickness(PlaneType planeType)
 {
 	if (!_pRender)
 		return false;
-	return _pRender->GetThickness(val, planeType);
+	return _pRender->GetThickness(planeType);
 }
 
 void HelloMonkey::SetMPRType( MPRType type )

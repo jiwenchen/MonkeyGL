@@ -366,7 +366,7 @@
         let thickness = 1.0;
         function updateThickness(delta){
             thickness = thickness + delta;
-            let url = `/updatethickness?thickness=` + String(thickness);
+            let url = `/updatethickness?uid=${uid}&thickness=` + String(thickness);
             fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {

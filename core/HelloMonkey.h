@@ -113,7 +113,7 @@ namespace MonkeyGL {
 
         virtual void UpdateThickness(double val);
         virtual void SetThickness(double val, PlaneType planeType);
-        virtual bool GetThickness(double& val, PlaneType planeType);
+        virtual double GetThickness(PlaneType planeType);
         virtual void SetMPRType(MPRType type);
 
         // cpr

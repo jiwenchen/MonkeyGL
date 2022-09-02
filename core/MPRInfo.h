@@ -45,7 +45,7 @@ namespace MonkeyGL
         bool GetPlaneInfo(PlaneType planeType, PlaneInfo& info);
         void UpdateThickness(double val);
         void SetThickness(double val, PlaneType planeType);
-        bool GetThickness(double& val, PlaneType planeType);
+        double GetThickness(PlaneType planeType);
         double GetPixelSpacing(PlaneType planeType);
         bool GetPlaneSize(int& nWidth, int& nHeight, const PlaneType& planeType);
         bool GetPlaneNumber(int& nNumber, const PlaneType& planeType);

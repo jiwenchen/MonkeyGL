@@ -849,6 +849,9 @@ function updatePosition(eventData) {
     // console.log("todo: updatePosition: update other pane image and line", eventData)
     let mprItem = {};
     let {changeType, element, thicknessDistance, centerCircle, horizontalLine} = eventData;
+
+    console.log(`points: [${horizontalLine.firstStartPoint.x}, ${horizontalLine.firstStartPoint.y}], [${horizontalLine.firstEndPoint.x}, ${horizontalLine.firstEndPoint.y}], `);
+
     let angle = getSlopeAngle(horizontalLine.firstStartPoint, horizontalLine.firstEndPoint)
     mprItem["plane_name"] = element.id;
     mprItem["angle"] = angle;
@@ -876,7 +879,6 @@ function updatePosition(eventData) {
             mprItem["angle"] = angle
         }
     }
-    console.log(`change type: ${changeType}`);
     mprItem["change_type"] = changeType;
     handleCenterLine(mprItem)
 }

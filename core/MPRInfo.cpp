@@ -278,12 +278,11 @@ void MPRInfo::SetThickness(double val, PlaneType planeType)
 	m_planeInfos[planeType].m_fSliceThickness = val;
 }
 
-bool MPRInfo::GetThickness(double& val, PlaneType planeType)
+double MPRInfo::GetThickness(PlaneType planeType)
 {
 	if (m_planeInfos.find(planeType) == m_planeInfos.end())
-		return false;
-	val = m_planeInfos[planeType].m_fSliceThickness;
-	return true;
+		return -1.0;
+	return m_planeInfos[planeType].m_fSliceThickness;
 }
 
 double MPRInfo::GetPixelSpacing( PlaneType planeType )
