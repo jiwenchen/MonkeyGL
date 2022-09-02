@@ -277,6 +277,14 @@
                     else if (2 == plane_type){
                         showCoronal(cornerstoneMetaData);
                     }
+                    const result = [
+                      {
+                          "plane_type": plane_type,
+                          "crosshair": {x: buffer.data.x, y: buffer.data.y},
+                          "rotate_angle": 0
+                      }
+                    ];
+                    handleCenterLineResult(result) 
                 });
         }
 
@@ -312,7 +320,7 @@
         }
 
         function rotateStretchedCRP(angle){
-          let url = `/rotatestretchedcpr?angle=` + String(angle);
+          let url = `/rotatestretchedcpr?uid=${uid}&angle=` + String(angle);
           fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -334,7 +342,7 @@
         }
 
         function rotateStraightenedCRP(angle){
-          let url = `/rotatestraightenedcpr?angle=` + String(angle);
+          let url = `/rotatestraightenedcpr?uid=${uid}&angle=` + String(angle);
           fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -652,21 +660,8 @@
         document.addEventListener('mouseup', mouseUpHandler);
       });
 
-      window.updateMprImage = function (imageObj) {
-        let metaData = decodeMPR(imageObj);
-        switch (imageObj.plane_type) {
-          case 0:
-            showAxial(metaData);
-            break;
-          case 1:
-            showSagittal(metaData);
-            break;
-          case 2:
-            showCoronal(metaData);
-            break;
-            default:
-              console.log(`imageObj.plane_type error: ${imageObj.plane_type}`)
-        }
+      window.updateMprImage = function (plane_type) {
+        getMPR(plane_type)
       };
 
     };

@@ -1,4 +1,4 @@
-const TYPES = ['axial', 'coronal', 'sagittal'];
+const TYPES = ['axial', 'sagittal', 'coronal'];
 let MPR_ELEMENTS = [];
 let initStatus = {};
 function initCrosshairs(type) {
@@ -873,8 +873,11 @@ function updatePosition(eventData) {
             let lastPt = Object.assign({}, eventData[changeType].lastPt);
             mprItem["start_pt"] = [startPt.x, startPt.y]; // [x, y]
             mprItem["end_pt"] = [lastPt.x, lastPt.y]; // [x, y]
+            mprItem["angle"] = angle
         }
     }
+    console.log(`change type: ${changeType}`);
+    mprItem["change_type"] = changeType;
     handleCenterLine(mprItem)
 }
 
@@ -883,26 +886,27 @@ function handleCenterLine(mprItem) {
     if (plane_type === -1) {
         console.log("plane_name error... plane_name: ", mprItem.plane_name)
     }
-    let url = `/mprbrowse?uid=${uid}&plane_type=${plane_type}&delta=1`;
+    let url = '';
+    if ("centerCircle" == mprItem.change_type){
+        const x = mprItem.crosshair[0];
+        const y = mprItem.crosshair[1];
+        url = `/panmpr?uid=${uid}&plane_type=${plane_type}&x=${x}&y=${y}`;
+    }
+    else if ("verticalLine" == mprItem.change_type || "horizontalLine" == mprItem.change_type){
+        start_pt = mprItem.start_pt;
+        end_pt = mprItem.end_pt;
+        angle = mprItem.angle
+        console.log(`angle: ${angle}`)
+        url = `/rotatech?uid=${uid}&plane_type=${plane_type}&angle=${angle}`;
+    }
     // 1. request after position change
     fetch(apiPrefix + url, {credentials: "same-origin"})
         .then((response) => response.json())
         .then((buffer) => {
-            const result = [
-                {
-                    "plane_type": 1,
-                    "crosshair": {x: 300, y: 100},
-                    "rotate_angle": -45,
-                    "data": window.base_sagittal,
-                },
-                {
-                    "plane_type": 2,
-                    "crosshair": {x: 200, y: 150},
-                    "rotate_angle": 45,
-                    "data": window.base_coronal,
-                }
-            ];
-            handleCenterLineResult(result)
+            const list = [0,1,2].filter(item => item !=plane_type);
+            list.forEach(item => {
+                updateMprImage(item);    
+            })
         });
 }
 
@@ -923,7 +927,7 @@ function handleCenterLineResult(result) {
         return;
     }
     result.forEach(item => {
-            this.updateMprImage(item);
+            // this.updateMprImage(item);
             // this.updateLine()
             // 2. async line
             setOperaterLinePosByElement(item, MPR_ELEMENTS[item.plane_type], 'centerCircle')

@@ -54,6 +54,7 @@ def init_data():
 def init_server():
     uid = str(uuid.uuid4())
     monkeys[uid] = mk.HelloMonkey()
+    monkeys[uid].SetLogLevel(mk.LogLevelWarn)
     return {
         "uid": uid,
         'message': 'successful'
@@ -573,6 +574,19 @@ def pan_mpr(
 ):
     hm = get_monkey_instance(uid)
     hm.PanCrossHair(x, y, mk.PlaneType(plane_type))
+
+    return {
+        'message': 'successful'
+    }
+
+@app.get('/rotatech')
+def rotate_cross_hair(
+        uid: str,
+        plane_type: int,
+        angle: float
+):
+    hm = get_monkey_instance(uid)
+    hm.RotateCrossHair(angle, mk.PlaneType(plane_type))
 
     return {
         'message': 'successful'
