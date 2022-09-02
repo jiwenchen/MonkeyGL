@@ -22,6 +22,7 @@
   <label for="v5"><input id="v5" value="5" type="radio" class="radio-volume" name="volume"/>corocta</label>
 
   <br>
+  <button id="release" type="button" class="btn btn-default">Release</button>
   <button id="reset" type="button" class="btn btn-default">Reset</button>
   <button id="anterior" type="button" class="btn btn-default">Anterior</button>
   <button id="posterior" type="button" class="btn btn-default">Posterior</button>
@@ -29,7 +30,7 @@
   <button id="right" type="button" class="btn btn-default">Right</button>
   <button id="head" type="button" class="btn btn-default">Head</button>
   <button id="foot" type="button" class="btn btn-default">Foot</button>
-  <button id="switchvrmip" type="button" class="btn btn-default">VR / MIP</button>
+  <button id="setrendertype" type="button" class="btn btn-default">VR/MIP/SR</button>
   <button id="loadtf" type="button" class="btn btn-default">Load TF</button>
   <button id="savetf" type="button" class="btn btn-default">Save TF</button>
 
@@ -77,9 +78,39 @@
   <script src="js/utils.js"></script>
   <!-- <script src="js/mock/base64.js"></script> -->
   <script>
+    let uid = '';
     const href = window.location.href;
     const apiPrefix =  (href.includes("127.0.0.1") || href.includes("localhost")) ? "http://192.168.6.41:7788": ""
     window.onload = function () {
+
+      function init(){
+        fetch(apiPrefix + '/initserver', {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            }
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            uid = data['uid'];
+            console.log(data)
+          })
+      }
+
+      init();
+
+      function release(){
+        fetch(apiPrefix + `/releaseserver?uid=${uid}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            }
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            uid = ''
+          })
+      }
 
       $(".radio-volume").change((e) => {
         let val = e.target.value;
@@ -89,7 +120,7 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ vol_type: +val }),
+          body: JSON.stringify({ vol_type: +val, uid: uid }),
         })
           .then((response) => response.json())
           .then((data) => {
@@ -109,7 +140,7 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ line_index: +val }),
+          body: JSON.stringify({ line_index: +val, uid: uid }),
         })
           .then((response) => response.json())
           .then((data) => {
@@ -132,13 +163,13 @@
 
       function getvrdata(){
           vrRending = true;
-          let url = `/vrdata`;
+          let url = `/vrdata?uid=` + uid;
           displayVR(url);
       }
 
       function rotateVR(x_angle, y_angle){
         vrRending = true;
-        let url = `/rotatevr?x_angle=` + String(x_angle) + "&y_angle=" + String(y_angle);
+        let url = `/rotatevr?uid=` + uid + `&x_angle=` + String(x_angle) + "&y_angle=" + String(y_angle);
         displayVR(url);
     }
 
@@ -154,7 +185,7 @@
 
       function panVR(x_shift, y_shift){
           vrRending = true;
-          let url = `/panvr?x_shift=` + String(x_shift) + "&y_shift=" + String(y_shift);
+          let url = `/panvr?uid=` + uid + `&x_shift=` + String(x_shift) + "&y_shift=" + String(y_shift);
           displayVR(url);
       }
 
@@ -168,7 +199,7 @@
       }
 
       function zoomVR(delta){
-        let url = `/zoomvr?delta=${delta}`;
+        let url = `/zoomvr?uid=${uid}&delta=${delta}`;
         displayVR(url);
       }
 
@@ -179,6 +210,9 @@
             updateThickness(-1);
         });
 
+        document.getElementById('release').addEventListener('click', function (e) {
+          release();
+        });
         document.getElementById('reset').addEventListener('click', function (e) {
           reset();
         });
@@ -200,8 +234,8 @@
         document.getElementById('foot').addEventListener('click', function (e) {
           orientation_vr(5);
         });
-        document.getElementById('switchvrmip').addEventListener('click', function (e) {
-          switchvrmip();
+        document.getElementById('setrendertype').addEventListener('click', function (e) {
+          setrendertype();
         });
         document.getElementById('loadtf').addEventListener('click', function (e) {
           loadtf();
@@ -214,7 +248,7 @@
         let enableCPR = false;
         document.getElementById('showCPR').addEventListener('click', function (e) {
             enableCPR = !enableCPR;
-            let url = `/vrenablecprline?enableCPR=${enableCPR}`;
+            let url = `/vrenablecprline?uid=${uid}&enableCPR=${enableCPR}`;
             displayVR(url);
         });
 
@@ -229,7 +263,7 @@
         });
 
         function getMPR(plane_type){
-            let url = `/mprdata?plane_type=` + String(plane_type);
+            let url = `/mprdata?uid=${uid}&plane_type=` + String(plane_type);
             fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -248,7 +282,7 @@
 
         let browseMPR = _.throttle(_browseMPR, 100);
         function _browseMPR(plane_type, delta){
-          let url = `/mprbrowse?plane_type=${String(plane_type)}&delta=${delta}`;
+          let url = `/mprbrowse?uid=${uid}&plane_type=${String(plane_type)}&delta=${delta}`;
             fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -268,7 +302,7 @@
         let slice = 0;
         function browseOrigin(delta){
             slice = slice + delta;
-            let url = `/originbrowse?slice=` + String(slice);
+            let url = `/originbrowse?uid=${uid}&slice=` + String(slice);
             fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -335,34 +369,34 @@
         }
 
         function reset(){
-            let url = `/reset`;
+            let url = `/reset?uid=${uid}`;
             displayVR(url);
         }
 
         function orientation_vr(orient){
-          let url = `/orientation?dir=` + String(orient);
+          let url = `/orientation?uid=${uid}&dir=` + String(orient);
           displayVR(url);
         }
 
         function loadtf(){
-          let url = `/loadtf`;
+          let url = `/loadtf?uid=${uid}`;
           displayVR(url);
         }
 
         function savetf(){
-          let url = `/savetf`;
+          let url = `/savetf?uid=${uid}`;
           displayVR(url);
         }
 
-        let vrmip = false;
-        function switchvrmip(){
-          let url = `/switchvrmip?vrmip=` + String(vrmip);
+        let render_type = 0;
+        function setrendertype(){
+          render_type = render_type + 1;
+          let url = `/setrendertype?uid=${uid}&type=` + render_type%3;
           displayVR(url);
-          vrmip = !vrmip;
         }
 
         function updateMPRType(mpr_type){
-            let url = `/updatemprtype?mpr_type=` + String(mpr_type);
+            let url = `/updatemprtype?uid=${uid}&mpr_type=` + String(mpr_type);
             fetch(apiPrefix + url, { credentials: "same-origin" })
                 .then((response) => response.json())
                 .then((buffer) => {
@@ -373,7 +407,7 @@
         }
 
         function panMPR(plane_type, x, y){
-          let url = `/panmpr?plane_type=` + String(plane_type) + `&x=` + String(x) + `&y=` + String(y);
+          let url = `/panmpr?uid=${uid}&plane_type=` + String(plane_type) + `&x=` + String(x) + `&y=` + String(y);
           fetch(apiPrefix + url, { credentials: "same-origin" })
               .then((response) => response.json())
               .then((buffer) => {

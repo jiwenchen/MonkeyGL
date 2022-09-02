@@ -79,6 +79,7 @@ void cu_copyMaskData(unsigned char* h_maskData, cudaExtent volumeSize, cudaArray
 	{
 		checkCudaErrors(cudaFreeArray(d_maskArray));
 		d_maskArray = 0;
+		maskTexture = 0;
 	}
 
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<unsigned char>();
@@ -121,6 +122,13 @@ void cu_copyMaskData(unsigned char* h_maskData, cudaExtent volumeSize, cudaArray
 extern "C"
 void cu_setTransferFunc( float* pTransferFunc, int nLenTransferFunc, cudaArray*& d_transferFuncArray, cudaTextureObject_t& transferFuncTexture)
 {
+    if (d_transferFuncArray != 0)
+	{
+		checkCudaErrors(cudaFreeArray(d_transferFuncArray));
+		d_transferFuncArray = 0;
+		transferFuncTexture = 0;
+	}
+
 	cudaResourceDesc texRes;
     memset(&texRes, 0, sizeof(cudaResourceDesc));
     texRes.resType = cudaResourceTypeArray;
@@ -134,11 +142,6 @@ void cu_setTransferFunc( float* pTransferFunc, int nLenTransferFunc, cudaArray*&
 
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float4>();
 
-    if (d_transferFuncArray != 0)
-	{
-		checkCudaErrors(cudaFreeArray(d_transferFuncArray));
-		d_transferFuncArray = 0;
-	}
     checkCudaErrors(cudaMallocArray( &d_transferFuncArray, &channelDesc, nLenTransferFunc, 1));
     checkCudaErrors(
         cudaMemcpy2DToArray(

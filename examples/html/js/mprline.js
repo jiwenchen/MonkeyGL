@@ -883,7 +883,7 @@ function handleCenterLine(mprItem) {
     if (plane_type === -1) {
         console.log("plane_name error... plane_name: ", mprItem.plane_name)
     }
-    let url = `/mprbrowse?plane_type=${plane_type}&delta=1`;
+    let url = `/mprbrowse?uid=${uid}&plane_type=${plane_type}&delta=1`;
     // 1. request after position change
     fetch(apiPrefix + url, {credentials: "same-origin"})
         .then((response) => response.json())
