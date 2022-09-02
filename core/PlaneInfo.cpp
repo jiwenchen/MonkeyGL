@@ -27,6 +27,7 @@ using namespace MonkeyGL;
 PlaneInfo::PlaneInfo(void)
 {
 	m_MPRType = MPRTypeAverage;
+	m_fCrossHairAngle = 0;
 }
 
 PlaneInfo::~PlaneInfo(void)

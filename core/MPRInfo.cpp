@@ -375,9 +375,11 @@ void MPRInfo::PanCrossHair(float fx, float fy, PlaneType planeType)
 	m_ptCrossHair = ptVoxel;
 }
 
-void MPRInfo::RotateCrossHair( float fAngle, PlaneType planeType )
+void MPRInfo::RotateCrossHair( float fCrosshairAngle, PlaneType planeType )
 {
 	Direction3d dirA = m_planeInfos[planeType].GetNormDirection();
+	float fAngle = fCrosshairAngle - m_planeInfos[planeType].m_fCrossHairAngle;
+	m_planeInfos[planeType].m_fCrossHairAngle = fCrosshairAngle;
 
 	fAngle = fAngle/180*PI;
 	double x = dirA.x();

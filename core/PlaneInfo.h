@@ -45,6 +45,7 @@ namespace MonkeyGL{
 		}
 
 	public:
+		float m_fCrossHairAngle;
 		PlaneType m_PlaneType;
 		Direction3d m_dirH;
 		Direction3d m_dirV;
