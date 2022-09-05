@@ -841,46 +841,68 @@ function mprPositionModified(evt, eventData) {
 // firstStartPoint, firstEndPoint
 // lastStartPoint, lastEndPoint
 function getSlopeAngle(s1, s2) {
-    return Math.atan((s2.y - s1.y) / (s2.x - s1.x)) * 180 / Math.PI;
+    let dy = s2.y - s1.y;
+    let dx = s2.x - s1.x;
+    let theta = Math.atan2(dy, dx); // range (-PI, PI]
+    theta *= 180 / Math.PI;
+    return theta;
 }
 
+// 增加缓存变量 用于检测操作线两端是否发生变化
+let cacheAngle;
 // get other pane image and update line
 function updatePosition(eventData) {
-    // console.log("todo: updatePosition: update other pane image and line", eventData)
-    let mprItem = {};
-    let {changeType, element, thicknessDistance, centerCircle, horizontalLine} = eventData;
+  let mprItem = {};
+  let { changeType, element, thicknessDistance, centerCircle, horizontalLine, verticalLine } = eventData;
+  let = eventData.horizontalLine;
 
-    console.log(`points: [${horizontalLine.firstStartPoint.x}, ${horizontalLine.firstStartPoint.y}], [${horizontalLine.firstEndPoint.x}, ${horizontalLine.firstEndPoint.y}], `);
+  let lastPt = horizontalLine.lastPt;
+  if (changeType === "verticalLine") {
+    lastPt = verticalLine.lastPt;
+  }
 
-    let angle = getSlopeAngle(horizontalLine.firstStartPoint, horizontalLine.firstEndPoint)
-    mprItem["plane_name"] = element.id;
-    mprItem["angle"] = angle;
-    if (changeType.includes("ThicknessLine")) {
-        let thickness = thicknessDistance;
-
-        if (thickness === Infinity) {
-            console.warn("Infinity thickness");
-            return;
-        }
-        mprItem['thickness'] = thickness * 2
-    } else {
-        if (changeType === "centerCircle") {
-            // mpr crosshair move
-            let indexVertical = centerCircle.centerPoint.x;
-            let indexHorizontal = centerCircle.centerPoint.y;
-            mprItem["crosshair"] = [indexVertical, indexHorizontal]; //[x,y]
-            //update crosshair of imageData
-        } else {
-            // mpr crosshair rotate
-            let startPt = Object.assign({}, eventData[changeType].startPt); // currentPoints
-            let lastPt = Object.assign({}, eventData[changeType].lastPt);
-            mprItem["start_pt"] = [startPt.x, startPt.y]; // [x, y]
-            mprItem["end_pt"] = [lastPt.x, lastPt.y]; // [x, y]
-            mprItem["angle"] = angle
-        }
+  let angle = getSlopeAngle(centerCircle.centerPoint, lastPt);
+  mprItem["plane_name"] = element.id;
+  let iAngle = parseInt(angle, 10);
+  if (!isNaN(cacheAngle) && cacheAngle !== iAngle) {
+    let difference = cacheAngle > iAngle ? cacheAngle - iAngle : iAngle - cacheAngle;
+    if (difference > 160) {
+    //   console.log("reverse ", difference);
+      if (iAngle > 0) {
+        iAngle = -180 + iAngle;
+      } else {
+        iAngle = 180 + iAngle;
+      }
     }
-    mprItem["change_type"] = changeType;
-    handleCenterLine(mprItem)
+  }
+  cacheAngle = iAngle;
+  mprItem["angle"] = angle;
+  if (changeType.includes("ThicknessLine")) {
+    let thickness = thicknessDistance;
+
+    if (thickness === Infinity) {
+      console.warn("Infinity thickness");
+      return;
+    }
+    mprItem["thickness"] = thickness * 2;
+  } else {
+    if (changeType === "centerCircle") {
+      // mpr crosshair move
+      let indexVertical = centerCircle.centerPoint.x;
+      let indexHorizontal = centerCircle.centerPoint.y;
+      mprItem["crosshair"] = [indexVertical, indexHorizontal]; //[x,y]
+      //update crosshair of imageData
+    } else {
+      // mpr crosshair rotate
+      let startPt = Object.assign({}, eventData[changeType].startPt); // currentPoints
+      let lastPt = Object.assign({}, eventData[changeType].lastPt);
+      mprItem["start_pt"] = [startPt.x, startPt.y]; // [x, y]
+      mprItem["end_pt"] = [lastPt.x, lastPt.y]; // [x, y]
+      mprItem["angle"] = angle;
+    }
+  }
+  mprItem["change_type"] = changeType;
+  handleCenterLine(mprItem);
 }
 
 function handleCenterLine(mprItem) {
