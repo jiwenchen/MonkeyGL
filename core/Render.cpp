@@ -832,3 +832,11 @@ bool Render::TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeig
 
 	return true;
 }
+
+void Render::ShowPlaneInVR(bool bShow)
+{
+	IRender::ShowPlaneInVR(bShow);
+	m_cuDataInfo.CopyMaskData(m_dataMan.GetMaskData().get(), m_VolumeSize);
+	UpdateAlphaWWWL();
+	UpdateTransferFunctions();
+}

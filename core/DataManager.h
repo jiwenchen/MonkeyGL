@@ -75,6 +75,8 @@ namespace MonkeyGL {
             return m_volInfo.Need2InvertZ();
         }
 
+        void ShowPlaneInVR(bool bShow);
+
         int GetDim(int index);
         double GetSpacing(int index);
         double GetMinSpacing();
@@ -133,6 +135,7 @@ namespace MonkeyGL {
         int m_activeLabel;
         std::map<unsigned char, ObjectInfo> m_objectInfos;
 
+        int m_planeLabel;
         RGBA m_colorBG;
     };
 

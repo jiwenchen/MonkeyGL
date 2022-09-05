@@ -265,3 +265,8 @@ bool IRender::RotateCPR(float angle, PlaneType planeType)
 {
 	return m_dataMan.RotateCPR(angle, planeType);
 }
+
+void IRender::ShowPlaneInVR(bool bShow)
+{
+	return m_dataMan.ShowPlaneInVR(bShow);
+}

@@ -605,6 +605,18 @@ def rotate_cross_hair(
         'message': 'successful'
     }
 
+@app.get('/showplaneinvr')
+def show_plane_in_vr(
+    uid: str,
+    show: bool
+):
+    hm = get_monkey_instance(uid)
+    hm.ShowPlaneInVR(show)
+
+    return {
+        'message': 'successful'
+    }
+
 
 if __name__ == "__main__":
     uvicorn.run(app='server:app', host="0.0.0.0",

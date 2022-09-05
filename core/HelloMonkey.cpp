@@ -703,3 +703,10 @@ void HelloMonkey::ShowCPRLineInVR(bool bShow)
 {
 	m_bShowCPRLineInVR = bShow;
 }
+
+void HelloMonkey::ShowPlaneInVR(bool bShow)
+{
+	if (!_pRender)
+		return;
+	return _pRender->ShowPlaneInVR(bShow);
+}

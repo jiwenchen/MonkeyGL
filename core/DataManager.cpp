@@ -513,3 +513,48 @@ Point3d DataManager::GetCenterPoint()
 {
     return m_mprInfo.GetCenterPoint();
 }
+
+void DataManager::ShowPlaneInVR(bool bShow)
+{
+	if (bShow)
+	{
+		Logger::Info("DataManager::ShowPlaneInVR");
+		int nWidth = m_volInfo.GetDim(0);
+		int nHeight = m_volInfo.GetDim(1);
+		int nDepth = m_volInfo.GetDim(2);
+
+		int xySize = nWidth*nHeight;
+		int xzSize = nWidth*nDepth;
+		int yzSize = nHeight*nDepth;
+
+		std::shared_ptr<unsigned char> pData(new unsigned char[nWidth*nHeight*nDepth]);
+		for (int z=200; z<203; z++)
+		{
+			for (int xy=0; xy<xySize; xy++){
+				pData.get()[xy+z*xySize] = 1;
+			}
+		}
+
+		for (int z=0; z<nDepth; z++){
+			for (int y=200; y<203; y++){
+				for (int x=0; x<nWidth; x++){
+					pData.get()[z*xySize+y*nWidth+x] = 1;
+				}
+			}
+		}
+		for (int z=0; z<nDepth; z++){
+			for (int y=0; y<nHeight; y++){
+				for (int x=250; x<253; x++){
+					pData.get()[z*xySize+y*nWidth+x] = 1;
+				}
+			}
+		}
+
+		m_planeLabel = AddNewObjectMask(pData, nWidth, nHeight, nDepth);
+		SetVRWWWL(400, 40);
+		std::map<int, RGBA> ctrlPts;
+		ctrlPts[0] = RGBA(0, 0, 0, 1);
+		ctrlPts[99] = RGBA(1, 1, 1, 1);
+		SetObjectAlpha(0.6, m_planeLabel);
+	}
+}

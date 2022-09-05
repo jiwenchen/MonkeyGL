@@ -285,6 +285,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("RotateCPR", &pyHelloMonkey::RotateCPR)
         .def("ShowCPRLineInVR", &pyHelloMonkey::ShowCPRLineInVR)
         .def("SetVRSize", &pyHelloMonkey::SetVRSize)
+        .def("ShowPlaneInVR", &pyHelloMonkey::ShowPlaneInVR)
 
         .def("GetZoomRatio", &pyHelloMonkey::GetZoomRatio)
         .def("GetPlaneCurrentIndex", &pyHelloMonkey::GetPlaneCurrentIndex)

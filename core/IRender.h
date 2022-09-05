@@ -115,6 +115,8 @@ namespace MonkeyGL{
         virtual std::vector<Point3d> GetCPRLineVoxel();
         virtual bool RotateCPR(float angle, PlaneType planeType);
 
+        virtual void ShowPlaneInVR(bool bShow);
+
     protected:
         DataManager m_dataMan;
     };

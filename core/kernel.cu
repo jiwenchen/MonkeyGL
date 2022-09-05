@@ -433,7 +433,7 @@ __global__ void d_renderSurface(
 			}
 
 			temp = 32768*tex3D<float>(volumeTexture, pos.x, pos.y, pos.z);
-			if (temp <= 500){
+			if (temp <= 400){
 				accuLength += fStep;
 				continue;
 			}
@@ -456,7 +456,8 @@ __global__ void d_renderSurface(
 			sum = f4ColorBG;
 		}
 		else{
-			sum = make_float4(alphaAcc+0.05, 0.0f, 0.0f, 1.0f);
+			// sum = make_float4(alphaAcc+0.05, 0.0f, 0.0f, 1.0f);
+			sum = make_float4(alphaAcc+0.05, alphaAcc+0.05, alphaAcc+0.05, 1.0f);
 		}
 
 		unsigned int result = rgbaFloatToInt(sum);

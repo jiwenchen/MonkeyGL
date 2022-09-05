@@ -87,6 +87,8 @@ namespace MonkeyGL {
         virtual bool SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts, unsigned char nLabel);
         virtual bool LoadTransferFunction(const char* szFile);
 
+        void ShowPlaneInVR(bool bShow);
+
     private:
         void Init();
         void UpdateTransferFunctions();

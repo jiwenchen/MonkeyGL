@@ -122,6 +122,9 @@ namespace MonkeyGL {
         virtual bool RotateCPR(float angle, PlaneType planeType);
         virtual void ShowCPRLineInVR(bool bShow);
 
+        // plane in VR
+        virtual void ShowPlaneInVR(bool bShow);
+
     private:
         bool m_bShowCPRLineInVR;
         int m_nWidth_VR;
