@@ -77,8 +77,10 @@ namespace MonkeyGL {
 
         virtual bool GetBatchData(std::vector<short*>& vecBatchData, const BatchInfo& batchInfo);
 
-        virtual bool GetPlaneIndex(int& index, PlaneType planeType);
-        virtual bool GetPlaneNumber(int& nTotalNum, PlaneType planeType);
+        virtual bool GetPlaneIndex(int& index, const PlaneType&  planeType);
+        virtual int GetPlaneIndex(const PlaneType&  planeType);
+        virtual bool GetPlaneNumber(int& nTotalNum, const PlaneType&  planeType);
+        virtual int GetPlaneNumber(const PlaneType&  planeType);
    
         virtual bool GetPlaneRotateMatrix(float* pMatrix, PlaneType planeType);
 

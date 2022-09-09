@@ -434,18 +434,36 @@ bool HelloMonkey::GetBatchData( std::vector<short*>& vecBatchData, const BatchIn
 	return _pRender->GetBatchData(vecBatchData, batchInfo);
 }
 
-bool HelloMonkey::GetPlaneIndex( int& index, PlaneType planeType )
+bool HelloMonkey::GetPlaneIndex( int& index, const PlaneType&  planeType )
 {
 	if (!_pRender)
 		return NULL;
 	return _pRender->GetPlaneIndex(index, planeType);
 }
 
-bool HelloMonkey::GetPlaneNumber( int& nTotalNum, PlaneType planeType )
+int HelloMonkey::GetPlaneIndex( const PlaneType&  planeType )
+{
+	int index = -1;
+	if (!_pRender)
+		return index;
+	_pRender->GetPlaneIndex(index, planeType);
+	return index;
+}
+
+bool HelloMonkey::GetPlaneNumber( int& nTotalNum, const PlaneType&  planeType )
 {
 	if (!_pRender)
 		return NULL;
 	return _pRender->GetPlaneNumber(nTotalNum, planeType);
+}
+
+int HelloMonkey::GetPlaneNumber( const PlaneType&  planeType )
+{
+	int nTotalNum = -1;
+	if (!_pRender)
+		return nTotalNum;
+	_pRender->GetPlaneNumber(nTotalNum, planeType);
+	return nTotalNum;
 }
 
 bool HelloMonkey::GetPlaneRotateMatrix( float* pMatrix, PlaneType planeType )

@@ -286,6 +286,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("ShowCPRLineInVR", &pyHelloMonkey::ShowCPRLineInVR)
         .def("SetVRSize", &pyHelloMonkey::SetVRSize)
         .def("ShowPlaneInVR", &pyHelloMonkey::ShowPlaneInVR)
+        .def("SetPlaneIndex", &pyHelloMonkey::SetPlaneIndex)
 
         .def("GetZoomRatio", &pyHelloMonkey::GetZoomRatio)
         .def("GetPlaneCurrentIndex", &pyHelloMonkey::GetPlaneCurrentIndex)
@@ -297,5 +298,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SaveVR2Png", &pyHelloMonkey::SaveVR2Png)
         .def("GetPlaneData_pngString", &pyHelloMonkey::GetPlaneData_pngString)
         .def("GetOriginData_pngString", &pyHelloMonkey::GetOriginData_pngString)
-        .def("GetCrossHairPoint", static_cast<Point2d (pyHelloMonkey::*)(const PlaneType&)>(&pyHelloMonkey::GetCrossHairPoint));
+        .def("GetCrossHairPoint", static_cast<Point2d (pyHelloMonkey::*)(const PlaneType&)>(&pyHelloMonkey::GetCrossHairPoint))
+        .def("GetPlaneIndex", static_cast<int (pyHelloMonkey::*)(const PlaneType&)>(&pyHelloMonkey::GetPlaneIndex))
+        .def("GetPlaneNumber", static_cast<int (pyHelloMonkey::*)(const PlaneType&)>(&pyHelloMonkey::GetPlaneNumber));
 }
