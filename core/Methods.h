@@ -57,8 +57,14 @@ namespace MonkeyGL {
         );
 
         static void DrawDotInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, int x, int y, RGB clr=RGB(1.0, 1.0, 1.0));
+        static void DrawDotInImage8Bit(unsigned char* pVR, int nWidth, int nHeight, int x, int y, unsigned char brightness=255);
         static void DrawLineInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x0, float y0, float x1, float y1, int nLineWidth=2, RGB clr=RGB(1.0, 1.0, 1.0));
+        static void DrawLineInImage8Bit(unsigned char* pVR, int nWidth, int nHeight, float x0, float y0, float x1, float y1, int nLineWidth=2, unsigned char brightness=255);
         static void DrawCircleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x, float y, float r, int nLineWidth=2, RGB clr=RGB(1.0, 1.0, 1.0));
+        static void DrawTriangleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, int nLineWidth=2, RGB clr=RGB(1.0, 1.0, 1.0));
+        static void FillHoleInImage24Bit(unsigned char* pVR, float* pZBuffer, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, float zBuffer, RGB clr=RGB(1.0, 1.0, 1.0));
+
+        static void FillHoleInImage_Ch1(float* pImage, float* pZBuffer, int nWidth, int nHeight, float diffuese, float zBuffer, Point2f v1, Point2f v2, Point2f v3);
 
         static double Distance_Point2Line(Point3d pt, Direction3d dir, Point3d ptLine);
         static double Length_VectorInLine(Point3d pt, Direction3d dir, Point3d ptLine);
@@ -77,6 +83,7 @@ namespace MonkeyGL {
         }
 
         static Point3d GetTransferPoint(double m[3][3], Point3d pt);
+        static Point3f GetTransferPointf(float m[9], Point3f pt);
     };
 
 }

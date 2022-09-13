@@ -63,6 +63,7 @@ set(SRC_LIST
   ./core/HelloMonkey.cpp
   ./core/IRender.cpp
   ./core/Logger.cpp
+  ./core/MarchingCube.cpp
   ./core/Methods.cpp
   ./core/MPRInfo.cpp
   ./core/ImageReader.cpp

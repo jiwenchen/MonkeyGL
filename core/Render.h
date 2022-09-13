@@ -27,6 +27,7 @@
 #include "Methods.h"
 #include "IRender.h"
 #include "CuDataInfo.h"
+#include "MarchingCube.h"
 
 namespace MonkeyGL {
 
@@ -87,7 +88,9 @@ namespace MonkeyGL {
         virtual bool SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts, unsigned char nLabel);
         virtual bool LoadTransferFunction(const char* szFile);
 
-        void ShowPlaneInVR(bool bShow);
+        virtual void ShowPlaneInVR(bool bShow);
+
+        virtual std::vector<Facet2D> GetMeshPoints(int nWidth, int nHeight);
 
     private:
         void Init();
@@ -116,6 +119,8 @@ namespace MonkeyGL {
             m_f3maxLenSpacing.z = 1.0f*fMaxLen/(volumeSize.depth*fzSpacing);
         }
 
+        void MergeOrientationBox(unsigned char* pVR, int nWidth, int nHeight);
+
     private:
         float m_fVOI_xStart;
         float m_fVOI_xEnd;
@@ -142,6 +147,8 @@ namespace MonkeyGL {
         float3 m_f3Spacing;
         float3 m_f3maxLenSpacing;
         cudaExtent m_VolumeSize;
+
+        MarchingCube m_marchingCube;
     };
 }
 

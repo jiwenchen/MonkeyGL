@@ -117,6 +117,13 @@ namespace MonkeyGL{
                 ptOutput.SetZ(z()+pt.z());
             return ptOutput;
         }
+        Point<T, dim> operator+=(double s){
+            SetX(x()+s);
+            SetY(y()+s);
+            if(dim == 3)
+                SetZ(z()+s);
+            return *this;
+        }
 
         Point<T, dim> operator-=(Point<T, dim> pt){
             SetX(x()-pt.x());
@@ -132,6 +139,14 @@ namespace MonkeyGL{
             if (dim == 3)
                 ptOutput.SetZ(z()-pt.z());
             return ptOutput;
+        }
+
+        Point<T, dim> operator*=(double r){
+            SetX(x()*r);
+            SetY(y()*r);
+            if (dim == 3)
+                SetZ(z()*r);
+            return *this;
         }
 
         Point<T, dim> operator/=(double r){
@@ -170,6 +185,8 @@ namespace MonkeyGL{
 
     typedef Point<double, 3> Point3d;
     typedef Point<double, 2> Point2d;
+    typedef Point<float, 3> Point3f;
+    typedef Point<float, 2> Point2f;
 
 }
 

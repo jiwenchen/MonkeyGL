@@ -25,7 +25,7 @@
 
 namespace MonkeyGL{
 
-    template <unsigned char dim>
+    template <class T, unsigned char dim>
     class Direction
     {
     public:
@@ -35,7 +35,7 @@ namespace MonkeyGL{
             if (dim == 3)
                 m_Coords[2] = 0;
         };
-        Direction(double x, double y){
+        Direction(T x, T y){
             if (dim < 2)
                 return;
             m_Coords[0] = x;
@@ -43,7 +43,7 @@ namespace MonkeyGL{
 
             Normalize();
         }
-        Direction(double x, double y, double z){
+        Direction(T x, T y, T z){
             if (dim < 3)
                 return;
             m_Coords[0] = x;
@@ -52,7 +52,7 @@ namespace MonkeyGL{
 
             Normalize();
         }
-        Direction(Point<double, dim> ptStart, Point<double, dim> ptEnd){
+        Direction(Point<T, dim> ptStart, Point<T, dim> ptEnd){
             m_Coords[0] = ptEnd.x() - ptStart.x();
             m_Coords[1] = ptEnd.y() - ptStart.y();
             if (dim == 3)
@@ -64,31 +64,31 @@ namespace MonkeyGL{
         };
 
     public:
-        double x(){
+        T x(){
             return m_Coords[0];
         }
-        void SetX(double val){
+        void SetX(T val){
             m_Coords[0] = val;
         }
-        double y(){
+        T y(){
             return m_Coords[1];
         }
-        void SetY(double val){
+        void SetY(T val){
             m_Coords[1] = val;
         }
-        double z(){
+        T z(){
             if (dim < 3)
                 return 0;
             return m_Coords[2];
         }
-        void SetZ(double val){
+        void SetZ(T val){
             if(dim < 3)
                 return;
             m_Coords[2] = val;
         }
 
-        Point<double, dim> operator*(double fr){
-            Point<double, dim> ptOutput;
+        Point<T, dim> operator*(T fr){
+            Point<T, dim> ptOutput;
             ptOutput.SetX(x()*fr);
             ptOutput.SetY(y()*fr);
             if (dim == 3)
@@ -96,32 +96,32 @@ namespace MonkeyGL{
             return ptOutput;
         }
 
-        Direction<dim> cross(Direction<dim> dir){
-            Direction<dim> dirOutput;
+        Direction<T, dim> cross(Direction<T, dim> dir){
+            Direction<T, dim> dirOutput;
             if(dim == 3)
             {
-                double x = this->y()*dir.z() - this->z()*dir.y();
-                double y = this->z()*dir.x() - this->x()*dir.z();
-                double z = this->x()*dir.y() - this->y()*dir.x();
-                dirOutput = Direction<dim>(x, y, z);
+                T x = this->y()*dir.z() - this->z()*dir.y();
+                T y = this->z()*dir.x() - this->x()*dir.z();
+                T z = this->x()*dir.y() - this->y()*dir.x();
+                dirOutput = Direction<T, dim>(x, y, z);
             }
             return dirOutput;
         }
 
-        Direction<dim> negative(){
-            Direction<dim> dirOutput;
+        Direction<T, dim> negative(){
+            Direction<T, dim> dirOutput;
             if(dim == 3)
             {
-                double x = -this->x();
-                double y = -this->y();
-                double z = -this->z();
-                dirOutput = Direction<dim>(x, y, z);
+                T x = -this->x();
+                T y = -this->y();
+                T z = -this->z();
+                dirOutput = Direction<T, dim>(x, y, z);
             }
             return dirOutput;
         }
 
-        double dot(Direction<dim> dir){
-            double v = 0;
+        T dot(Direction<T, dim> dir){
+            T v = 0;
             v += this->x() * dir.x();
             v += this->y() * dir.y();
             if(dim == 3)
@@ -131,7 +131,7 @@ namespace MonkeyGL{
             return v;
         }
 
-        double Length()
+        T Length()
         {
             if (dim == 2)
                 return sqrt(m_Coords[0]*m_Coords[0]+m_Coords[1]*m_Coords[1]);
@@ -146,7 +146,7 @@ namespace MonkeyGL{
             if (dim < 2)
                 return;
 
-            double n = Length();
+            T n = Length();
             m_Coords[0] /= n;
             m_Coords[1] /= n;
             if (dim == 3)
@@ -154,11 +154,13 @@ namespace MonkeyGL{
         }
 
     private:
-        double m_Coords[dim];
+        T m_Coords[dim];
     };
 
-    typedef Direction<3> Direction3d;
-    typedef Direction<2> Direction2d;
+    typedef Direction<double, 3> Direction3d;
+    typedef Direction<double, 2> Direction2d;
+    typedef Direction<float, 3> Direction3f;
+    typedef Direction<float, 2> Direction2f;
 
 }
 

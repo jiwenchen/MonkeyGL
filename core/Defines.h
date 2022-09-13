@@ -49,6 +49,19 @@ namespace MonkeyGL{
             green = g;
             blue = b;
         }
+        RGB operator*= (float r){
+            this->red *= r;
+            this->green *= r;
+            this->blue *= r;
+            return *this;
+        }
+        RGB operator* (float r){
+            RGB clr;
+            clr.red = red * r;
+            clr.green = green * r;
+            clr.blue = blue * r;
+            return clr;
+        }
         void Print(){
             cout << "red: " << red << endl; 
             cout << "green: " << green << endl; 
@@ -216,5 +229,21 @@ namespace MonkeyGL{
         LogLevelInfo,
         LogLevelWarn,
         LogLevelError
+    };
+
+    struct Facet3D{
+        Direction3f n;
+        Point3f v1;
+        Point3f v2;
+        Point3f v3;
+        unsigned short reserved;
+    };
+
+    struct Facet2D{
+        float diffuse;
+        float zBuffer;
+        Point2f v1;
+        Point2f v2;
+        Point2f v3;
     };
 }

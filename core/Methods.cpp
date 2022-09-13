@@ -24,6 +24,7 @@
 #include "math.h"
 #include <iostream>
 #include <cstring>
+#include <memory>
 
 using namespace MonkeyGL;
 
@@ -91,8 +92,8 @@ void Methods::ComputeTransformMatrix(
 	Rx[8] = cos((fxRotate)/180.0f*PI);
 
 	Rz[0] = cos((fzRotate)/180.0f*PI);
-	Rz[1] = -sin((fzRotate)/180.0f*PI);
-	Rz[3] = sin((fzRotate)/180.0f*PI);
+	Rz[1] = sin((fzRotate)/180.0f*PI);
+	Rz[3] = -sin((fzRotate)/180.0f*PI);
 	Rz[4] = cos((fzRotate)/180.0f*PI);
 
 	matrixMul(Temp, Rx, Rz,  3, 3, 3);
@@ -118,13 +119,13 @@ void Methods::ComputeTransformMatrix(
 	matrixMul(pTransposeTransformMatrix, Temp, pTransposeTransformMatrix, 3, 3, 3);
 
 	RxT[4] = cos((fxRotate)/180.0f*PI);
-	RxT[5] = -sin((fxRotate)/180.0f*PI);
-	RxT[7] = sin((fxRotate)/180.0f*PI);
+	RxT[5] = sin((fxRotate)/180.0f*PI);
+	RxT[7] = -sin((fxRotate)/180.0f*PI);
 	RxT[8] = cos((fxRotate)/180.0f*PI);
 
 	RzT[0] = cos((fzRotate)/180.0f*PI);
-	RzT[1] = sin((fzRotate)/180.0f*PI);
-	RzT[3] = -sin((fzRotate)/180.0f*PI);
+	RzT[1] = -sin((fzRotate)/180.0f*PI);
+	RzT[3] = sin((fzRotate)/180.0f*PI);
 	RzT[4] = cos((fzRotate)/180.0f*PI);
 
 	matrixMul(pTransposRotateMatrix, pTransposRotateMatrix, RzT, 3, 3, 3);
@@ -172,6 +173,13 @@ void Methods::DrawDotInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, i
 	pVR[3*(y*nWidth+x)+1] = green;
 	pVR[3*(y*nWidth+x)+2] = blue;
 }
+void Methods::DrawDotInImage8Bit(unsigned char* pVR, int nWidth, int nHeight, int x, int y, unsigned char brightness)
+{
+	if (x<0 || x>=nWidth || y<0 || y>=nHeight){
+		return;
+	}
+	pVR[y*nWidth+x] = brightness;
+}
 
 void Methods::DrawLineInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x0, float y0, float x1, float y1, int nLineWidth, RGB clr){
 	double len = sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
@@ -192,6 +200,25 @@ void Methods::DrawLineInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, 
 	}
 }
 
+void Methods::DrawLineInImage8Bit(unsigned char* pVR, int nWidth, int nHeight, float x0, float y0, float x1, float y1, int nLineWidth, unsigned char brightness){
+	double len = sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
+	Direction2d dir = Direction2d(x1-x0, y1-y0);
+	Direction2d dirN = Direction2d(-dir.y(), dir.x());
+
+	float half = 1.0*nLineWidth/2;
+	float x0Fist = x0 - (half-0.5)*dirN.x();
+	float y0Fist = y0 - (half-0.5)*dirN.y();
+	for (int idx=0; idx<nLineWidth; idx++){
+		float x0temp = x0Fist + idx*dirN.x();
+		float y0temp = y0Fist + idx*dirN.y();
+		for (int i=0; i<=int(len+0.5)*2; i++){
+			int x = int(x0temp + i*dir.x()/2.0 + 0.5);
+			int y = int(y0temp + i*dir.y()/2.0 + 0.5);
+			DrawDotInImage8Bit(pVR, nWidth, nHeight, x, y, brightness);
+		}
+	}
+}
+
 void Methods::DrawCircleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x, float y, float r, int nLineWidth, RGB clr){
 	double angDelta = PI/180.0;
 	double m[2][2] = {{cos(angDelta), -sin(angDelta)}, {sin(angDelta), cos(angDelta)}};
@@ -207,6 +234,139 @@ void Methods::DrawCircleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight
 		xPre = xNxt;
 		yPre = yNxt;
 	}
+}
+
+
+void Methods::DrawTriangleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, int nLineWidth, RGB clr)
+{
+	Methods::DrawLineInImage24Bit(pVR, nWidth, nHeight, v1.x(), v1.y(), v2.x(), v2.y(), nLineWidth, clr);
+	Methods::DrawLineInImage24Bit(pVR, nWidth, nHeight, v2.x(), v2.y(), v3.x(), v3.y(), nLineWidth, clr);
+	Methods::DrawLineInImage24Bit(pVR, nWidth, nHeight, v3.x(), v3.y(), v1.x(), v1.y(), nLineWidth, clr);
+}
+
+void Methods::FillHoleInImage24Bit(unsigned char* pVR, float* pZBuffer, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, float zBuffer, RGB clr)
+{
+	float fxmin = min(v1.x(), min(v2.x(), v3.x()));
+	float fymin = min(v1.y(), min(v2.y(), v3.y()));
+	float fxmax = max(v1.x(), max(v2.x(), v3.x()));
+	float fymax = max(v1.y(), max(v2.y(), v3.y()));
+	int xmin = int(fxmin);
+	int ymin = int(fymin);
+	int xmax = int(fxmax+0.5);
+	int ymax = int(fymax+0.5);
+	if (xmin>=nWidth || ymin>=nHeight || xmax<0 || ymax <0){
+		return;
+	}
+
+	int nw = xmax - xmin + 1;
+	int nh = ymax - ymin + 1;
+
+	std::shared_ptr<unsigned char> pMask(new unsigned char[nw * nh]);
+	memset(pMask.get(), 0, nw * nh); 
+	Methods::DrawLineInImage8Bit(pMask.get(), nw, nh, v1.x()-xmin, v1.y()-ymin, v2.x()-xmin, v2.y()-ymin, 1);
+	Methods::DrawLineInImage8Bit(pMask.get(), nw, nh, v1.x()-xmin, v1.y()-ymin, v3.x()-xmin, v3.y()-ymin, 1);
+	Methods::DrawLineInImage8Bit(pMask.get(), nw, nh, v2.x()-xmin, v2.y()-ymin, v3.x()-xmin, v3.y()-ymin, 1);
+
+	for (int y=0; y<nh; y++){
+		for (int x=0; x<nw; x++){
+			if (pMask.get()[y*nw+x] == 0){
+				pMask.get()[y*nw+x] = 1;
+			}
+			else{
+				break;
+			}
+		}
+		for (int x=nw-1; x>=0; x--){
+			if (pMask.get()[y*nw+x] == 0){
+				pMask.get()[y*nw+x] = 1;
+			}
+			else{
+				break;
+			}
+		}
+	}
+
+	for (int y=0; y<nh; y++){
+		int yIdx = y+ymin;
+		if (yIdx >= nHeight || yIdx < 0){
+			continue;
+		}
+		for (int x=0; x<nw; x++){
+			int xIdx = x + xmin;
+			if (xIdx >= nWidth || xIdx < 0){
+				continue;
+			}
+			if (pMask.get()[y*nw+x] != 1){
+				if (pZBuffer[yIdx*nWidth+xIdx] <= 0 || pZBuffer[yIdx*nWidth+xIdx] < zBuffer){
+					Methods::DrawDotInImage24Bit(pVR, nWidth, nHeight, xIdx, yIdx, clr);
+					pZBuffer[yIdx*nWidth+xIdx] = zBuffer;
+				}
+			}
+		}
+	}
+}
+
+void Methods::FillHoleInImage_Ch1(float* pImage, float* pZBuffer, int nWidth, int nHeight, float diffuese, float zBuffer, Point2f v1, Point2f v2, Point2f v3)
+{
+	float fxmin = min(v1.x(), min(v2.x(), v3.x()));
+	float fymin = min(v1.y(), min(v2.y(), v3.y()));
+	float fxmax = max(v1.x(), max(v2.x(), v3.x()));
+	float fymax = max(v1.y(), max(v2.y(), v3.y()));
+	int xmin = int(fxmin);
+	int ymin = int(fymin);
+	int xmax = int(fxmax+0.5);
+	int ymax = int(fymax+0.5);
+	if (xmin>=nWidth || ymin>=nHeight || xmax<0 || ymax <0){
+		return;
+	}
+
+	int nw = xmax - xmin + 1;
+	int nh = ymax - ymin + 1;
+
+	std::shared_ptr<unsigned char> pMask(new unsigned char[nw * nh]);
+	memset(pMask.get(), 0, nw * nh); 
+	Methods::DrawLineInImage8Bit(pMask.get(), nw, nh, v1.x()-xmin, v1.y()-ymin, v2.x()-xmin, v2.y()-ymin, 1);
+	Methods::DrawLineInImage8Bit(pMask.get(), nw, nh, v1.x()-xmin, v1.y()-ymin, v3.x()-xmin, v3.y()-ymin, 1);
+	Methods::DrawLineInImage8Bit(pMask.get(), nw, nh, v2.x()-xmin, v2.y()-ymin, v3.x()-xmin, v3.y()-ymin, 1);
+
+	for (int y=0; y<nh; y++){
+		for (int x=0; x<nw; x++){
+			if (pMask.get()[y*nw+x] == 0){
+				pMask.get()[y*nw+x] = 1;
+			}
+			else{
+				break;
+			}
+		}
+		for (int x=nw-1; x>=0; x--){
+			if (pMask.get()[y*nw+x] == 0){
+				pMask.get()[y*nw+x] = 1;
+			}
+			else{
+				break;
+			}
+		}
+	}
+
+	for (int y=0; y<nh; y++){
+		int yIdx = y+ymin;
+		if (yIdx >= nHeight || yIdx < 0){
+			continue;
+		}
+		for (int x=0; x<nw; x++){
+			int xIdx = x + xmin;
+			if (xIdx >= nWidth || xIdx < 0){
+				continue;
+			}
+			if (pMask.get()[y*nw+x] != 1){
+				if (pZBuffer[yIdx*nWidth+xIdx] <= 0 || pZBuffer[yIdx*nWidth+xIdx] < zBuffer){
+					pImage[yIdx*nWidth+xIdx] = diffuese;
+					pZBuffer[yIdx*nWidth+xIdx] = zBuffer;
+				}
+			}
+		}
+	}
+
 }
 
 double Methods::Distance_Point2Line(Point3d pt, Direction3d dir, Point3d ptLine)
@@ -325,4 +485,18 @@ Point3d Methods::GetTransferPoint(double m[3][3], Point3d pt)
 		}
 	}
 	return Point3d(r[0], r[1], r[2]);
+}
+
+Point3f Methods::GetTransferPointf(float m[9], Point3f pt)
+{
+	double r[3];
+	for (int i=0; i<3; i++)
+	{
+		r[i] = 0;
+		for (int j=0; j<3; j++)
+		{
+			r[i] += m[i*3+j]*pt[j];
+		}
+	}
+	return Point3f(r[0], r[1], r[2]);
 }
