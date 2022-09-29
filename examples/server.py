@@ -143,16 +143,57 @@ def set_volume_type(
         hm.SetTransferFunc(tf1)
 
     elif vol_type == 3:
-        tf[0] = mk.RGBA(0.8, 0, 0, 0)
-        tf[10] = mk.RGBA(0.8, 0, 0, 0.3)
-        tf[40] = mk.RGBA(0.8, 0.8, 0, 0)
-        tf[99] = mk.RGBA(1, 0.8, 1, 1)
-        ww = 500
-        wl = 250
-        vol_file = 'rib.mhd'
+        # tf[10] = mk.RGBA(0.8, 0.8, 0.6, 0.0)
+        # tf[99] = mk.RGBA(1, 0.8, 1, 1)
+
+        # tf[10] = mk.RGBA(0.8, 0.8, 0.8, 0.0)
+        # tf[90] = mk.RGBA(0.8, 0.8, 0.8, 0.8)
+
+        tf[10] = mk.RGBA(0.3, 0.3, 0.4, 0)
+        tf[20] = mk.RGBA(0.3, 0.8, 1, 0.5)
+        tf[35] = mk.RGBA(0.3, 0.7, 0.8, 0)
+        ww = 1000
+        wl = -400
+
+        # ww = 500
+        # wl = 350
+        vol_file = 'lung.nii.gz'
         hm.LoadVolumeFile(f'{file_path}/{vol_file}')
         hm.SetVRWWWL(ww, wl)
         hm.SetTransferFunc(tf)
+        hm.SetObjectAlpha(0.8)
+
+        label1 = hm.AddObjectMaskFile(f'{file_path}/lung_vein.nii.gz')
+        tf1 = {}
+        tf1[5] = mk.RGBA(0.8, 0, 0, 0)
+        tf1[90] = mk.RGBA(0.8, 0.4, 0.8, 0.8)
+        ww1 = 500
+        wl1 = -700
+        hm.SetVRWWWL(ww1, wl1, label1)
+        hm.SetObjectAlpha(0.7, label1)
+        hm.SetTransferFunc(tf1)
+
+        label2 = hm.AddObjectMaskFile(f'{file_path}/lung_artery.nii.gz')
+        tf2 = {}
+        tf2[5] = mk.RGBA(0.8, 0.4, 0, 0.2)
+        tf2[90] = mk.RGBA(0.0, 0.8, 0, 0.8)
+        ww2 = 500
+        wl2 = -700
+        hm.SetVRWWWL(ww2, wl2, label2)
+        hm.SetObjectAlpha(0.7, label2)
+        hm.SetTransferFunc(tf2)
+
+        label3 = hm.AddObjectMaskFile(f'{file_path}/lung_bronchia.nii.gz')
+        tf3 = {}
+        tf3[5] = mk.RGBA(1.0, 0.8, 1.0, 0.5)
+        tf3[90] = mk.RGBA(0.0, 0.8, 0.9, 1.0)
+        ww3 = 700
+        wl3 = -1000
+        hm.SetVRWWWL(ww3, wl3, label3)
+        hm.SetObjectAlpha(0.8, label3)
+        hm.SetTransferFunc(tf3)
+        
+
     elif vol_type == 4:
         itk_mask = sitk.ReadImage(f'{file_path}/neckcta_mask.nii.gz')
         npmaskdata = sitk.GetArrayFromImage(itk_mask)
@@ -221,7 +262,7 @@ def set_volume_type(
         hm.SetObjectAlpha(1, label1)
         hm.SetTransferFunc(tf1)
 
-    hm.SetVRSize(800, 600)
+    hm.SetVRSize(512, 512)
 
     return {
         'message': 'successful'
@@ -251,8 +292,7 @@ def set_line_index(
         if line_index == 1:
             cpr_line = np.array(lines.get('line1', []))
         elif line_index == 2:
-            cpr_line = np.array(
-            )
+            cpr_line = np.array([])
     hm = get_monkey_instance(uid)
     hm.SetCPRLinePatientArray(cpr_line)
 

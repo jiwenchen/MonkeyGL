@@ -48,11 +48,13 @@ namespace MonkeyGL{
             red = r;
             green = g;
             blue = b;
+            trim();
         }
         RGB operator*= (float r){
             this->red *= r;
             this->green *= r;
             this->blue *= r;
+            this->trim();
             return *this;
         }
         RGB operator* (float r){
@@ -60,8 +62,28 @@ namespace MonkeyGL{
             clr.red = red * r;
             clr.green = green * r;
             clr.blue = blue * r;
+            clr.trim();
             return clr;
         }
+
+        RGB operator+ (float d){
+            RGB clr;
+            clr.red = red + d;
+            clr.green = green + d;
+            clr.blue = blue + d;
+            clr.trim();
+            return clr;
+        }
+
+        void trim(){
+            red = red<0 ? 0 : red;
+            red = red>1 ? 1 : red;
+            green = green<0 ? 0 : green;
+            green = green>1 ? 1 : green;
+            blue = blue<0 ? 0 : blue;
+            blue = blue>1 ? 1 : blue;
+        }
+
         void Print(){
             cout << "red: " << red << endl; 
             cout << "green: " << green << endl; 

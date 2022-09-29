@@ -196,14 +196,52 @@ def test_instance():
     hm2 = {}
 
     pass
-    
 
+
+def test_png():
+    import cv2
+    import copy
+    folder = './data/charimgs'
+
+    chs = [
+        "~", "`", "·", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "-", "+", "=", \
+        "[", "]", "{", "}", "\\", "|", ";", "'", ":", "\"", ",", ".", "/", "<", ">", "?", \
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", \
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", \
+        "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", \
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", \
+        "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+    ];
+
+    chs_name = [
+        "~", "`", "·", "！", "@", "#", "$", "%", "^", "&", "＊", "(", ")", "_", "-", "+", "=", \
+        "[", "]", "{", "}", "＼", "｜", "；", "‘", "：", "”", "，", "。", "／", "＜", "＞", "？", \
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", \
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", \
+        "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", \
+        "AA", "BB", "CC", "DD", "EE", "FF", "GG", "HH", "II", "JJ", "KK", "LL", "M M", "NN", \
+        "OO", "PP", "QQ", "RR", "SS", "TT", "UU", "V V", "WW", "XX", "YY", "ZZ"
+    ]
+
+    for i in range(70, 95):
+        ch = chs_name[i]
+        img = cv2.imread(f"{folder}/{ch}.png", cv2.IMREAD_UNCHANGED)
+        # if img is None:
+        # print (ch)
+
+        hm = mk.HelloMonkey()
+        img1 = copy.deepcopy(img[:,:,0])
+        npdatat = img1.swapaxes(1,0)
+        
+        hm.Transfer2Base64Array(npdatat)
+    pass
 
 if __name__ == "__main__":
+    test_png()
     # test_objs()
     # test_set_data()
     # test_load_nrrd()
-    test_instance()
+    # test_instance()
 
     # for i in range(100):
     #     time.sleep(1)

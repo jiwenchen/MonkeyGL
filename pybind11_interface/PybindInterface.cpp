@@ -77,6 +77,20 @@ std::shared_ptr<T> _arrays_3d_to_ptr(py::array_t<T> npData, int& nWidth, int& nH
     return pData;
 }
 
+template<typename T>
+std::shared_ptr<T> _arrays_2d_to_ptr(py::array_t<T> npData, int& nWidth, int& nHeight) {
+    py::buffer_info buf = npData.request();
+    nWidth = buf.shape[0];
+    nHeight = buf.shape[1];
+    int cnt = buf.size;
+
+    T* ptr = (T*)buf.ptr;
+    std::shared_ptr<T> pData(new T[cnt * sizeof(T)]);
+
+    memcpy(pData.get(), ptr, cnt*sizeof(T));
+    return pData;
+}
+
 std::vector<Point3d> _arrays_3d_to_points(py::array_t<float> cprLineArray) {
     std::vector<Point3d> cprLine;
     py::buffer_info buf = cprLineArray.request();
@@ -110,6 +124,13 @@ public:
         int nDepth = 0;
         std::shared_ptr<short> pData = _arrays_3d_to_ptr(npData, nWidth, nHeight, nDepth);
         return SetVolumeData(pData, nWidth, nHeight, nDepth);
+    };
+
+    virtual void Transfer2Base64Array(py::array_t<unsigned char> npData){
+        int nWidth = 0;
+        int nHeight = 0;
+        std::shared_ptr<unsigned char> pData = _arrays_2d_to_ptr(npData, nWidth, nHeight);
+        return Transfer2Base64(pData.get(), nWidth, nHeight);
     };
 
     virtual unsigned char AddNewObjectMaskArray(py::array_t<unsigned char> npData){
@@ -287,6 +308,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetVRSize", &pyHelloMonkey::SetVRSize)
         .def("ShowPlaneInVR", &pyHelloMonkey::ShowPlaneInVR)
         .def("SetPlaneIndex", &pyHelloMonkey::SetPlaneIndex)
+        .def("Transfer2Base64Array", &pyHelloMonkey::Transfer2Base64Array)
 
         .def("GetZoomRatio", &pyHelloMonkey::GetZoomRatio)
         .def("GetPlaneCurrentIndex", &pyHelloMonkey::GetPlaneCurrentIndex)

@@ -72,6 +72,7 @@ set(SRC_LIST
   ./core/Point.cpp
   ./core/Render.cpp
   ./core/StopWatch.cpp
+  ./core/AnnotationUtils.cpp
   ./core/TransferFunction.cpp
   ./core/VolumeInfo.cpp
   ./core/CuDataInfo.cu

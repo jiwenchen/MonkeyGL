@@ -635,6 +635,7 @@ bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 
 void Render::MergeOrientationBox(unsigned char* pVR, int nWidth, int nHeight)
 {
+	StopWatch sw("Render::MergeOrientationBox");
 	int nW_Box = 64, nH_Box=64;
 	if (nWidth <= nW_Box || nHeight <= nH_Box){
 		return;
@@ -666,7 +667,8 @@ void Render::MergeOrientationBox(unsigned char* pVR, int nWidth, int nHeight)
 				int xIdx = (x + nW_Box - nWidth) * 8;
 				float diffuse = pImage.get()[yIdx*w+xIdx];
 				if (diffuse > 0){
-					RGB clrTemp = clr * diffuse;	
+					RGB clrTemp = clr * diffuse;
+					clrTemp = clrTemp + 0.05;
 					int red = int(clrTemp.red * 255);
 					int green = int(clrTemp.green * 255);
 					int blue = int(clrTemp.blue * 255);

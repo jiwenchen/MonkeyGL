@@ -28,6 +28,7 @@
 #include "fpng/fpng.h"
 #include "Logger.h"
 #include "Methods.h"
+#include "AnnotationUtils.h"
 
 using namespace MonkeyGL;
 
@@ -50,6 +51,17 @@ HelloMonkey::HelloMonkey()
 
 	_pRender.reset(new Render());
 	m_bShowCPRLineInVR = false;
+
+	AnnotationUtils::Init();
+}
+
+void HelloMonkey::Transfer2Base64(unsigned char* pData, int nWidth, int nHeight)
+{	
+	std::string strBase64 = "";
+	{
+		strBase64 = Base64::Encode(pData, nWidth*nHeight);
+	}
+	printf("\"%s\",\n", strBase64.c_str());
 }
 
 HelloMonkey::~HelloMonkey(void)
@@ -335,6 +347,20 @@ std::vector<uint8_t> HelloMonkey::GetVRData_png(int nWidth, int nHeight)
 		StopWatch sw("GetVRData");
 		if (!_pRender->GetVRData(pVR.get(), nWidth, nHeight))
 			return out_buf;
+
+		{
+			StopWatch sw("Textout2Image");
+			AnnotationUtils::SetFontSize(FontSizeBig);
+			AnnotationUtils::Textout2Image("MonkeyGL_005461325464211<=", 10, 200, pVR.get(), nWidth, nHeight);
+
+			AnnotationUtils::SetFontSize(FontSizeMiddle);
+			int w, h;
+			AnnotationUtils::GetSize("Sanasdfa;ajgsdfQian~30<*?", w, h);
+			AnnotationUtils::Textout2Image("Sanasdfa;ajgsdfQian~30<*?", 512-w-5, 280, pVR.get(), nWidth, nHeight);
+
+			AnnotationUtils::SetFontSize(FontSizeSmall);
+			AnnotationUtils::Textout2Image("Hello*WorldZz", 10, 500, pVR.get(), nWidth, nHeight);
+		}
 
 		if (m_bShowCPRLineInVR)
 		{

@@ -127,6 +127,8 @@ namespace MonkeyGL {
         // plane in VR
         virtual void ShowPlaneInVR(bool bShow);
 
+        virtual void Transfer2Base64(unsigned char* pData, int nWidth, int nHeight);
+
     private:
         bool m_bShowCPRLineInVR;
         int m_nWidth_VR;
