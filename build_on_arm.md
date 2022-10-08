@@ -9,13 +9,13 @@ CPU: Cortex-A57 (Arm64) /4G Memory
 GPU: Nvidia Tegra X1 Maxwell架构 (128Core)  
 GCC: 7.5.0 
   
-# execute build command
+# process of build
 git clone https://github.com/jiwenchen/MonkeyGL  
 following REAMD.md，then execute two command in sequence:    
 1. `MonkeyGL/build.sh cpp Debug`  
 2. `MonkeyGL/build.sh pybind Debug` 
   
-# Problem solving during build
+# Problem solving during building
 ## cuda installation
 Install_scripts/cuda_install_ubuntu.sh does not work on Arm64 platform.  
 By default, `sudo apt-get install cuda` seems to support amd64 only.  
