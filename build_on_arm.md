@@ -21,13 +21,13 @@ CUDA 10.2 is installed.
 ## upgrade cmake
 In ubuntu18.04, cmake 3.10 is shipped. MonkeyGL need at least 3.16 or higher.  
 Go to cmake official site and download binary.  
-set a symbolic link from /usr/bin/cmake to newly downloaded cmake.    
+set a symbolic link from `/usr/bin/cmake` to newly downloaded cmake.    
 Finally the latest 3.24 is used.  
 
 ## No cpp switch in `./build.sh cpp Debug`
 During executing "./build.sh cpp Debug", encounter following errors：  
-1. “C++ error: unrecognized command line option '-msse4.1'”  
-2. “C++ error: unrecognized command line option '-mpclmul'”  
+1. `C++ error: unrecognized command line option '-msse4.1'` 
+2. `C++ error: unrecognized command line option '-mpclmul'`  
  
 It's very possible that these two swiches are not supported in arm64 architecture.   
 Use `find .|xargs | grep -ri ‘msse’` to search all possible occurrence and remove them. 
