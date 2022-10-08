@@ -1,3 +1,7 @@
+**MonkeyGL** is a great open source fast image rendering library base on CUDA and ITK.   
+It reduces dependency on other GL library like OpenGL, and provides a python interface to improve usability.   
+Following text focuses on building MonkeyGL on arm64 CPU platform to prove its platform compatibility.  
+  
 # Hardware and software environment
 Hardware：Nvidia Jetson Nano  
 OS: Ubuntu 18.04 desktop  
@@ -16,13 +20,13 @@ following REAMD.md，then execute two command in sequence:
 Install_scripts/cuda_install_ubuntu.sh does not work on Arm64 platform.  
 By default, `sudo apt-get install cuda` seems to support amd64 only.  
 Go to CUDA toolkit website and download binary to finish CUDA installation.  
-CUDA 10.2 is installed.
+[CUDA 10.2](https://developer.nvidia.com/cuda-10.2-download-archive) is installed.  
 
 ## upgrade cmake
 In ubuntu18.04, cmake 3.10 is shipped. MonkeyGL need at least 3.16 or higher.  
 Go to cmake official site and download binary.  
 set a symbolic link from `/usr/bin/cmake` to newly downloaded cmake.    
-Finally the latest 3.24 is used.  
+[cmake 3.24](https://cmake.org/download/) is used.   
 
 ## No cpp switch in `./build.sh cpp Debug`
 During executing "./build.sh cpp Debug", encounter following errors：  
@@ -46,4 +50,5 @@ But **NOT very sure** of its impact to result of calculation.
 ## problem in `./build.sh pybind Debug`
 pyMonkeyGL.so should be in `MonkeyGL/build` directory. But actually it's in `MonkeyGL/`。  
 You need to manually copy file to target directory.
-
+  
+Finally build succeed! Let's enjoy MonkeyGL together.
