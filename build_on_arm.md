@@ -8,8 +8,8 @@ GCC: 7.5.0
 # execute build command
 git clone https://github.com/jiwenchen/MonkeyGL  
 following REAMD.md，then execute two command in sequence:    
-  MonkeyGL/build.sh cpp Debug  
-  MonkeyGL/build.sh pybind Debug  
+1. MonkeyGL/build.sh cpp Debug  
+2. MonkeyGL/build.sh pybind Debug  
   
 # Problem solving during build
 ## cuda installation
@@ -26,8 +26,8 @@ Finally the latest 3.24 is used.
 
 ## No cpp switch in `./build.sh cpp Debug`
 During executing "./build.sh cpp Debug", encounter following errors：  
-“C++ error: unrecognized command line option '-msse4.1'”  
-“C++ error: unrecognized command line option '-mpclmul'”  
+1. “C++ error: unrecognized command line option '-msse4.1'”  
+2. “C++ error: unrecognized command line option '-mpclmul'”  
  
 It's very possible that these two swiches are not supported in arm64 architecture.   
 Use `find .|xargs | grep -ri ‘msse’` to search all possible occurrence and remove them. 
@@ -35,12 +35,13 @@ These switches are found in flags.make, links.txt and CMakeLists.txt.
 In build.sh, change `-DSSE=1` to be `-DSSE=0`, and close SSE switch.
   
 ## problem in `make`
-During 'make', a problem is found with `narrowing conversion of '-2' from int to char`  
-There is a solution, that is change `char []` to be `singed char []`.
-After fixing following two files, 'make' can be done.
-MonekeyGL/core/Base64.hpp  
-MonekeyGL/core/MarchingCube.cpp  
-But NOT very sure of its impact to result of calculation.
+During 'make', a problem is found with `narrowing conversion of '-2' from int to char`   
+There is a solution, that is change `char []` to be `singed char []`.  
+After fixing following two files, 'make' can be done.  
+1. MonekeyGL/core/Base64.hpp  
+2. MonekeyGL/core/MarchingCube.cpp   
+
+But **NOT very sure** of its impact to result of calculation.
   
 ## problem in `./build.sh pybind Debug`
 pyMonkeyGL.so should be in `MonkeyGL/build` directory. But actually it's in `MonkeyGL/`。  
