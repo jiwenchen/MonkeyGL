@@ -1,15 +1,15 @@
 # Hardware and software environment
 Hardware：Nvidia Jetson Nano  
-OS:Ubuntu 18.04 desktop  
-CPU:Cortex-A57 (Arm64) /4G Memory   
+OS: Ubuntu 18.04 desktop  
+CPU: Cortex-A57 (Arm64) /4G Memory   
 GPU: Nvidia Tegra X1 Maxwell架构 (128Core)  
 GCC: 7.5.0 
   
 # execute build command
 git clone https://github.com/jiwenchen/MonkeyGL  
 following REAMD.md，then execute two command in sequence:    
-1. MonkeyGL/build.sh cpp Debug  
-2. MonkeyGL/build.sh pybind Debug  
+1. `MonkeyGL/build.sh cpp Debug`  
+2. `MonkeyGL/build.sh pybind Debug` 
   
 # Problem solving during build
 ## cuda installation
