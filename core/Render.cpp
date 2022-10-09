@@ -565,7 +565,7 @@ bool Render::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType
 		m_dataMan.GetPlaneSize(nWidth, nHeight, planeType);
 		Point3d ptCrossHair = m_dataMan.GetCrossHair();
 		Point3d ptDelta = ptCrossHair - m_dataMan.GetCenterPoint();
-		Point3d ptRotate = Methods::matrixMul(m_pTransposeTransformMatrix, ptDelta);
+		Point3d ptRotate = Methods::MatrixMul(m_pTransposeTransformMatrix, ptDelta);
 
 		double x = ptRotate.x();
 		double z = ptRotate.z();
@@ -876,7 +876,7 @@ bool Render::TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeig
 	pt -= Point3d(0.5, 0.5, 0.5);
 	pt /= maxper;
 
-	pt = Methods::matrixMul(m_pTransposeTransformMatrix, pt);
+	pt = Methods::MatrixMul(m_pTransposeTransformMatrix, pt);
 	fx = (pt.x() + 0.5) * nWidth + m_fTotalXTranslate;
 	fy = (pt.z() + 0.5) * nHeight + m_fTotalYTranslate;
 

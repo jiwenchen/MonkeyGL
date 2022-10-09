@@ -82,9 +82,9 @@ void Methods::ComputeTransformMatrix(
 	Rz[3] = -sin((fzRotate)/180.0f*PI);
 	Rz[4] = cos((fzRotate)/180.0f*PI);
 
-	matrixMul(pTransformMatrix, pTransformMatrix, S,  3, 3, 3);
-	matrixMul(pTransformMatrix, pTransformMatrix, Rz, 3, 3, 3);
-	matrixMul(pTransformMatrix, pTransformMatrix, Rx, 3, 3, 3);
+	MatrixMul(pTransformMatrix, pTransformMatrix, S,  3, 3, 3);
+	MatrixMul(pTransformMatrix, pTransformMatrix, Rz, 3, 3, 3);
+	MatrixMul(pTransformMatrix, pTransformMatrix, Rx, 3, 3, 3);
 
 	Rx[4] = cos((fxRotate)/180.0f*PI);
 	Rx[5] = -sin((fxRotate)/180.0f*PI);
@@ -96,8 +96,8 @@ void Methods::ComputeTransformMatrix(
 	Rz[3] = -sin((fzRotate)/180.0f*PI);
 	Rz[4] = cos((fzRotate)/180.0f*PI);
 
-	matrixMul(Temp, Rx, Rz,  3, 3, 3);
-	matrixMul(pRotateMatrix, Temp, pRotateMatrix, 3, 3, 3);
+	MatrixMul(Temp, Rx, Rz,  3, 3, 3);
+	MatrixMul(pRotateMatrix, Temp, pRotateMatrix, 3, 3, 3);
 
 	//-------------------------------------------------------
 	RxT[4] = cos((fxRotate)/180.0f*PI);
@@ -114,9 +114,9 @@ void Methods::ComputeTransformMatrix(
 	ST[3] = 0.0f;	ST[4] = fScale;	ST[5] = 0.0f;
 	ST[6] = 0.0f;	ST[7] = 0.0f;	ST[8] = fScale;
 
-	matrixMul(Temp, RxT, RzT,  3, 3, 3);
-	matrixMul(Temp, Temp, ST, 3, 3, 3);
-	matrixMul(pTransposeTransformMatrix, Temp, pTransposeTransformMatrix, 3, 3, 3);
+	MatrixMul(Temp, RxT, RzT,  3, 3, 3);
+	MatrixMul(Temp, Temp, ST, 3, 3, 3);
+	MatrixMul(pTransposeTransformMatrix, Temp, pTransposeTransformMatrix, 3, 3, 3);
 
 	RxT[4] = cos((fxRotate)/180.0f*PI);
 	RxT[5] = sin((fxRotate)/180.0f*PI);
@@ -128,11 +128,11 @@ void Methods::ComputeTransformMatrix(
 	RzT[3] = sin((fzRotate)/180.0f*PI);
 	RzT[4] = cos((fzRotate)/180.0f*PI);
 
-	matrixMul(pTransposRotateMatrix, pTransposRotateMatrix, RzT, 3, 3, 3);
-	matrixMul(pTransposRotateMatrix, pTransposRotateMatrix, RxT, 3, 3, 3);
+	MatrixMul(pTransposRotateMatrix, pTransposRotateMatrix, RzT, 3, 3, 3);
+	MatrixMul(pTransposRotateMatrix, pTransposRotateMatrix, RxT, 3, 3, 3);
 }
 
-void Methods::matrixMul( float *pDst, float *pSrc1, float *pSrc2, int nH1, int nW1, int nW2 )
+void Methods::MatrixMul( float *pDst, float *pSrc1, float *pSrc2, int nH1, int nW1, int nW2 )
 {
 	int i, j, k;
 
@@ -153,7 +153,7 @@ void Methods::matrixMul( float *pDst, float *pSrc1, float *pSrc2, int nH1, int n
 	delete [] pTemp;
 }
 
-Point3d Methods::matrixMul( float *fMatrix, Point3d pt )
+Point3d Methods::MatrixMul( float *fMatrix, Point3d pt )
 {
 	double x = fMatrix[0]*pt.x() + fMatrix[1]*pt.y() + fMatrix[2]*pt.z();
 	double y = fMatrix[3]*pt.x() + fMatrix[4]*pt.y() + fMatrix[5]*pt.z();

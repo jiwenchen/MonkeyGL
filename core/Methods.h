@@ -36,7 +36,7 @@ namespace MonkeyGL {
     public:
         static void SetSeg(float* m, int n);
 
-        static void matrixMul(
+        static void MatrixMul(
             float *pDst, 
             float *pSrc1, 
             float *pSrc2, 
@@ -44,7 +44,7 @@ namespace MonkeyGL {
             int nW1, 
             int nW2
         );
-        static Point3d matrixMul(float *fMatrix, Point3d pt);
+        static Point3d MatrixMul(float *fMatrix, Point3d pt);
 
         static void ComputeTransformMatrix(
             float* pRotateMatrix,
