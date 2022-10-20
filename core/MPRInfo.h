@@ -31,8 +31,6 @@
 
 namespace MonkeyGL
 {
-    class DataManager;
-
     class MPRInfo
     {
     public:
@@ -40,7 +38,6 @@ namespace MonkeyGL
         ~MPRInfo();
 
     public:
-        bool SetDataManager(DataManager* pDataManager);
         void SetMPRType(MPRType type);
         bool GetPlaneInfo(PlaneType planeType, PlaneInfo& info);
         void UpdateThickness(double val);
@@ -74,7 +71,6 @@ namespace MonkeyGL
         void UpdatePlaneSize(PlaneType planeType);
 
     private:
-        DataManager* m_pDataManager;
         std::map<PlaneType, PlaneInfo> m_planeInfos;
         Point3d m_ptCrossHair;
         Point3d m_ptCenter;

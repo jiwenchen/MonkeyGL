@@ -29,7 +29,6 @@ using namespace MonkeyGL;
 
 CPRInfo::CPRInfo()
 {
-	m_pDataManager = NULL;
 	m_dirStretchedCPR = Direction3d(0, 0, 1);
 	m_angleStrechedCPR = 0;
 	m_angleStraightenedCPR = 0;
@@ -40,11 +39,6 @@ CPRInfo::CPRInfo()
 
 CPRInfo::~CPRInfo()
 {
-}
-
-void CPRInfo::SetDataManager(DataManager *pDataManager)
-{
-	m_pDataManager = pDataManager;
 }
 
 void CPRInfo::SetSpacing(Point3d spacing)
@@ -166,14 +160,14 @@ bool CPRInfo::GetCPRInfoStraightened(Point3d *&pPoints, Direction3d *&pDirs, int
 
 bool CPRInfo::SetCPRLinePatient(std::vector<Point3d> cprLine)
 {
-	if (NULL == m_pDataManager)
+	if (NULL == DataManager::Instance())
 	{
 		return false;
 	}
 	m_cprLineVoxel.clear();
 	for (size_t i = 0; i < cprLine.size(); i++)
 	{
-		m_cprLineVoxel.push_back(m_pDataManager->Patient2Voxel(cprLine[i]));
+		m_cprLineVoxel.push_back(DataManager::Instance()->Patient2Voxel(cprLine[i]));
 	}
 	return UpdateCPRInfo();
 }

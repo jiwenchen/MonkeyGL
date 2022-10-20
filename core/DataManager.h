@@ -40,6 +40,8 @@ namespace MonkeyGL {
         ~DataManager(void);
 
     public:
+        static DataManager* Instance();
+        
         bool LoadVolumeFile(const char* szFile);
         bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
         unsigned char AddObjectMaskFile(const char* szFile);

@@ -31,12 +31,20 @@ DataManager::DataManager(void)
 {
 	m_activeLabel = -1;
 	m_objectInfos.clear();
-	m_mprInfo.SetDataManager(this);
-	m_cprInfo.SetDataManager(this);
 }
 
 DataManager::~DataManager(void)
 {
+}
+
+DataManager* DataManager::Instance()
+{
+	static DataManager* pDataManager = NULL;
+	if (NULL == pDataManager)
+	{
+		pDataManager = new DataManager();
+	}
+	return pDataManager;
 }
 
 void DataManager::ClearAndReset()

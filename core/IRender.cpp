@@ -22,6 +22,7 @@
 
 #include "IRender.h"
 #include "Logger.h"
+#include "DataManager.h"
 
 using namespace MonkeyGL;
 
@@ -36,98 +37,98 @@ IRender::~IRender(void)
 
 bool IRender::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
 {
-	return m_dataMan.SetVolumeData(pData, nWidth, nHeight, nDepth);
+	return DataManager::Instance()->SetVolumeData(pData, nWidth, nHeight, nDepth);
 }
 
 unsigned char IRender::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth)
 {
-	return m_dataMan.AddNewObjectMask(pData, nWidth, nHeight, nDepth);
+	return DataManager::Instance()->AddNewObjectMask(pData, nWidth, nHeight, nDepth);
 }
 
 unsigned char IRender::AddObjectMaskFile( const char* szFile )
 {
-	return m_dataMan.AddObjectMaskFile(szFile);
+	return DataManager::Instance()->AddObjectMaskFile(szFile);
 }
 
 bool IRender::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth, const unsigned char& nLabel)
 {
-	return m_dataMan.UpdateObjectMask(pData, nWidth, nHeight, nDepth, nLabel);
+	return DataManager::Instance()->UpdateObjectMask(pData, nWidth, nHeight, nDepth, nLabel);
 }
 
 void IRender::LoadVolumeFile( const char* szFile )
 {
-	m_dataMan.LoadVolumeFile(szFile);
+	DataManager::Instance()->LoadVolumeFile(szFile);
 }
 
 void IRender::SetDirection( Direction3d dirX, Direction3d dirY, Direction3d dirZ )
 {
-	m_dataMan.SetDirection(dirX, dirY, dirZ);
+	DataManager::Instance()->SetDirection(dirX, dirY, dirZ);
 }
 
 void IRender::SetSpacing( double x, double y, double z )
 {
-	m_dataMan.SetSpacing(x, y, z);
+	DataManager::Instance()->SetSpacing(x, y, z);
 }
 
 void IRender::SetOrigin(Point3d pt)
 {
-	m_dataMan.SetOrigin(pt);
+	DataManager::Instance()->SetOrigin(pt);
 }
 
 void IRender::Reset()
 {
-	m_dataMan.Reset();
+	DataManager::Instance()->Reset();
 }
 
 
 bool IRender::SetTransferFunc(std::map<int, RGBA> ctrlPts)
 {
-	return m_dataMan.SetControlPoints_TF(ctrlPts);
+	return DataManager::Instance()->SetControlPoints_TF(ctrlPts);
 }
 
 bool IRender::SetTransferFunc(std::map<int, RGBA> ctrlPts, unsigned char nLabel)
 {
-	return m_dataMan.SetControlPoints_TF(ctrlPts, nLabel);
+	return DataManager::Instance()->SetControlPoints_TF(ctrlPts, nLabel);
 }
 
 bool IRender::SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts)
 {
-	return m_dataMan.SetControlPoints_TF(rgbPts, alphaPts);
+	return DataManager::Instance()->SetControlPoints_TF(rgbPts, alphaPts);
 }
 
 bool IRender::SetTransferFunc(std::map<int, RGBA> rgbPts, std::map<int, float> alphaPts, unsigned char nLabel)
 {
-	return m_dataMan.SetControlPoints_TF(rgbPts, alphaPts, nLabel);
+	return DataManager::Instance()->SetControlPoints_TF(rgbPts, alphaPts, nLabel);
 }
 
 bool IRender::LoadTransferFunction(const char* szFile)
 {
-	return m_dataMan.LoadTransferFunction(szFile);
+	return DataManager::Instance()->LoadTransferFunction(szFile);
 }
 
 bool IRender::SaveTransferFunction(const char* szFile)
 {
-	return m_dataMan.SaveTransferFunction(szFile);
+	return DataManager::Instance()->SaveTransferFunction(szFile);
 }
 
 void IRender::SetColorBackground(RGBA clrBG)
 {
-	m_dataMan.SetColorBackground(clrBG);
+	DataManager::Instance()->SetColorBackground(clrBG);
 }
 
 std::shared_ptr<short> IRender::GetVolumeData(int& nWidth, int& nHeight, int& nDepth)
 {
-	return m_dataMan.GetVolumeData(nWidth, nHeight, nDepth);
+	return DataManager::Instance()->GetVolumeData(nWidth, nHeight, nDepth);
 }
 
 std::shared_ptr<unsigned char> IRender::GetMaskData()
 {
-	return m_dataMan.GetMaskData();
+	return DataManager::Instance()->GetMaskData();
 }
 
 bool IRender::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& planeType )
 {
-	return m_dataMan.GetPlaneMaxSize(nWidth, nHeight, planeType);
+	return DataManager::Instance()->GetPlaneMaxSize(nWidth, nHeight, planeType);
 }
 
 bool IRender::GetPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType)
@@ -137,136 +138,136 @@ bool IRender::GetPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHei
 
 bool IRender::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType )
 {
-	return m_dataMan.GetCrossHairPoint(x, y, planeType);
+	return DataManager::Instance()->GetCrossHairPoint(x, y, planeType);
 }
 
 bool IRender::TransferImage2Voxel(double& x, double& y, double& z, double xImage, double yImage, PlaneType planeType)
 {
-	return m_dataMan.TransferImage2Voxel(x, y, z, xImage, yImage, planeType);
+	return DataManager::Instance()->TransferImage2Voxel(x, y, z, xImage, yImage, planeType);
 }
 
 bool IRender::GetCrossHairPoint3D( Point3d& pt )
 {
-	pt = m_dataMan.GetCrossHair();
+	pt = DataManager::Instance()->GetCrossHair();
 	return true;
 }
 
 bool IRender::GetDirection( Direction2d& dirH, Direction2d& dirV, const PlaneType& planeType )
 {
-	return m_dataMan.GetDirection(dirH, dirV, planeType);
+	return DataManager::Instance()->GetDirection(dirH, dirV, planeType);
 }
 
 bool IRender::GetDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, const PlaneType& planeType )
 {
-	return m_dataMan.GetDirection3D(dir3dH, dir3dV, planeType);
+	return DataManager::Instance()->GetDirection3D(dir3dH, dir3dV, planeType);
 }
 
 bool IRender::GetBatchDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, double fAngle, const PlaneType& planeType )
 {
-	return m_dataMan.GetBatchDirection3D(dir3dH, dir3dV, fAngle, planeType);
+	return DataManager::Instance()->GetBatchDirection3D(dir3dH, dir3dV, fAngle, planeType);
 }
 
 void IRender::Browse( float fDelta, PlaneType planeType )
 {
-	m_dataMan.Browse(fDelta, planeType);
+	DataManager::Instance()->Browse(fDelta, planeType);
 }
 
 void IRender::SetPlaneIndex( int index, PlaneType planeType )
 {
-	m_dataMan.SetPlaneIndex(index, planeType);
+	DataManager::Instance()->SetPlaneIndex(index, planeType);
 }
 
 void IRender::PanCrossHair( float fx, float fy, PlaneType planeType )
 {
-	m_dataMan.PanCrossHair(fx, fy, planeType);
+	DataManager::Instance()->PanCrossHair(fx, fy, planeType);
 }
 
 void IRender::RotateCrossHair( float fAngle, PlaneType planeType )
 {
-	m_dataMan.RotateCrossHair(fAngle, planeType);
+	DataManager::Instance()->RotateCrossHair(fAngle, planeType);
 }
 
 double IRender::GetPixelSpacing( PlaneType planeType )
 {
-	return m_dataMan.GetPixelSpacing(planeType);
+	return DataManager::Instance()->GetPixelSpacing(planeType);
 }
 
 bool IRender::GetPlaneIndex( int& index, PlaneType planeType )
 {
-	return m_dataMan.GetPlaneIndex(index, planeType);
+	return DataManager::Instance()->GetPlaneIndex(index, planeType);
 }
 
 bool IRender::GetPlaneNumber( int& nTotalNum, PlaneType planeType )
 {
-	return m_dataMan.GetPlaneNumber(nTotalNum, planeType);
+	return DataManager::Instance()->GetPlaneNumber(nTotalNum, planeType);
 }
 
 bool IRender::GetPlaneRotateMatrix( float* pMatirx, PlaneType planeType )
 {
-	return m_dataMan.GetPlaneRotateMatrix(pMatirx, planeType);
+	return DataManager::Instance()->GetPlaneRotateMatrix(pMatirx, planeType);
 }
 
 void IRender::UpdateThickness( double val )
 {
-	m_dataMan.UpdateThickness(val);
+	DataManager::Instance()->UpdateThickness(val);
 }
 
 void IRender::SetThickness(double val, PlaneType planeType)
 {
-	m_dataMan.SetThickness(val, planeType);
+	DataManager::Instance()->SetThickness(val, planeType);
 }
 
 double IRender::GetThickness(PlaneType planeType)
 {
-	return m_dataMan.GetThickness(planeType);
+	return DataManager::Instance()->GetThickness(planeType);
 }
 
 void IRender::SetMPRType(MPRType type)
 {
-	m_dataMan.SetMPRType(type);
+	DataManager::Instance()->SetMPRType(type);
 }
 
 bool IRender::SetVRWWWL(float fWW, float fWL)
 {
-	return m_dataMan.SetVRWWWL(fWW, fWL);
+	return DataManager::Instance()->SetVRWWWL(fWW, fWL);
 }
 
 bool IRender::SetVRWWWL(float fWW, float fWL, unsigned char nLabel)
 {
-	return m_dataMan.SetVRWWWL(fWW, fWL, nLabel);
+	return DataManager::Instance()->SetVRWWWL(fWW, fWL, nLabel);
 }
 
 bool IRender::SetObjectAlpha(float fAlpha)
 {
-	return m_dataMan.SetObjectAlpha(fAlpha);
+	return DataManager::Instance()->SetObjectAlpha(fAlpha);
 }
 
 bool IRender::SetObjectAlpha(float fAlpha, unsigned char nLabel)
 {
-	return m_dataMan.SetObjectAlpha(fAlpha, nLabel);
+	return DataManager::Instance()->SetObjectAlpha(fAlpha, nLabel);
 }
 
 bool IRender::SetCPRLinePatient(std::vector<Point3d> cprLine)
 {
-	return m_dataMan.SetCPRLinePatient(cprLine);
+	return DataManager::Instance()->SetCPRLinePatient(cprLine);
 }
 
 bool IRender::SetCPRLineVoxel(std::vector<Point3d> cprLine)
 {
-	return m_dataMan.SetCPRLineVoxel(cprLine);
+	return DataManager::Instance()->SetCPRLineVoxel(cprLine);
 }
 
 std::vector<Point3d> IRender::GetCPRLineVoxel()
 {
-	return m_dataMan.GetCPRLineVoxel();
+	return DataManager::Instance()->GetCPRLineVoxel();
 }
 
 bool IRender::RotateCPR(float angle, PlaneType planeType)
 {
-	return m_dataMan.RotateCPR(angle, planeType);
+	return DataManager::Instance()->RotateCPR(angle, planeType);
 }
 
 void IRender::ShowPlaneInVR(bool bShow)
 {
-	return m_dataMan.ShowPlaneInVR(bShow);
+	return DataManager::Instance()->ShowPlaneInVR(bShow);
 }

@@ -26,6 +26,7 @@
 #include "StopWatch.h"
 #include "TransferFunction.h"
 #include "Logger.h"
+#include "DataManager.h"
 
 using namespace MonkeyGL;
 
@@ -256,7 +257,7 @@ void Render::UpdateTransferFunctions()
 	std::shared_ptr<RGBA> ptfBuffer(NULL);
 	int ntfLength = 0;
 
-	std::map<unsigned char, ObjectInfo> objectInfos = m_dataMan.GetObjectInfos();
+	std::map<unsigned char, ObjectInfo> objectInfos = DataManager::Instance()->GetObjectInfos();
 	for (std::map<unsigned char, ObjectInfo>::iterator iter=objectInfos.begin(); iter!=objectInfos.end(); iter++){
 		if (iter->second.GetTransferFunction(ptfBuffer, ntfLength))
 		{
@@ -303,7 +304,7 @@ bool Render::SetObjectAlpha(float fAlpha, unsigned char nLabel)
 
 void Render::UpdateAlphaWWWL()
 {
-	std::map<unsigned char, ObjectInfo> objectInfos = m_dataMan.GetObjectInfos();
+	std::map<unsigned char, ObjectInfo> objectInfos = DataManager::Instance()->GetObjectInfos();
 	for (std::map<unsigned char, ObjectInfo>::iterator iter=objectInfos.begin(); iter!=objectInfos.end(); iter++){
 		unsigned char label = iter->first;
 		ObjectInfo info = iter->second;
@@ -317,11 +318,11 @@ bool Render::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight,
 	if (!IRender::SetVolumeData(pData, nWidth, nHeight, nDepth))
 		return false;
 
-	m_VolumeSize.width = m_dataMan.GetDim(0);
-	m_VolumeSize.height = m_dataMan.GetDim(1);
-	m_VolumeSize.depth = m_dataMan.GetDim(2);
+	m_VolumeSize.width = DataManager::Instance()->GetDim(0);
+	m_VolumeSize.height = DataManager::Instance()->GetDim(1);
+	m_VolumeSize.depth = DataManager::Instance()->GetDim(2);
 
-	m_cuDataInfo.CopyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize);
+	m_cuDataInfo.CopyVolumeData(DataManager::Instance()->GetVolumeData().get(), m_VolumeSize);
 
 	return true;
 }
@@ -332,7 +333,7 @@ unsigned char Render::AddNewObjectMask(std::shared_ptr<unsigned char>pData, int 
 	if (nLabel == 0)
 		return 0;
 
-	m_cuDataInfo.CopyMaskData(m_dataMan.GetMaskData().get(), m_VolumeSize);
+	m_cuDataInfo.CopyMaskData(DataManager::Instance()->GetMaskData().get(), m_VolumeSize);
 
 	return nLabel;
 }
@@ -343,7 +344,7 @@ unsigned char Render::AddObjectMaskFile(const char* szFile)
 	if (nLabel == 0)
 		return 0;
 
-	m_cuDataInfo.CopyMaskData(m_dataMan.GetMaskData().get(), m_VolumeSize);
+	m_cuDataInfo.CopyMaskData(DataManager::Instance()->GetMaskData().get(), m_VolumeSize);
 
 	return nLabel;
 }
@@ -353,7 +354,7 @@ bool Render::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWidth, i
 	if (!IRender::AddNewObjectMask(pData, nWidth, nHeight, nDepth))
 		return false;
 
-	m_cuDataInfo.CopyMaskData(m_dataMan.GetMaskData().get(), m_VolumeSize);
+	m_cuDataInfo.CopyMaskData(DataManager::Instance()->GetMaskData().get(), m_VolumeSize);
 
 	return true;
 }
@@ -364,12 +365,12 @@ void Render::LoadVolumeFile( const char* szFile )
 	
 	IRender::LoadVolumeFile(szFile);
 
-	m_VolumeSize.width = m_dataMan.GetDim(0);
-	m_VolumeSize.height = m_dataMan.GetDim(1);
-	m_VolumeSize.depth = m_dataMan.GetDim(2);
+	m_VolumeSize.width = DataManager::Instance()->GetDim(0);
+	m_VolumeSize.height = DataManager::Instance()->GetDim(1);
+	m_VolumeSize.depth = DataManager::Instance()->GetDim(2);
 
-	m_cuDataInfo.CopyVolumeData(m_dataMan.GetVolumeData().get(), m_VolumeSize);
-	InitCommon(m_dataMan.GetSpacing(0), m_dataMan.GetSpacing(1), m_dataMan.GetSpacing(2), m_VolumeSize);
+	m_cuDataInfo.CopyVolumeData(DataManager::Instance()->GetVolumeData().get(), m_VolumeSize);
+	InitCommon(DataManager::Instance()->GetSpacing(0), DataManager::Instance()->GetSpacing(1), DataManager::Instance()->GetSpacing(2), m_VolumeSize);
 }
 
 void Render::NormalizeVOI()
@@ -411,7 +412,7 @@ bool Render::GetPlaneData( std::shared_ptr<short>& pData, int& nWidth, int& nHei
 
 bool Render::GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType)
 {
-	if (!m_dataMan.GetPlaneSize(nWidth, nHeight, planeType))
+	if (!DataManager::Instance()->GetPlaneSize(nWidth, nHeight, planeType))
 		return false;
 
 	if (nWidth % 2) // just for fpng
@@ -421,14 +422,14 @@ bool Render::GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nH
 	pData.reset(new short[nWidth*nHeight]);
 
 	PlaneInfo info;
-	if (!m_dataMan.GetPlaneInfo(planeType, info))
+	if (!DataManager::Instance()->GetPlaneInfo(planeType, info))
 		return false;
 
 	Direction3d& dirH = info.m_dirH;
 	Direction3d& dirV = info.m_dirV;
 	Direction3d dirN = info.GetNormDirection();
 	double fPixelSpacing = info.m_fPixelSpacing;
-	Point3d ptCenter = m_dataMan.GetCenterPointPlane(dirN);
+	Point3d ptCenter = DataManager::Instance()->GetCenterPointPlane(dirN);
 	Point3d ptLeftTop = ptCenter - dirH*(0.5*nWidth*fPixelSpacing);
 	ptLeftTop = ptLeftTop - dirV*(0.5*nHeight*fPixelSpacing);
 
@@ -471,7 +472,7 @@ bool Render::GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nH
 				dirN_cu, 
 				ptLeftTop_cu, 
 				info.m_fPixelSpacing, 
-				m_dataMan.Need2InvertZ(), 
+				DataManager::Instance()->Need2InvertZ(), 
 				halfNum
 			);
 			return true;
@@ -491,7 +492,7 @@ bool Render::GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nH
 				dirN_cu, 
 				ptLeftTop_cu, 
 				info.m_fPixelSpacing, 
-				m_dataMan.Need2InvertZ(), 
+				DataManager::Instance()->Need2InvertZ(), 
 				halfNum
 			);
 			return true;
@@ -511,7 +512,7 @@ bool Render::GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nH
 				dirN_cu, 
 				ptLeftTop_cu, 
 				info.m_fPixelSpacing, 
-				m_dataMan.Need2InvertZ(), 
+				DataManager::Instance()->Need2InvertZ(), 
 				halfNum
 			);
 			return true;
@@ -529,7 +530,7 @@ bool Render::GetCPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nH
 	Point3d* pPoints = NULL;
 	Direction3d* pDirs = NULL;
 
-	if (!m_dataMan.GetCPRInfo(pPoints, pDirs, nWidth, nHeight, planeType))
+	if (!DataManager::Instance()->GetCPRInfo(pPoints, pDirs, nWidth, nHeight, planeType))
 		return false;
 
 	pData.reset(new short[nWidth*nHeight]);
@@ -542,7 +543,7 @@ bool Render::GetCPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nH
 		m_VolumeSize,
 		(double*)pPoints, 
 		(double*)pDirs, 
-		m_dataMan.Need2InvertZ()
+		DataManager::Instance()->Need2InvertZ()
 	);
 
 	delete [] pPoints;
@@ -562,16 +563,16 @@ bool Render::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType
 	{
 		int nWidth = 0;
 		int nHeight = 0;
-		m_dataMan.GetPlaneSize(nWidth, nHeight, planeType);
-		Point3d ptCrossHair = m_dataMan.GetCrossHair();
-		Point3d ptDelta = ptCrossHair - m_dataMan.GetCenterPoint();
+		DataManager::Instance()->GetPlaneSize(nWidth, nHeight, planeType);
+		Point3d ptCrossHair = DataManager::Instance()->GetCrossHair();
+		Point3d ptDelta = ptCrossHair - DataManager::Instance()->GetCenterPoint();
 		Point3d ptRotate = Methods::MatrixMul(m_pTransposeTransformMatrix, ptDelta);
 
 		double x = ptRotate.x();
 		double z = ptRotate.z();
 
-		double xLen = m_dataMan.GetDim(0)*m_dataMan.GetSpacing(0);
-		double zLen = m_dataMan.GetDim(2)*m_dataMan.GetSpacing(2);
+		double xLen = DataManager::Instance()->GetDim(0)*DataManager::Instance()->GetSpacing(0);
+		double zLen = DataManager::Instance()->GetDim(2)*DataManager::Instance()->GetSpacing(2);
 
 		double spacing = (xLen/nWidth)>(zLen/nHeight) ? (xLen/nWidth) : (zLen/nHeight);
 		
@@ -580,7 +581,7 @@ bool Render::GetCrossHairPoint( double& x, double& y, const PlaneType& planeType
 	}
 	else
 	{
-		return m_dataMan.GetCrossHairPoint(x, y, planeType);
+		return DataManager::Instance()->GetCrossHairPoint(x, y, planeType);
 	}
 	return true;
 }
@@ -592,7 +593,7 @@ void Render::PanCrossHair( float fx, float fy, PlaneType planeType )
 	}
 	else
 	{
-		m_dataMan.PanCrossHair(fx, fy, planeType);
+		DataManager::Instance()->PanCrossHair(fx, fy, planeType);
 	}
 }
 
@@ -622,9 +623,9 @@ bool Render::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
 		m_fTotalYTranslate, 
 		m_fTotalScale,
 		m_cuDataInfo.m_h_transformMatrix, 
-		m_dataMan.Need2InvertZ(),
+		DataManager::Instance()->Need2InvertZ(),
 		m_voi_Normalize, 
-		m_dataMan.GetColorBackground(), 
+		DataManager::Instance()->GetColorBackground(), 
 		m_renderType
 	);
 
@@ -770,7 +771,7 @@ bool Render::GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInf
 					dirN_cu, 
 					ptLeftTop_cu, 
 					batchInfo.m_fPixelSpacing, 
-					m_dataMan.Need2InvertZ(), 
+					DataManager::Instance()->Need2InvertZ(), 
 					halfNum
 				);
 			}
@@ -862,15 +863,15 @@ void Render::Pan(float fxShift, float fyShift)
 
 bool Render::TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeight, Point3d ptVoxel)
 {
-	double fxSpacing = m_dataMan.GetSpacing(0);
-	double fySpacing = m_dataMan.GetSpacing(1);
-	double fzSpacing = m_dataMan.GetSpacing(2);
+	double fxSpacing = DataManager::Instance()->GetSpacing(0);
+	double fySpacing = DataManager::Instance()->GetSpacing(1);
+	double fzSpacing = DataManager::Instance()->GetSpacing(2);
 
 	float fMaxLen = max(m_VolumeSize.width*fxSpacing, max(m_VolumeSize.height*fySpacing, m_VolumeSize.depth*fzSpacing));
 	Point3d maxper(fMaxLen/(m_VolumeSize.width*fxSpacing), fMaxLen/(m_VolumeSize.height*fySpacing), fMaxLen/(m_VolumeSize.depth*fzSpacing));
 
 	Point3d pt(ptVoxel.x()/m_VolumeSize.width, ptVoxel.y()/m_VolumeSize.height, ptVoxel.z()/m_VolumeSize.depth);
-	if (m_dataMan.Need2InvertZ()){
+	if (DataManager::Instance()->Need2InvertZ()){
 		pt.SetZ(1.0 - pt.z());
 	}
 	pt -= Point3d(0.5, 0.5, 0.5);
@@ -886,7 +887,7 @@ bool Render::TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeig
 void Render::ShowPlaneInVR(bool bShow)
 {
 	IRender::ShowPlaneInVR(bShow);
-	m_cuDataInfo.CopyMaskData(m_dataMan.GetMaskData().get(), m_VolumeSize);
+	m_cuDataInfo.CopyMaskData(DataManager::Instance()->GetMaskData().get(), m_VolumeSize);
 	UpdateAlphaWWWL();
 	UpdateTransferFunctions();
 }

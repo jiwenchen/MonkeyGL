@@ -22,12 +22,12 @@
 
 #pragma once
 #include <map>
+#include <vector>
 #include "Defines.h"
 #include "VolumeInfo.h"
 #include "TransferFunction.h"
 #include "Point.h"
 #include "Direction.h"
-#include "DataManager.h"
 #include "BatchInfo.h"
 
 namespace MonkeyGL{
@@ -116,9 +116,6 @@ namespace MonkeyGL{
         virtual bool RotateCPR(float angle, PlaneType planeType);
 
         virtual void ShowPlaneInVR(bool bShow);
-
-    protected:
-        DataManager m_dataMan;
     };
 
 }

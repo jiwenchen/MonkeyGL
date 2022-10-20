@@ -28,7 +28,6 @@
 #include "Defines.h"
 
 namespace MonkeyGL {
-    class DataManager;
 
     class CPRInfo
     {
@@ -37,7 +36,6 @@ namespace MonkeyGL {
         ~CPRInfo();
 
     public:
-        void SetDataManager(DataManager* pDataManager);
         void SetSpacing(Point3d spacing);
         bool SetCPRLinePatient(std::vector<Point3d> cprLine);
         bool SetCPRLineVoxel(std::vector<Point3d> cprLine);
@@ -70,6 +68,5 @@ namespace MonkeyGL {
         double m_angleStraightenedCPR;
         Point3d m_spacing;
         double m_minSpacing;
-        DataManager* m_pDataManager;
     };
 }

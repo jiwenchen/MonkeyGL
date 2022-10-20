@@ -28,22 +28,11 @@ using namespace MonkeyGL;
 
 MPRInfo::MPRInfo()
 {
-    m_pDataManager = NULL;
 }
 
 MPRInfo::~MPRInfo()
 {
 }
-
-bool MPRInfo::SetDataManager(DataManager* pDataManager)
-{
-    if (NULL == pDataManager){
-        return false;
-    }
-    m_pDataManager = pDataManager;
-    return true;
-}
-
 
 bool MPRInfo::GetPlaneInitSize(int& nWidth, int& nHeight, int& nNumber, int dim[], double spacing[], const PlaneType& planeType)
 {
@@ -106,11 +95,11 @@ bool MPRInfo::GetPlaneInitSize(int& nWidth, int& nHeight, int& nNumber, int dim[
 
 bool MPRInfo::ResetPlaneInfos()
 {
-    if (NULL == m_pDataManager){
+    if (NULL == DataManager::Instance()){
         return false;
     }
-    int dim[3] = {m_pDataManager->GetDim(0), m_pDataManager->GetDim(1), m_pDataManager->GetDim(2)};
-    double spacing[3] = {m_pDataManager->GetSpacing(0), m_pDataManager->GetSpacing(1), m_pDataManager->GetSpacing(2)};
+    int dim[3] = {DataManager::Instance()->GetDim(0), DataManager::Instance()->GetDim(1), DataManager::Instance()->GetDim(2)};
+    double spacing[3] = {DataManager::Instance()->GetSpacing(0), DataManager::Instance()->GetSpacing(1), DataManager::Instance()->GetSpacing(2)};
 	m_ptCrossHair = Point3d(0.5*dim[0]*spacing[0], 
 							0.5*dim[1]*spacing[1], 
 							0.5*dim[2]*spacing[2]);
@@ -157,8 +146,8 @@ bool MPRInfo::ResetPlaneInfos()
 		default:
 			break;
 		}
-		info.m_fPixelSpacing = m_pDataManager->GetMinSpacing();
-		info.m_fSliceThickness = m_pDataManager->GetMinSpacing();
+		info.m_fPixelSpacing = DataManager::Instance()->GetMinSpacing();
+		info.m_fSliceThickness = DataManager::Instance()->GetMinSpacing();
 		m_planeInfos[planeType] = info;
 
 		m_ptCenter = m_ptCrossHair;
@@ -319,7 +308,7 @@ bool MPRInfo::GetPlaneIndex( int& index, const PlaneType& planeType )
 	if (!GetPlaneInfo(planeType, info))
 		return false;
 	int nTotalNumber = m_planeInfos[planeType].m_nNumber;
-	double spacing = m_pDataManager->GetMinSpacing();
+	double spacing = DataManager::Instance()->GetMinSpacing();
 	double distCrossHair2Center = Methods::Distance_Point2Plane(m_ptCrossHair, info.m_dirH, info.m_dirV, m_ptCenter);
 	int nDeltaNum = distCrossHair2Center/spacing;
 	index = nDeltaNum + (nTotalNumber-1)/2;
@@ -333,7 +322,7 @@ void MPRInfo::SetPlaneIndex( int index, PlaneType planeType )
 	PlaneInfo& info = m_planeInfos[planeType];
 	Direction3d dirN = info.GetNormDirection();
 	int nTotalNum = info.m_nNumber;
-	double spacing = m_pDataManager->GetMinSpacing();
+	double spacing = DataManager::Instance()->GetMinSpacing();
 	double dist2Center = (index - (nTotalNum-1)/2) * spacing;
 	Point3d ptProj = Methods::Projection_Point2Plane(m_ptCrossHair, info.m_dirH, info.m_dirV, m_ptCenter);
 	m_ptCrossHair = ptProj + dirN*dist2Center;
@@ -442,15 +431,15 @@ void MPRInfo::UpdatePlaneSize(PlaneType planeType)
 	PlaneInfo info;
 	if (!GetPlaneInfo(planeType, info))
 		return;
-	double xLen = m_pDataManager->GetDim(0) * m_pDataManager->GetSpacing(0);
-	double yLen = m_pDataManager->GetDim(1) * m_pDataManager->GetSpacing(1);
-	double zLen = m_pDataManager->GetDim(2) * m_pDataManager->GetSpacing(2);
-	double spacing = m_pDataManager->GetMinSpacing();
+	double xLen = DataManager::Instance()->GetDim(0) * DataManager::Instance()->GetSpacing(0);
+	double yLen = DataManager::Instance()->GetDim(1) * DataManager::Instance()->GetSpacing(1);
+	double zLen = DataManager::Instance()->GetDim(2) * DataManager::Instance()->GetSpacing(2);
+	double spacing = DataManager::Instance()->GetMinSpacing();
 
 	int nWidth = 0, nHeight = 0, nNumber = 0;
 	if (1)
 	{
-		std::vector<Point3d> ptVertexes = m_pDataManager->GetVertexes();
+		std::vector<Point3d> ptVertexes = DataManager::Instance()->GetVertexes();
 
 		double xNegative = 0, xPositive = 0;
 		double yNegative = 0, yPositive = 0;
