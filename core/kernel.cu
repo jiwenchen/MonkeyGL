@@ -24,7 +24,7 @@
 #include <helper_cuda.h>
 #include <helper_math.h>
 #include "Defines.h"
-#include "CuDataInfo.h"
+#include "CuDataManager.h"
 
 using namespace MonkeyGL;
 

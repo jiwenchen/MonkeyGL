@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "CuDataInfo.h"
+#include "CuDataManager.h"
 
 using namespace MonkeyGL;
 
@@ -31,7 +31,7 @@ void cu_copyMaskData(unsigned char* h_maskData, cudaExtent volumeSize, cudaArray
 extern "C"
 bool cu_setTransferFunc( float* pTransferFunc, int nLenTransferFunc, cudaArray*& d_transferFuncArray, cudaTextureObject_t& transferFuncTexture);
 
-CuDataInfo::CuDataInfo()
+CuDataManager::CuDataManager()
 {
     m_d_volumeArray = 0;
 	m_h_volumeTexture = 0;
@@ -43,7 +43,7 @@ CuDataInfo::CuDataInfo()
 	}
 }
 
-CuDataInfo::~CuDataInfo()
+CuDataManager::~CuDataManager()
 {
     if (m_d_volumeArray != 0)
 	{
@@ -67,22 +67,22 @@ CuDataInfo::~CuDataInfo()
 	}
 }
 
-void CuDataInfo::CopyVolumeData(short* h_volumeData, cudaExtent volumeSize)
+void CuDataManager::CopyVolumeData(short* h_volumeData, cudaExtent volumeSize)
 {
     cu_copyVolumeData(h_volumeData, volumeSize, m_d_volumeArray, m_h_volumeTexture);
 }
 
-void CuDataInfo::CopyMaskData(unsigned char* h_maskData, cudaExtent volumeSize)
+void CuDataManager::CopyMaskData(unsigned char* h_maskData, cudaExtent volumeSize)
 {
     cu_copyMaskData(h_maskData, volumeSize, m_d_maskArray, m_h_maskTexture);
 }
 
-void CuDataInfo::SetTransferFunction( float* pTransferFunc, int nLenTransferFunc, unsigned char nLabel)
+void CuDataManager::SetTransferFunction( float* pTransferFunc, int nLenTransferFunc, unsigned char nLabel)
 {
     cu_setTransferFunc(pTransferFunc, nLenTransferFunc, m_d_transferFuncArrays[nLabel], m_h_transferFuncTextures[nLabel]);
 }
 
-void CuDataInfo::CopyOperatorMatrix( float *pTransformMatrix, float *pTransposeTransformMatrix)
+void CuDataManager::CopyOperatorMatrix( float *pTransformMatrix, float *pTransposeTransformMatrix)
 {
     memcpy(&m_h_transformMatrix, pTransformMatrix, sizeof(float3x3));
 }

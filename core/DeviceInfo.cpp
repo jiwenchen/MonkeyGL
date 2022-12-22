@@ -27,7 +27,7 @@ using namespace MonkeyGL;
 
 DeviceInfo::DeviceInfo()
 {
-	bool m_bInit = false;
+	m_bInit = false;
 	m_nCount = 0;
 	m_vecProp.clear();
 
@@ -37,6 +37,8 @@ DeviceInfo::DeviceInfo()
 	if (m_nCount <= 0)
 		return;
 
+	int maxMem = -1;
+	int maxIdx = -1;
 	for (int dev = 0; dev < m_nCount; ++dev)
 	{
 		if (cudaSuccess != cudaSetDevice(dev))
@@ -50,13 +52,20 @@ DeviceInfo::DeviceInfo()
 		deviceProp.totalMem = cuDeviceProp.totalGlobalMem;
 		deviceProp.major = cuDeviceProp.major;
 		deviceProp.minor = cuDeviceProp.minor;
-
 		m_vecProp.push_back(deviceProp);
+
+		if (deviceProp.totalMem > maxMem){
+			maxMem = deviceProp.totalMem;
+			maxIdx = dev;
+		}
 	}
 
 	if (m_vecProp.size() <= 0)
 		return;
 
+	if (maxIdx >= 0){
+		cudaSetDevice(maxIdx);
+	}
 	m_bInit = true;
 }
 
@@ -72,6 +81,11 @@ DeviceInfo* DeviceInfo::Instance()
 		pDeviceInfo = new DeviceInfo();
 	}
 	return pDeviceInfo;
+}
+
+bool DeviceInfo::Initialized()
+{
+	return m_bInit;
 }
 
 bool DeviceInfo::GetCount( int& count )

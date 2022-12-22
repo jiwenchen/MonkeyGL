@@ -20,49 +20,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
-#include <string>
-#include <vector>
-#include <cstring>
+#include "CPRImageLayer.h"
+#include <driver_types.h>
+#include "vector_types.h"
+#include "DataManager.h"
 
-namespace MonkeyGL{
+using namespace MonkeyGL;
 
-    struct DeviceProp
-    {
-        char name[256];
-        unsigned long totalMem;
-        int major;
-        int minor;
+extern "C" void cu_renderCPR(
+	short *pData,
+	int width,
+	int height,
+	cudaTextureObject_t volumeTexture,
+	cudaExtent volumeSize,
+	double *pPoints,
+	double *pDirs,
+	bool invertZ);
 
-        char reserved[1024];
+CPRImageLayer::CPRImageLayer()
+: ImageLayer()
+{
+}
 
-        DeviceProp(){
-            memset(this, 0, sizeof(DeviceProp));
-        }
-    };
+CPRImageLayer::~CPRImageLayer()
+{
+}
 
-    class DeviceInfo
-    {
-    public:
-        DeviceInfo();
-        ~DeviceInfo();
+bool CPRImageLayer::GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, PlaneType planeType)
+{
+    if (PlaneStretchedCPR != planeType && PlaneStraightenedCPR != planeType){
+        return false;
+    }
 
-        static DeviceInfo* Instance();
+	Point3d *pPoints = NULL;
+	Direction3d *pDirs = NULL;
 
-    public:
-        bool Initialized();
-        bool GetCount(int& count);
-        bool GetName(std::string& strName, const int& index);
-        bool GetTotalGlobal(unsigned long& mem, const int& index);
-        bool GetMajor(int& major, const int& index);
-        bool GetMinor(int& minor, const int& index);
+	if (!DataManager::Instance()->GetCPRInfo(pPoints, pDirs, nWidth, nHeight, planeType))
+		return false;
 
-        bool SetDevice(const int& index);
+    pData.reset(new short[nWidth * nHeight]);
 
-    private:
-        bool m_bInit;
-        int m_nCount;
-        std::vector<DeviceProp> m_vecProp;
-    };
+    cu_renderCPR(
+		pData.get(),
+		nWidth,
+		nHeight,
+		DataManager::Instance()->GetCuDataManager().GetVolumeTexture(),
+		DataManager::Instance()->GetVolumeSize(),
+		(double *)pPoints,
+		(double *)pDirs,
+		DataManager::Instance()->Need2InvertZ());
 
+	delete[] pPoints;
+	delete[] pDirs;
+
+    return false;
 }

@@ -60,7 +60,7 @@ namespace MonkeyGL{
         virtual double GetThickness(PlaneType planeType);
         virtual void SetMPRType(MPRType type);
 
-        virtual bool TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeight, Point3d ptVoxel) = 0;
+        virtual bool TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeight, Point3d ptVoxel);
 
     // output
         virtual std::shared_ptr<short> GetVolumeData(int& nWidth, int& nHeight, int& nDepth);
@@ -77,7 +77,9 @@ namespace MonkeyGL{
 
         virtual double GetPixelSpacing(PlaneType planeType);
 
-        virtual bool GetVRData(unsigned char* pVR, int nWidth, int nHeight) = 0;
+        virtual bool SetVRSize(int nWidth, int nHeight);
+        virtual void GetVRSize(int& nWidth, int& nHeight);
+        virtual bool GetVRData(std::shared_ptr<unsigned char>& pData, int nWidth, int nHeight) = 0;
 
         virtual bool GetBatchData( std::vector<short*>& vecBatchData, BatchInfo batchInfo ) = 0;
 
@@ -85,19 +87,18 @@ namespace MonkeyGL{
         virtual bool GetPlaneNumber(int& nTotalNum, PlaneType planeType);
         virtual bool GetPlaneRotateMatrix(float* pMatirx, PlaneType planeType);
 
-
-        virtual void Anterior() = 0;
-        virtual void Posterior() = 0;
-        virtual void Left() = 0;
-        virtual void Right() = 0;
-        virtual void Head() = 0;
-        virtual void Foot() = 0;
-
-        virtual void SetRenderType(RenderType type) = 0;
-        virtual void Rotate(float fxRotate, float fyRotate) = 0;
-        virtual float Zoom(float ratio) = 0;
-        virtual float GetZoomRatio() = 0;
-        virtual void Pan(float fxShift, float fyShift) = 0;
+        virtual void Anterior();
+        virtual void Posterior();
+        virtual void Left();
+        virtual void Right();
+        virtual void Head();
+        virtual void Foot();
+ 
+        virtual void SetRenderType(RenderType type);
+        virtual void Rotate(float fxRotate, float fyRotate);
+        virtual float Zoom(float ratio);
+        virtual float GetZoomRatio();
+        virtual void Pan(float fxShift, float fyShift);
         virtual bool SetVRWWWL(float fWW, float fWL);
         virtual bool SetVRWWWL(float fWW, float fWL, unsigned char nLabel);
         virtual bool SetObjectAlpha(float fAlpha);

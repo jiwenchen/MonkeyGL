@@ -21,48 +21,17 @@
 // SOFTWARE.
 
 #pragma once
-#include <string>
-#include <vector>
-#include <cstring>
+#include "BaseDataProvider.h"
+#include "Defines.h"
 
-namespace MonkeyGL{
-
-    struct DeviceProp
-    {
-        char name[256];
-        unsigned long totalMem;
-        int major;
-        int minor;
-
-        char reserved[1024];
-
-        DeviceProp(){
-            memset(this, 0, sizeof(DeviceProp));
-        }
-    };
-
-    class DeviceInfo
+namespace MonkeyGL
+{
+    class VRProvider : public BaseDataProvider
     {
     public:
-        DeviceInfo();
-        ~DeviceInfo();
-
-        static DeviceInfo* Instance();
-
-    public:
-        bool Initialized();
-        bool GetCount(int& count);
-        bool GetName(std::string& strName, const int& index);
-        bool GetTotalGlobal(unsigned long& mem, const int& index);
-        bool GetMajor(int& major, const int& index);
-        bool GetMinor(int& minor, const int& index);
-
-        bool SetDevice(const int& index);
-
-    private:
-        bool m_bInit;
-        int m_nCount;
-        std::vector<DeviceProp> m_vecProp;
+        VRProvider();
+        ~VRProvider();
     };
+    
+} // namespace MonkeyGL
 
-}

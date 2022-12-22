@@ -30,6 +30,8 @@
 #include "ObjectInfo.h"
 #include "MPRInfo.h"
 #include "CPRInfo.h"
+#include "RenderInfo.h"
+#include "CuDataManager.h"
 
 namespace MonkeyGL {
 
@@ -41,6 +43,18 @@ namespace MonkeyGL {
 
     public:
         static DataManager* Instance();
+
+        VolumeInfo& GetVolumeInfo();
+        MPRInfo& GetMPRInfo();
+        CPRInfo& GetCPRInfo();
+        RenderInfo& GetRenderInfo();
+        CuDataManager& GetCuDataManager();
+
+        bool TryToEnableGPU(bool enable);
+        bool GPUEnabled();
+
+        bool SetVRSize(int nWidth, int nHeight);
+        void GetVRSize(int& nWidth, int& nHeight);
         
         bool LoadVolumeFile(const char* szFile);
         bool SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth);
@@ -56,6 +70,12 @@ namespace MonkeyGL {
         void SetSpacing(double x, double y, double z);
         void SetOrigin(Point3d pt);
 
+        cudaExtent GetVolumeSize(){
+            return m_VolumeSize;
+        }
+
+        void SetRenderType(RenderType type);
+        RenderType GetRenderType();
         bool SetVRWWWL(float fWW, float fWL);
         bool SetVRWWWL(float fWW, float fWL, unsigned char nLabel);
         bool SetObjectAlpha(float fAlpha);
@@ -86,6 +106,20 @@ namespace MonkeyGL {
 
         bool GetBatchDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, double fAngle, const PlaneType& planeType );
         std::vector<Point3d> GetVertexes();
+
+        void Rotate(float fxRotate, float fyRotate);
+        float Zoom(float ratio);
+        float GetZoomRatio();
+        void Pan(float fxShift, float fyShift);
+
+        void Anterior();
+        void Posterior();
+        void Left();
+        void Right();
+        void Head();
+        void Foot();
+
+        bool TransferVoxel2ImageInVR(float &fx, float &fy, int nWidth, int nHeight, Point3d ptVoxel);
 
         // MPR
         void SetMPRType(MPRType type);
@@ -126,16 +160,66 @@ namespace MonkeyGL {
             return m_volInfo.Voxel2Patient(ptVoxel);
         }
 
+        AlphaAndWWWLInfo GetAlphaAndWWWLInfo() {
+            return m_AlphaAndWWWLInfo;
+        }
+        float3 GetMaxLenSpacing() {
+            return m_f3maxLenSpacing;
+        }
+        float3 GetSpacing() {
+            return m_f3Spacing;
+        }
+        float3 GetSpacingVoxel() {
+            return m_f3SpacingVoxel;
+        }
+        VOI GetVOINormalize() {
+            return m_voiNormalize;
+        }
+
     private:
         void ClearAndReset();
 
+        void InitCommon(float fxSpacing, float fySpacing, float fzSpacing, cudaExtent volumeSize){
+            m_f3Spacing.x = fxSpacing;
+            m_f3Spacing.y = fySpacing;
+            m_f3Spacing.z = fzSpacing;
+            m_f3SpacingVoxel.x = 1.0f / volumeSize.width;
+            m_f3SpacingVoxel.y = 1.0f / volumeSize.height;
+            m_f3SpacingVoxel.z = 1.0f / volumeSize.depth;
+
+            float fMaxSpacing = max(fxSpacing, max(fySpacing, fzSpacing));	
+
+            float fMaxLen = max(volumeSize.width*fxSpacing, max(volumeSize.height*fySpacing, volumeSize.depth*fzSpacing));
+            m_f3maxLenSpacing.x = 1.0f*fMaxLen/(volumeSize.width*fxSpacing);
+            m_f3maxLenSpacing.y = 1.0f*fMaxLen/(volumeSize.height*fySpacing);
+            m_f3maxLenSpacing.z = 1.0f*fMaxLen/(volumeSize.depth*fzSpacing);
+        }
+
+        void NormalizeVOI();
+
+        void UpdateTransferFunctions();
+        void UpdateAlphaWWWL();
+
     private:
+        bool m_gpuEnabeld;
+
         VolumeInfo m_volInfo;
         MPRInfo m_mprInfo;
         CPRInfo m_cprInfo;
+        RenderInfo m_renderInfo;
+        CuDataManager m_cuDataMan;
+
+        RenderType m_renderType;
 
         int m_activeLabel;
         std::map<unsigned char, ObjectInfo> m_objectInfos;
+        AlphaAndWWWLInfo m_AlphaAndWWWLInfo;
+
+        cudaExtent m_VolumeSize;
+        VOI m_voiNormalize;
+        float3 m_f3SpacingVoxel;
+        float3 m_f3Spacing;
+        float3 m_f3maxLenSpacing;
 
         int m_planeLabel;
         RGBA m_colorBG;

@@ -21,48 +21,26 @@
 // SOFTWARE.
 
 #pragma once
-#include <string>
 #include <vector>
-#include <cstring>
+#include <memory>
+#include "BaseLayer.h"
 
 namespace MonkeyGL{
+    class DataManager;
 
-    struct DeviceProp
-    {
-        char name[256];
-        unsigned long totalMem;
-        int major;
-        int minor;
-
-        char reserved[1024];
-
-        DeviceProp(){
-            memset(this, 0, sizeof(DeviceProp));
-        }
-    };
-
-    class DeviceInfo
+    class BaseDataProvider
     {
     public:
-        DeviceInfo();
-        ~DeviceInfo();
-
-        static DeviceInfo* Instance();
+        BaseDataProvider();
+        ~BaseDataProvider();
 
     public:
-        bool Initialized();
-        bool GetCount(int& count);
-        bool GetName(std::string& strName, const int& index);
-        bool GetTotalGlobal(unsigned long& mem, const int& index);
-        bool GetMajor(int& major, const int& index);
-        bool GetMinor(int& minor, const int& index);
+        virtual void EnableLayer(bool enable, LayerType type);
+        
+        virtual bool GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth, int& nHeight, PlaneType planeType);
+        virtual bool GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, PlaneType planeType);
 
-        bool SetDevice(const int& index);
-
-    private:
-        bool m_bInit;
-        int m_nCount;
-        std::vector<DeviceProp> m_vecProp;
+    protected:
+        std::vector< std::shared_ptr<BaseLayer> > m_layers;
     };
-
 }

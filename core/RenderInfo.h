@@ -21,48 +21,59 @@
 // SOFTWARE.
 
 #pragma once
-#include <string>
-#include <vector>
-#include <cstring>
 
 namespace MonkeyGL{
 
-    struct DeviceProp
+    class RenderInfo
     {
-        char name[256];
-        unsigned long totalMem;
-        int major;
-        int minor;
+    public:
+        RenderInfo(/* args */);
+        ~RenderInfo();
 
-        char reserved[1024];
+    public:
+        bool SetVRSize(int nWidth, int nHeight);
+        void GetVRSize(int& nWidth, int& nHeight);
 
-        DeviceProp(){
-            memset(this, 0, sizeof(DeviceProp));
+        void Rotate(float fxRotate, float fyRotate);
+        float Zoom(float ratio);
+        float GetZoomRatio();
+        void Pan(float fxShift, float fyShift);
+
+        void Anterior();
+        void Posterior();
+        void Left();
+        void Right();
+        void Head();
+        void Foot();
+
+        float GetTotalXTranslate(){
+            return m_fTotalXTranslate;
         }
-    };
 
-    class DeviceInfo
-    {
-    public:
-        DeviceInfo();
-        ~DeviceInfo();
+        float GetTotalYTranslate(){
+            return m_fTotalYTranslate;
+        }
 
-        static DeviceInfo* Instance();
-
-    public:
-        bool Initialized();
-        bool GetCount(int& count);
-        bool GetName(std::string& strName, const int& index);
-        bool GetTotalGlobal(unsigned long& mem, const int& index);
-        bool GetMajor(int& major, const int& index);
-        bool GetMinor(int& minor, const int& index);
-
-        bool SetDevice(const int& index);
+        float GetTotalScale(){
+            return m_fTotalScale;
+        }
 
     private:
-        bool m_bInit;
-        int m_nCount;
-        std::vector<DeviceProp> m_vecProp;
-    };
+        void Init();
 
+    private:
+        friend class DataManager;
+        
+        int m_nWidth_VR;
+        int m_nHeight_VR;
+
+        float m_fTotalXTranslate;
+        float m_fTotalYTranslate;
+        float m_fTotalScale;
+
+        float m_pRotateMatrix[9];
+        float m_pTransposRotateMatrix[9];
+        float m_pTransformMatrix[9];
+        float m_pTransposeTransformMatrix[9];
+    };
 }

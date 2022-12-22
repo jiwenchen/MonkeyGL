@@ -30,7 +30,6 @@ IRender::IRender(void)
 {
 }
 
-
 IRender::~IRender(void)
 {
 }
@@ -79,7 +78,6 @@ void IRender::Reset()
 {
 	DataManager::Instance()->Reset();
 }
-
 
 bool IRender::SetTransferFunc(std::map<int, RGBA> ctrlPts)
 {
@@ -192,6 +190,16 @@ double IRender::GetPixelSpacing( PlaneType planeType )
 	return DataManager::Instance()->GetPixelSpacing(planeType);
 }
 
+bool IRender::SetVRSize(int nWidth, int nHeight)
+{
+	return DataManager::Instance()->SetVRSize(nWidth, nHeight);
+}
+
+void IRender::GetVRSize(int& nWidth, int& nHeight)
+{
+	DataManager::Instance()->GetVRSize(nWidth, nHeight);
+}
+
 bool IRender::GetPlaneIndex( int& index, PlaneType planeType )
 {
 	return DataManager::Instance()->GetPlaneIndex(index, planeType);
@@ -205,6 +213,56 @@ bool IRender::GetPlaneNumber( int& nTotalNum, PlaneType planeType )
 bool IRender::GetPlaneRotateMatrix( float* pMatirx, PlaneType planeType )
 {
 	return DataManager::Instance()->GetPlaneRotateMatrix(pMatirx, planeType);
+}
+
+void IRender::Anterior()
+{
+	DataManager::Instance()->Anterior();
+}
+
+void IRender::Posterior()
+{
+	DataManager::Instance()->Posterior();
+}
+
+void IRender::Left()
+{
+	DataManager::Instance()->Left();
+}
+
+void IRender::Right()
+{
+	DataManager::Instance()->Right();
+}
+
+void IRender::Head()
+{
+	DataManager::Instance()->Head();
+}
+
+void IRender::Foot()
+{
+	DataManager::Instance()->Foot();
+}
+
+void IRender::Rotate(float fxRotate, float fyRotate)
+{
+	DataManager::Instance()->Rotate(fxRotate, fyRotate);
+}
+
+float IRender::Zoom(float ratio)
+{
+	return DataManager::Instance()->Zoom(ratio);
+}
+
+float IRender::GetZoomRatio()
+{
+	return DataManager::Instance()->GetZoomRatio();
+}
+
+void IRender::Pan(float fxShift, float fyShift)
+{
+	DataManager::Instance()->Pan(fxShift, fyShift);
 }
 
 void IRender::UpdateThickness( double val )
@@ -225,6 +283,16 @@ double IRender::GetThickness(PlaneType planeType)
 void IRender::SetMPRType(MPRType type)
 {
 	DataManager::Instance()->SetMPRType(type);
+}
+
+bool IRender::TransferVoxel2ImageInVR(float& fx, float& fy, int nWidth, int nHeight, Point3d ptVoxel)
+{
+	return DataManager::Instance()->TransferVoxel2ImageInVR(fx, fy, nWidth, nHeight, ptVoxel);
+}
+
+void IRender::SetRenderType(RenderType type)
+{
+	DataManager::Instance()->SetRenderType(type);
 }
 
 bool IRender::SetVRWWWL(float fWW, float fWL)

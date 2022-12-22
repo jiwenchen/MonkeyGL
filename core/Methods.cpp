@@ -36,7 +36,7 @@ Methods::~Methods(void)
 {
 }
 
-void Methods::SetSeg( float* m, int n )
+void Methods::SetIdentityMatrix( float* m, int n )
 {
 	for (int i=0; i<n; i++)
 	{
@@ -61,12 +61,12 @@ void Methods::ComputeTransformMatrix(
 )
 {
 	float Rx[9], Rz[9], S[9], Temp[9], RxT[9], RzT[9], ST[9];
-	Methods::SetSeg(Rx, 3);
-	Methods::SetSeg(Rz, 3);
-	Methods::SetSeg(Temp, 3);
-	Methods::SetSeg(RxT, 3);
-	Methods::SetSeg(RzT, 3);
-	Methods::SetSeg(ST, 3);
+	Methods::SetIdentityMatrix(Rx, 3);
+	Methods::SetIdentityMatrix(Rz, 3);
+	Methods::SetIdentityMatrix(Temp, 3);
+	Methods::SetIdentityMatrix(RxT, 3);
+	Methods::SetIdentityMatrix(RzT, 3);
+	Methods::SetIdentityMatrix(ST, 3);
 
 	S[0] = 1.0f/fScale;	S[1] = 0.0f;		S[2] = 0.0f;
 	S[3] = 0.0f;		S[4] = 1.0f/fScale;	S[5] = 0.0f;

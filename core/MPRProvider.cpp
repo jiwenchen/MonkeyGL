@@ -20,49 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
-#include <string>
-#include <vector>
-#include <cstring>
+#include "MPRProvider.h"
+#include "MPRImageLayer.h"
 
-namespace MonkeyGL{
+using namespace MonkeyGL;
 
-    struct DeviceProp
-    {
-        char name[256];
-        unsigned long totalMem;
-        int major;
-        int minor;
+MPRProvider::MPRProvider()
+: BaseDataProvider()
+{
+    m_layers.push_back(std::shared_ptr<MPRImageLayer>(new MPRImageLayer()));
+}
 
-        char reserved[1024];
-
-        DeviceProp(){
-            memset(this, 0, sizeof(DeviceProp));
-        }
-    };
-
-    class DeviceInfo
-    {
-    public:
-        DeviceInfo();
-        ~DeviceInfo();
-
-        static DeviceInfo* Instance();
-
-    public:
-        bool Initialized();
-        bool GetCount(int& count);
-        bool GetName(std::string& strName, const int& index);
-        bool GetTotalGlobal(unsigned long& mem, const int& index);
-        bool GetMajor(int& major, const int& index);
-        bool GetMinor(int& minor, const int& index);
-
-        bool SetDevice(const int& index);
-
-    private:
-        bool m_bInit;
-        int m_nCount;
-        std::vector<DeviceProp> m_vecProp;
-    };
-
+MPRProvider::~MPRProvider()
+{
 }

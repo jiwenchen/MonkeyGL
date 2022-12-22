@@ -34,7 +34,7 @@ namespace MonkeyGL {
         ~Methods(void);
 
     public:
-        static void SetSeg(float* m, int n);
+        static void SetIdentityMatrix(float* m, int n);
 
         static void MatrixMul(
             float *pDst, 

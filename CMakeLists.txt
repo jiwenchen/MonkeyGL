@@ -52,30 +52,41 @@ link_libraries(ITKIOMeta-5.2)
 
 set(SRC_LIST
   ./core/fpng/fpng.cpp
+  ./core/AnnotationLayer.cpp
+  ./core/AnnotationUtils.cpp
   ./core/Base64.hpp
+  ./core/BaseDataProvider.cpp
+  ./core/BaseLayer.cpp
   ./core/BatchInfo.cpp
+  ./core/CPRImageLayer.cpp
   ./core/CPRInfo.cpp
-  ./core/CuDataInfo.cpp
+  ./core/CPRProvider.cpp
+  ./core/CuDataManager.cpp
   ./core/DataManager.cpp
   ./core/DeviceInfo.cpp
   ./core/Defines.cpp
   ./core/Direction.cpp
   ./core/HelloMonkey.cpp
+  ./core/ImageReader.cpp
+  ./core/ImageLayer.cpp
   ./core/IRender.cpp
   ./core/Logger.cpp
   ./core/MarchingCube.cpp
   ./core/Methods.cpp
+  ./core/MPRImageLayer.cpp
   ./core/MPRInfo.cpp
-  ./core/ImageReader.cpp
+  ./core/MPRProvider.cpp
   ./core/ObjectInfo.cpp
   ./core/PlaneInfo.cpp
   ./core/Point.cpp
   ./core/Render.cpp
+  ./core/RenderInfo.cpp
   ./core/StopWatch.cpp
-  ./core/AnnotationUtils.cpp
   ./core/TransferFunction.cpp
   ./core/VolumeInfo.cpp
-  ./core/CuDataInfo.cu
+  ./core/VRImageLayer.cpp
+  ./core/VRProvider.cpp
+  ./core/CuDataManager.cu
   ./core/kernel.cu
   ./core/test.cu
 )

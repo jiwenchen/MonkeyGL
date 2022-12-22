@@ -100,7 +100,7 @@ namespace MonkeyGL {
         std::shared_ptr<unsigned char> CheckAndNormMaskData(std::shared_ptr<unsigned char>pData, int nWidth, int nHeight, int nDepth);
         std::shared_ptr<unsigned char> NormMaskData(std::shared_ptr<unsigned char>pData);
 
-    private:
+    private:        
         std::shared_ptr<short> m_pVolume;
         bool m_bVolumeHasInverted;
         std::shared_ptr<unsigned char> m_pMask;

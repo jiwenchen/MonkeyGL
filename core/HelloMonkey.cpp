@@ -46,9 +46,6 @@ HelloMonkey::HelloMonkey()
 		Logger::Error("fpng cpu not supports sse41");
 	}
 
-	m_nWidth_VR = 512;
-	m_nHeight_VR = 512;
-
 	_pRender.reset(new Render());
 	m_bShowCPRLineInVR = false;
 
@@ -323,11 +320,11 @@ std::string HelloMonkey::GetOriginData_pngString(int slice)
 	return strBase64;
 }
 
-bool HelloMonkey::GetVRData( unsigned char* pVR, int nWidth, int nHeight )
+bool HelloMonkey::GetVRData( std::shared_ptr<unsigned char>& pData, int nWidth, int nHeight )
 {
 	if (!_pRender)
 		return false;
-	if (!_pRender->GetVRData(pVR, nWidth, nHeight))
+	if (!_pRender->GetVRData(pData, nWidth, nHeight))
 		return false;
 
 	return true;	
@@ -341,11 +338,10 @@ std::vector<uint8_t> HelloMonkey::GetVRData_png(int nWidth, int nHeight)
 	if (!_pRender)
 		return out_buf;
 	
- 	std::shared_ptr<unsigned char> pVR (new unsigned char[nWidth*nHeight*3]);
-
+ 	std::shared_ptr<unsigned char> pVR;
 	{
 		StopWatch sw("GetVRData");
-		if (!_pRender->GetVRData(pVR.get(), nWidth, nHeight))
+		if (!_pRender->GetVRData(pVR, nWidth, nHeight))
 			return out_buf;
 
 		{
@@ -415,29 +411,23 @@ void HelloMonkey::SaveVR2Png(const char* szFile, int nWidth, int nHeight)
 
 bool HelloMonkey::SetVRSize(int nWidth, int nHeight)
 {
-	float delta = (nWidth*nHeight)/(768*768);
-	if (delta > 1){
-		m_nWidth_VR = nWidth / delta;
-		m_nHeight_VR = nHeight / delta;
-	}
-	else{
-		m_nWidth_VR = nWidth;
-		m_nHeight_VR = nHeight;
-	}
-
-	if (m_nWidth_VR % 2){
-		m_nWidth_VR = m_nWidth_VR + 1;
-	}
-	
-	return true;
+	if (!_pRender)
+		return NULL;
+	return _pRender->SetVRSize(nWidth, nHeight);
 }
 
 std::string HelloMonkey::GetVRData_pngString()
 {
 	StopWatch sw("GetVRData_pngString");
-	std::vector<uint8_t> out_buf = GetVRData_png(m_nWidth_VR, m_nHeight_VR);
 
 	std::string strBase64 = "";
+	int w=-1, h=-1;
+	if (!_pRender){
+		return strBase64;
+	}
+	_pRender->GetVRSize(w, h);
+	std::vector<uint8_t> out_buf = GetVRData_png(w, h);
+
 	{
 		StopWatch sw("Base64 Encode");
 		strBase64 = Base64::Encode(out_buf.data(), out_buf.size());

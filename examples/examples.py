@@ -131,7 +131,7 @@ def test_set_data():
         ]
     ]))
 
-    b64str = hm.GetVRData_pngString(512, 512)
+    # b64str = hm.GetVRData_pngString(512, 512)
     # hm.SaveVR2Png('multivol.png', 512, 512)
 
     hm.GetPlaneData_pngString(mk.PlaneStretchedCPR)
@@ -153,7 +153,8 @@ def test_load_nrrd():
     # hm.SaveVR2Png(f'{file_path}/a.png', 512, 512)
 
     # vr = hm.GetVRArray(768, 768)
-    # b64str = hm.GetVRData_pngString(512, 512)
+    # b64str = hm.GetVRData_pngString()
+    # print(b64str)
 
     hm.GetPlaneData_pngString(mk.PlaneAxial)
 
@@ -237,9 +238,9 @@ def test_png():
     pass
 
 if __name__ == "__main__":
-    test_png()
+    # test_png()
     # test_objs()
-    # test_set_data()
+    test_set_data()
     # test_load_nrrd()
     # test_instance()
 

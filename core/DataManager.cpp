@@ -24,17 +24,23 @@
 #include "Logger.h"
 #include "Methods.h"
 #include "ImageReader.h"
+#include "DeviceInfo.h"
 
 using namespace MonkeyGL;
 
 DataManager::DataManager(void)
 {
 	m_activeLabel = -1;
+	m_gpuEnabeld = false;
+	TryToEnableGPU(true);
 	m_objectInfos.clear();
+	
+	m_renderType = RenderTypeVR;
 }
 
 DataManager::~DataManager(void)
 {
+	m_objectInfos.clear();
 }
 
 DataManager* DataManager::Instance()
@@ -47,6 +53,47 @@ DataManager* DataManager::Instance()
 	return pDataManager;
 }
 
+VolumeInfo& DataManager::GetVolumeInfo()
+{
+	return m_volInfo;
+}
+
+MPRInfo& DataManager::GetMPRInfo()
+{
+	return m_mprInfo;
+}
+
+CPRInfo& DataManager::GetCPRInfo()
+{
+	return m_cprInfo;
+}
+
+RenderInfo& DataManager::GetRenderInfo()
+{
+	return m_renderInfo;
+}
+
+CuDataManager& DataManager::GetCuDataManager()
+{
+	return m_cuDataMan;
+}
+
+bool DataManager::TryToEnableGPU(bool enable)
+{
+	if (enable && DeviceInfo::Instance()->Initialized()){
+		m_gpuEnabeld = true;
+	}
+	else{
+		m_gpuEnabeld = false;
+	}
+	return m_gpuEnabeld;
+}
+
+bool DataManager::GPUEnabled()
+{
+	return m_gpuEnabeld;
+}
+
 void DataManager::ClearAndReset()
 {
 	m_activeLabel = -1;
@@ -54,25 +101,153 @@ void DataManager::ClearAndReset()
 	m_volInfo.Clear();
 }
 
+bool DataManager::SetVRSize(int nWidth, int nHeight)
+{
+	return m_renderInfo.SetVRSize(nWidth, nHeight);
+}
+
+void DataManager::GetVRSize(int& nWidth, int& nHeight)
+{
+	m_renderInfo.GetVRSize(nWidth, nHeight);
+}
+
 bool DataManager::LoadVolumeFile( const char* szFile )
 {
 	ClearAndReset();
 	bool res = m_volInfo.LoadVolumeFile(szFile);
-	m_cprInfo.SetSpacing(Point3d(m_volInfo.GetSpacing(0), m_volInfo.GetSpacing(1), m_volInfo.GetSpacing(2)));
+	m_cprInfo.SetSpacing(Point3d(GetSpacing(0), GetSpacing(1), GetSpacing(2)));
 	m_mprInfo.ResetPlaneInfos();
 	m_activeLabel = 0;
 	m_objectInfos[0] = ObjectInfo();
+
+	m_VolumeSize.width = GetDim(0);
+	m_VolumeSize.height = GetDim(1);
+	m_VolumeSize.depth = GetDim(2);
+
+	NormalizeVOI();
+
+	if (DeviceInfo::Instance()->Initialized()){
+
+		m_cuDataMan.CopyVolumeData(GetVolumeData().get(), m_VolumeSize);
+		InitCommon(GetSpacing(0), GetSpacing(1), GetSpacing(2), m_VolumeSize);
+	}
+
 	return res;
 }
 
 bool DataManager::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHeight, int nDepth)
 {
 	ClearAndReset();
-	bool res = m_volInfo.SetVolumeData(pData, nWidth, nHeight, nDepth);
+	if (!m_volInfo.SetVolumeData(pData, nWidth, nHeight, nDepth))
+		return false;
 	m_mprInfo.ResetPlaneInfos();
 	m_activeLabel = 0;
 	m_objectInfos[0] = ObjectInfo();
-	return res;
+
+	m_VolumeSize.width = GetDim(0);
+	m_VolumeSize.height = GetDim(1);
+	m_VolumeSize.depth = GetDim(2);
+
+	NormalizeVOI();
+
+	if (DeviceInfo::Instance()->Initialized()){
+		m_cuDataMan.CopyVolumeData(GetVolumeData().get(), m_VolumeSize);
+	}
+
+	return true;
+}
+
+void DataManager::NormalizeVOI()
+{
+	m_voiNormalize.left = 0;
+	m_voiNormalize.right = m_VolumeSize.width - 1;
+	m_voiNormalize.posterior = 0;
+	m_voiNormalize.anterior = m_VolumeSize.height - 1;
+	m_voiNormalize.head = 0;
+	m_voiNormalize.foot = m_VolumeSize.depth - 1;
+}
+
+void DataManager::Rotate(float fxRotate, float fyRotate)
+{
+	m_renderInfo.Rotate(fxRotate, fyRotate);
+	m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
+}
+
+float DataManager::Zoom(float ratio)
+{
+	float newRatio = m_renderInfo.Zoom(ratio);
+	m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
+	return newRatio;
+}
+
+float DataManager::GetZoomRatio()
+{
+	return m_renderInfo.GetZoomRatio();
+}
+
+void DataManager::Pan(float fxShift, float fyShift)
+{
+	m_renderInfo.Pan(fxShift, fyShift);
+}
+
+void DataManager::Anterior()
+{
+	m_renderInfo.Anterior();
+	m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
+}
+
+void DataManager::Posterior()
+{
+	m_renderInfo.Posterior();
+	m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
+}
+
+void DataManager::Left()
+{
+	m_renderInfo.Left();
+	m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
+}
+
+void DataManager::Right()
+{
+	m_renderInfo.Right();
+	m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
+}
+
+void DataManager::Head()
+{
+	m_renderInfo.Head();
+	m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
+}
+
+void DataManager::Foot()
+{
+	m_renderInfo.Foot();
+	m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
+}
+
+bool DataManager::TransferVoxel2ImageInVR(float &fx, float &fy, int nWidth, int nHeight, Point3d ptVoxel)
+{
+	double fxSpacing = GetSpacing(0);
+	double fySpacing = GetSpacing(1);
+	double fzSpacing = GetSpacing(2);
+
+	float fMaxLen = max(m_VolumeSize.width * fxSpacing, max(m_VolumeSize.height * fySpacing, m_VolumeSize.depth * fzSpacing));
+	Point3d maxper(fMaxLen / (m_VolumeSize.width * fxSpacing), fMaxLen / (m_VolumeSize.height * fySpacing), fMaxLen / (m_VolumeSize.depth * fzSpacing));
+
+	Point3d pt(ptVoxel.x() / m_VolumeSize.width, ptVoxel.y() / m_VolumeSize.height, ptVoxel.z() / m_VolumeSize.depth);
+	if (Need2InvertZ())
+	{
+		pt.SetZ(1.0 - pt.z());
+	}
+	pt -= Point3d(0.5, 0.5, 0.5);
+	pt /= maxper;
+
+	pt = Methods::MatrixMul(m_renderInfo.m_pTransposeTransformMatrix, pt);
+	fx = (pt.x() + 0.5) * nWidth + m_renderInfo.m_fTotalXTranslate;
+	fy = (pt.z() + 0.5) * nHeight + m_renderInfo.m_fTotalYTranslate;
+
+	return true;
 }
 
 unsigned char DataManager::AddObjectMaskFile(const char* szFile)
@@ -125,6 +300,10 @@ unsigned char DataManager::AddNewObjectMask(std::shared_ptr<unsigned char>pData,
 
 	m_objectInfos[nLabel] = m_objectInfos[m_activeLabel];
 	m_activeLabel = nLabel;
+
+	if (GPUEnabled()){
+		m_cuDataMan.CopyMaskData(GetMaskData().get(), m_VolumeSize);
+	}
 	return nLabel;
 }
 
@@ -140,7 +319,12 @@ bool DataManager::UpdateObjectMask(std::shared_ptr<unsigned char>pData, int nWid
 	if (m_objectInfos.find(nLabel) == m_objectInfos.end()){
 		return false;
 	}
-	return m_volInfo.UpdateObjectMask(pData, nWidth, nHeight, nDepth, nLabel);
+	bool res = m_volInfo.UpdateObjectMask(pData, nWidth, nHeight, nDepth, nLabel);
+
+	if (GPUEnabled()){
+		m_cuDataMan.CopyMaskData(GetMaskData().get(), m_VolumeSize);
+	}
+	return res;
 }
 
 bool DataManager::SetControlPoints_TF( std::map<int, RGBA> ctrlPts)
@@ -155,6 +339,8 @@ bool DataManager::SetControlPoints_TF( std::map<int, RGBA> ctrlPts, unsigned cha
 		return false;
 	}
 	m_objectInfos[nLabel].idx2rgba = ctrlPts;
+
+	UpdateTransferFunctions();
 	return true;
 }
 
@@ -171,7 +357,27 @@ bool DataManager::SetControlPoints_TF( std::map<int, RGBA> rgbPts, std::map<int,
 	}
 	m_objectInfos[nLabel].idx2rgba = rgbPts;
 	m_objectInfos[nLabel].idx2alpha = alphaPts;
+
+	UpdateTransferFunctions();
 	return true;
+}
+
+void DataManager::UpdateTransferFunctions()
+{
+	if (!GPUEnabled()){
+		return;
+	}
+
+	std::shared_ptr<RGBA> ptfBuffer(NULL);
+	int ntfLength = 0;
+
+	for (std::map<unsigned char, ObjectInfo>::iterator iter = m_objectInfos.begin(); iter != m_objectInfos.end(); iter++)
+	{
+		if (iter->second.GetTransferFunction(ptfBuffer, ntfLength))
+		{
+			m_cuDataMan.SetTransferFunction((float *)(ptfBuffer.get()), ntfLength, iter->first);
+		}
+	}
 }
 
 bool DataManager::LoadTransferFunction(const char* szFile) 
@@ -224,6 +430,8 @@ void DataManager::SetSpacing( double x, double y, double z )
 	m_volInfo.SetSpacing(x, y, z);
 	m_cprInfo.SetSpacing(Point3d(x, y, z));
 	m_mprInfo.ResetPlaneInfos();
+
+	InitCommon(x, y, z, m_VolumeSize);
 }
 
 void DataManager::SetOrigin(Point3d pt)
@@ -313,8 +521,8 @@ bool DataManager::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& p
 {
 	if (planeType == PlaneVR)
 	{
-		nWidth = 512;
-		nHeight = 512;
+		nWidth = m_renderInfo.m_nWidth_VR;
+		nHeight = m_renderInfo.m_nHeight_VR;
 		return true;
 	}
 	else if (planeType == PlaneStretchedCPR || planeType == PlaneStraightenedCPR)
@@ -337,6 +545,16 @@ bool DataManager::GetPlaneMaxSize( int& nWidth, int& nHeight, const PlaneType& p
 	return false;
 }
 
+void DataManager::SetRenderType(RenderType type)
+{
+	m_renderType = type;
+}
+
+RenderType DataManager::GetRenderType()
+{
+	return m_renderType;
+}
+
 bool DataManager::SetVRWWWL(float fWW, float fWL)
 {
 	return SetVRWWWL(fWW, fWL, m_activeLabel);
@@ -352,6 +570,8 @@ bool DataManager::SetVRWWWL(float fWW, float fWL, unsigned char nLabel)
 	}
 	m_objectInfos[nLabel].ww = fWW;
 	m_objectInfos[nLabel].wl = fWL;
+
+	UpdateAlphaWWWL();
 	return true;
 }
 
@@ -367,7 +587,20 @@ bool DataManager::SetObjectAlpha(float fAlpha, unsigned char nLabel)
 		return false;
 	}
 	m_objectInfos[nLabel].alpha = fAlpha;
+
+	UpdateAlphaWWWL();
 	return true;
+}
+
+void DataManager::UpdateAlphaWWWL()
+{
+	for (std::map<unsigned char, ObjectInfo>::iterator iter = m_objectInfos.begin(); iter != m_objectInfos.end(); iter++)
+	{
+		unsigned char label = iter->first;
+		ObjectInfo info = iter->second;
+		m_AlphaAndWWWLInfo[label] = AlphaAndWWWL(info.alpha, info.ww, info.wl);
+		Logger::Info("DataManager::UpdateAlphaWWWL: label[%d], alpha[%.2f], ww[%.2f], wl[%.2f]", label, info.alpha, info.ww, info.wl);
+	}
 }
 
 bool DataManager::GetBatchDirection3D( Direction3d& dir3dH, Direction3d& dir3dV, double fAngle, const PlaneType& planeType )
@@ -460,6 +693,10 @@ void DataManager::SetPlaneIndex( int index, PlaneType planeType )
 
 bool DataManager::GetPlaneRotateMatrix( float* pMatirx, PlaneType planeType )
 {
+	if (planeType == PlaneVR){
+		memcpy(pMatirx, m_renderInfo.m_pRotateMatrix, 9 * sizeof(float));
+		return true;
+	}
 	return m_mprInfo.GetPlaneRotateMatrix(pMatirx, planeType);
 }
 

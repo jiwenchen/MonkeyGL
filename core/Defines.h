@@ -253,6 +253,13 @@ namespace MonkeyGL{
         LogLevelError
     };
 
+    enum LayerType
+    {
+        LayerTypeNotDefined = -1,
+        LayerTypeImage,
+        LayerTypeAnnotation
+    };
+
     struct Facet3D{
         Direction3f n;
         Point3f v1;

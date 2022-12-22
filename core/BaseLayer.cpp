@@ -20,49 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
-#include <string>
-#include <vector>
-#include <cstring>
+#include "BaseLayer.h"
 
-namespace MonkeyGL{
+using namespace MonkeyGL;
 
-    struct DeviceProp
-    {
-        char name[256];
-        unsigned long totalMem;
-        int major;
-        int minor;
+BaseLayer::BaseLayer()
+{
+    m_enabled = false;
+    m_layerType = LayerTypeNotDefined;
+}
 
-        char reserved[1024];
+BaseLayer::~BaseLayer()
+{
+}
 
-        DeviceProp(){
-            memset(this, 0, sizeof(DeviceProp));
-        }
-    };
+void BaseLayer::Enable(bool enable)
+{
+    m_enabled = enable;
+}
 
-    class DeviceInfo
-    {
-    public:
-        DeviceInfo();
-        ~DeviceInfo();
+bool BaseLayer::IsEnabled()
+{
+    return m_enabled;
+}
 
-        static DeviceInfo* Instance();
-
-    public:
-        bool Initialized();
-        bool GetCount(int& count);
-        bool GetName(std::string& strName, const int& index);
-        bool GetTotalGlobal(unsigned long& mem, const int& index);
-        bool GetMajor(int& major, const int& index);
-        bool GetMinor(int& minor, const int& index);
-
-        bool SetDevice(const int& index);
-
-    private:
-        bool m_bInit;
-        int m_nCount;
-        std::vector<DeviceProp> m_vecProp;
-    };
-
+LayerType BaseLayer::GetLayerType()
+{
+    return m_layerType;
 }

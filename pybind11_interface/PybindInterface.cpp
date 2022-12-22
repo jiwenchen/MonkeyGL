@@ -150,8 +150,8 @@ public:
     };
 
     virtual py::array_t<unsigned char> GetVRArray(int nWidth, int nHeight){
-	    std::shared_ptr<unsigned char> pVR (new unsigned char[nWidth*nHeight*3]);
-        GetVRData((unsigned char*)pVR.get(), nWidth, nHeight);
+	    std::shared_ptr<unsigned char> pVR;
+        GetVRData(pVR, nWidth, nHeight);
         return _ptr_to_arrays_3d((unsigned char*)pVR.get(), 3, nWidth, nHeight);
     }
     

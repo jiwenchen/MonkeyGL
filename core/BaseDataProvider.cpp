@@ -20,49 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
-#include <string>
-#include <vector>
-#include <cstring>
+#include "BaseDataProvider.h"
+#include "DataManager.h"
 
-namespace MonkeyGL{
+using namespace MonkeyGL;
 
-    struct DeviceProp
-    {
-        char name[256];
-        unsigned long totalMem;
-        int major;
-        int minor;
+BaseDataProvider::BaseDataProvider()
+{
+    m_layers.clear();
+}
 
-        char reserved[1024];
+BaseDataProvider::~BaseDataProvider()
+{
+}
 
-        DeviceProp(){
-            memset(this, 0, sizeof(DeviceProp));
+void BaseDataProvider::EnableLayer(bool enable, LayerType type)
+{
+    for (auto layer : m_layers){
+        if (type == layer->GetLayerType()){
+            layer->Enable(enable);
         }
-    };
+    }
+}
 
-    class DeviceInfo
-    {
-    public:
-        DeviceInfo();
-        ~DeviceInfo();
+bool BaseDataProvider::GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth, int& nHeight, PlaneType planeType)
+{
+    for (auto layer : m_layers){
+        layer->GetRGBData(pData, nWidth, nHeight, planeType);
+    }
+    return true;
+}
 
-        static DeviceInfo* Instance();
-
-    public:
-        bool Initialized();
-        bool GetCount(int& count);
-        bool GetName(std::string& strName, const int& index);
-        bool GetTotalGlobal(unsigned long& mem, const int& index);
-        bool GetMajor(int& major, const int& index);
-        bool GetMinor(int& minor, const int& index);
-
-        bool SetDevice(const int& index);
-
-    private:
-        bool m_bInit;
-        int m_nCount;
-        std::vector<DeviceProp> m_vecProp;
-    };
-
+bool BaseDataProvider::GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, PlaneType planeType)
+{
+    for (auto layer : m_layers){
+        layer->GetGrayscaleData(pData, nWidth, nHeight, planeType);
+    }
+    return true;
 }
