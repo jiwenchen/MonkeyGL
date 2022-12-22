@@ -30,5 +30,9 @@ namespace MonkeyGL{
     public:
         AnnotationLayer();
         ~AnnotationLayer();
+
+    public:
+        virtual bool GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth, int& nHeight, PlaneType planeType);
+        virtual bool GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, PlaneType planeType);
     };
 }

@@ -21,8 +21,6 @@
 // SOFTWARE.
 
 #include "Render.h"
-#include <driver_types.h>
-#include "vector_types.h"
 #include "StopWatch.h"
 #include "TransferFunction.h"
 #include "Logger.h"
@@ -30,73 +28,13 @@
 
 using namespace MonkeyGL;
 
-extern "C" void cu_test_3d(short *h_volumeData, cudaExtent volumeSize);
-extern "C" void cu_init_id();
-extern "C" bool cu_set_1d(float *h_volumeData, int nLen, unsigned char nLabel);
-extern "C" void cu_test_1d(int nLen, unsigned char nLabel);
-
 Render::Render(void)
 {
-	// testcuda();
-}
-
-void Render::testcuda()
-{
-#if 1
-	int nWidth = 512;
-	int nHeight = 512;
-	int nDepth = 200;
-	short *pData = new short[nWidth * nHeight * nDepth];
-	for (int i = 0; i < nDepth; i++)
-	{
-		for (int j = 0; j < nWidth * nHeight; j++)
-		{
-			pData[i * nHeight * nWidth + j] = j + i;
-		}
-	}
-	// m_VolumeSize.width = nWidth;
-	// m_VolumeSize.height = nHeight;
-	// m_VolumeSize.depth = nDepth;
-
-	// cu_test_3d(pData, m_VolumeSize);
-
-	delete[] pData;
-#else
-	cu_init_id();
-	int nLen = 100;
-	float *pData = new float[nLen * 4];
-	for (int i = 0; i < nLen; i++)
-	{
-		pData[4 * i] = i;
-		pData[4 * i + 1] = i;
-		pData[4 * i + 2] = i;
-		pData[4 * i + 3] = i + 1;
-	}
-	cu_set_1d(pData, nLen, 1);
-
-	for (int i = 0; i < nLen; i++)
-	{
-		pData[4 * i] = i + 20;
-		pData[4 * i + 1] = i + 20;
-		pData[4 * i + 2] = i + 20;
-		pData[4 * i + 3] = i + 20 + 1;
-	}
-	cu_set_1d(pData, nLen, 10);
-
-	for (int l = 0; l < 10000; l++)
-	{
-		for (int i = 0; i < 12; i++)
-			cu_test_1d(nLen, i);
-	}
-
-	delete[] pData;
-#endif
 }
 
 Render::~Render(void)
 {
 }
-
 
 bool Render::GetPlaneData(std::shared_ptr<short> &pData, int &nWidth, int &nHeight, const PlaneType &planeType)
 {
@@ -174,59 +112,6 @@ bool Render::GetVRData(std::shared_ptr<unsigned char>& pData, int nWidth, int nH
 {
 	m_vrProvider.GetRGBData(pData, nWidth, nHeight, PlaneVR);
 	return true;
-}
-
-void Render::MergeOrientationBox(unsigned char *pVR, int nWidth, int nHeight)
-{
-	StopWatch sw("Render::MergeOrientationBox");
-	int nW_Box = 64, nH_Box = 64;
-	if (nWidth <= nW_Box || nHeight <= nH_Box)
-	{
-		return;
-	}
-
-	{
-		int w = 512;
-		int h = 512;
-		std::vector<Facet2D> facet2Ds = GetMeshPoints(w, h);
-		std::shared_ptr<float> pImage(new float[w * h]);
-		memset(pImage.get(), 0, w * h * sizeof(float));
-		std::shared_ptr<float> pZBuffer(new float[w * h]);
-		memset(pZBuffer.get(), 0, w * h * sizeof(float));
-
-		for (size_t i = 0; i < facet2Ds.size(); i++)
-		{
-			Facet2D &facet2D = facet2Ds[i];
-
-			Point2f &v1 = facet2D.v1;
-			Point2f &v2 = facet2D.v2;
-			Point2f &v3 = facet2D.v3;
-			float &zBuffer = facet2D.zBuffer;
-			Methods::FillHoleInImage_Ch1(pImage.get(), pZBuffer.get(), w, h, facet2D.diffuse, zBuffer, v1, v2, v3);
-		}
-
-		RGB clr(0.902, 0.902, 0.302);
-		for (int y = nHeight - nH_Box; y < nHeight; y++)
-		{
-			int yIdx = (y + nH_Box - nHeight) * 8;
-			for (int x = nWidth - nW_Box; x < nWidth; x++)
-			{
-				int xIdx = (x + nW_Box - nWidth) * 8;
-				float diffuse = pImage.get()[yIdx * w + xIdx];
-				if (diffuse > 0)
-				{
-					RGB clrTemp = clr * diffuse;
-					clrTemp = clrTemp + 0.05;
-					int red = int(clrTemp.red * 255);
-					int green = int(clrTemp.green * 255);
-					int blue = int(clrTemp.blue * 255);
-					pVR[3 * (y * nWidth + x)] = red;
-					pVR[3 * (y * nWidth + x) + 1] = green;
-					pVR[3 * (y * nWidth + x) + 2] = blue;
-				}
-			}
-		}
-	}
 }
 
 bool Render::GetBatchData(std::vector<short *> &vecBatchData, BatchInfo batchInfo)
@@ -334,43 +219,4 @@ void Render::ShowPlaneInVR(bool bShow)
 {
 	IRender::ShowPlaneInVR(bShow);
 	// m_cuDataInfo.CopyMaskData(DataManager::Instance()->GetMaskData().get(), m_VolumeSize);
-}
-
-Point2f TransferPoint2D(Point2f pt, int nWidth, int nHeight)
-{
-	float r = nHeight;
-	Point2f ptOut = pt;
-	ptOut *= r;
-	ptOut += Point2f(nWidth / 2.0, nHeight / 2.0);
-	return ptOut;
-}
-
-std::vector<Facet2D> Render::GetMeshPoints(int nWidth, int nHeight)
-{
-	std::vector<Facet3D> facet3Ds = m_marchingCube.GetMesh();
-	std::vector<Facet2D> facet2Ds;
-	// for (size_t i = 0; i < facet3Ds.size(); i++)
-	// {
-	// 	Facet3D &facet3D = facet3Ds[i];
-
-	// 	Point3f v1 = Methods::GetTransferPointf(m_pRotateMatrix, facet3D.v1);
-	// 	Point3f v2 = Methods::GetTransferPointf(m_pRotateMatrix, facet3D.v2);
-	// 	Point3f v3 = Methods::GetTransferPointf(m_pRotateMatrix, facet3D.v3);
-
-	// 	Direction3f n = Direction3f(v3, v1).cross(Direction3f(v3, v2));
-	// 	float d = n.dot(Direction3f(0, -1, 0));
-	// 	if (d < 0)
-	// 	{
-	// 		continue;
-	// 	}
-
-	// 	Facet2D facet2D;
-	// 	facet2D.diffuse = d;
-	// 	facet2D.zBuffer = (v1.y() + v2.y() + v3.y()) / 3 + 10000;
-	// 	facet2D.v1 = TransferPoint2D(Point2f(v1.x(), v1.z()), nWidth, nHeight);
-	// 	facet2D.v2 = TransferPoint2D(Point2f(v2.x(), v2.z()), nWidth, nHeight);
-	// 	facet2D.v3 = TransferPoint2D(Point2f(v3.x(), v3.z()), nWidth, nHeight);
-	// 	facet2Ds.push_back(facet2D);
-	// }
-	return facet2Ds;
 }

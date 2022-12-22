@@ -26,7 +26,6 @@
 #include "VolumeInfo.h"
 #include "Methods.h"
 #include "IRender.h"
-#include "MarchingCube.h"
 #include "VRProvider.h"
 #include "MPRProvider.h"
 #include "CPRProvider.h"
@@ -53,19 +52,11 @@ namespace MonkeyGL {
 
         virtual void ShowPlaneInVR(bool bShow);
 
-        virtual std::vector<Facet2D> GetMeshPoints(int nWidth, int nHeight);
-
     private:
         bool GetMPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType);
         bool GetCPRPlaneData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, const PlaneType& planeType);
 
-        void testcuda();
-
-        void MergeOrientationBox(unsigned char* pVR, int nWidth, int nHeight);
-
     private:
-        MarchingCube m_marchingCube;
-
         VRProvider m_vrProvider;
         MPRProvider m_mprProvider;
         CPRProvider m_cprProvider;

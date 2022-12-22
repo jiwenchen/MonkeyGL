@@ -82,6 +82,7 @@ set(SRC_LIST
   ./core/Render.cpp
   ./core/RenderInfo.cpp
   ./core/StopWatch.cpp
+  ./core/TestOnly.cpp
   ./core/TransferFunction.cpp
   ./core/VolumeInfo.cpp
   ./core/VRImageLayer.cpp

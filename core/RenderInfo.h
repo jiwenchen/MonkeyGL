@@ -58,6 +58,10 @@ namespace MonkeyGL{
             return m_fTotalScale;
         }
 
+        float* GetRotateMatrix(){
+            return m_pRotateMatrix;
+        }
+
     private:
         void Init();
 

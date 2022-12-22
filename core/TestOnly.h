@@ -21,24 +21,18 @@
 // SOFTWARE.
 
 #pragma once
-#include "ImageLayer.h"
-#include "MarchingCube.h"
 
-namespace MonkeyGL{
-    class VRImageLayer : public ImageLayer
+namespace MonkeyGL
+{
+    class TestOnly
     {
     public:
-        VRImageLayer();
-        ~VRImageLayer();
-
-    public:
-        virtual bool GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth, int& nHeight, PlaneType planeType);
+        TestOnly();
+        ~TestOnly();
 
     private:
-        void MergeOrientationBox(unsigned char *pVR, int nWidth, int nHeight);
-        std::vector<Facet2D> GetMeshPoints(int nWidth, int nHeight);
-
-    private:
-        MarchingCube m_marchingCube;
+        void testcuda();
     };
-}
+    
+} // namespace MonkeyGL
+
