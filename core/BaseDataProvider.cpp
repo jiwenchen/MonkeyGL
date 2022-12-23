@@ -46,7 +46,9 @@ void BaseDataProvider::EnableLayer(bool enable, LayerType type)
 bool BaseDataProvider::GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth, int& nHeight, PlaneType planeType)
 {
     for (auto layer : m_layers){
-        layer->GetRGBData(pData, nWidth, nHeight, planeType);
+        if (!layer->GetRGBData(pData, nWidth, nHeight, planeType)){
+            return false;
+        }
     }
     return true;
 }
@@ -54,7 +56,9 @@ bool BaseDataProvider::GetRGBData(std::shared_ptr<unsigned char>& pData, int& nW
 bool BaseDataProvider::GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, PlaneType planeType)
 {
     for (auto layer : m_layers){
-        layer->GetGrayscaleData(pData, nWidth, nHeight, planeType);
+        if (!layer->GetGrayscaleData(pData, nWidth, nHeight, planeType)){
+            return false;
+        }
     }
     return true;
 }

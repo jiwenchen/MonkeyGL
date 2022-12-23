@@ -73,5 +73,5 @@ bool CPRImageLayer::GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth,
 	delete[] pPoints;
 	delete[] pDirs;
 
-    return false;
+    return true;
 }

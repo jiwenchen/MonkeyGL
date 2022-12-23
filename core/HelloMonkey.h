@@ -131,6 +131,6 @@ namespace MonkeyGL {
 
     private:
         bool m_bShowCPRLineInVR;
-        std::shared_ptr<IRender> _pRender;
+        std::shared_ptr<IRender> m_pRender;
     };
 }
