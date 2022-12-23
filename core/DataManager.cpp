@@ -130,6 +130,7 @@ bool DataManager::LoadVolumeFile( const char* szFile )
 
 		m_cuDataMan.CopyVolumeData(GetVolumeData().get(), m_VolumeSize);
 		InitCommon(GetSpacing(0), GetSpacing(1), GetSpacing(2), m_VolumeSize);
+		m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
 	}
 
 	return res;
@@ -152,6 +153,7 @@ bool DataManager::SetVolumeData(std::shared_ptr<short>pData, int nWidth, int nHe
 
 	if (DeviceInfo::Instance()->Initialized()){
 		m_cuDataMan.CopyVolumeData(GetVolumeData().get(), m_VolumeSize);
+		m_cuDataMan.CopyOperatorMatrix(m_renderInfo.m_pTransformMatrix, m_renderInfo.m_pTransposeTransformMatrix);
 	}
 
 	return true;
