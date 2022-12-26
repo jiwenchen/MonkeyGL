@@ -63,6 +63,10 @@ VRImageLayer::~VRImageLayer()
 
 bool VRImageLayer::GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth, int& nHeight, PlaneType planeType)
 {
+	if (!DataManager::Instance()->IsLayerEnable(GetLayerType())){
+		return false;
+	}
+
     if (PlaneVR != planeType){
         return false;
     }

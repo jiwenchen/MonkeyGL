@@ -33,8 +33,6 @@ namespace MonkeyGL{
         ~BaseLayer();
 
     public:
-        virtual void Enable(bool enable);
-        virtual bool IsEnabled();
         virtual LayerType GetLayerType();
 
     public:
@@ -47,7 +45,6 @@ namespace MonkeyGL{
         }
 
     protected:
-        bool m_enabled;
         LayerType m_layerType;
     };
 }

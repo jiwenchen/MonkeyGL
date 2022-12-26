@@ -33,6 +33,7 @@
   <button id="setrendertype" type="button" class="btn btn-default">VR/MIP/SR</button>
   <button id="loadtf" type="button" class="btn btn-default">Load TF</button>
   <button id="savetf" type="button" class="btn btn-default">Save TF</button>
+  <button id="showannotation" type="button" class="btn btn-default">Show Annotation</button>
 
   <br>
   MPR:
@@ -244,6 +245,12 @@
           savetf();
         });
 
+        let showAnnotation = false;
+        document.getElementById('showannotation').addEventListener('click', function (e) {
+          showAnnotation = !showAnnotation;
+          showannotation(showAnnotation);
+        });
+
 
         let enableCPR = false;
         document.getElementById('showCPR').addEventListener('click', function (e) {
@@ -393,6 +400,11 @@
 
         function savetf(){
           let url = `/savetf?uid=${uid}`;
+          displayVR(url);
+        }
+        
+        function showannotation(show){
+          let url = `/showannotation?uid=${uid}&show=` + String(show);
           displayVR(url);
         }
 

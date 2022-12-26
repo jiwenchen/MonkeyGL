@@ -24,6 +24,8 @@
 #include "AnnotationLayer.h"
 #include "StopWatch.h"
 #include "AnnotationUtils.h"
+#include "AnnotationInfo.h"
+#include "DataManager.h"
 
 using namespace MonkeyGL;
 
@@ -39,28 +41,29 @@ AnnotationLayer::~AnnotationLayer()
 bool AnnotationLayer::GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth, int& nHeight, PlaneType planeType)
 {
     StopWatch sw("AnnotationLayer::GetRGBData");
+	if (!DataManager::Instance()->IsLayerEnable(GetLayerType())){
+		return false;
+	}
+
     if (PlaneVR != planeType){
         return false;
     }
     if (!pData || nWidth <= 10 || nHeight <= 10){
         return false;
     }
-
-    AnnotationUtils::SetFontSize(FontSizeBig);
-    AnnotationUtils::Textout2Image("MonkeyGL_005461325464211<=", 10, 200, pData.get(), nWidth, nHeight);
-
-    AnnotationUtils::SetFontSize(FontSizeMiddle);
-    int w, h;
-    AnnotationUtils::GetSize("Sanasdfa;ajgsdfQian~30<*?", w, h);
-    AnnotationUtils::Textout2Image("Sanasdfa;ajgsdfQian~30<*?", 512-w-5, 280, pData.get(), nWidth, nHeight);
-
-    AnnotationUtils::SetFontSize(FontSizeSmall);
-    AnnotationUtils::Textout2Image("Hello*WorldZz", 10, 500, pData.get(), nWidth, nHeight);
+    std::vector<AnnotationDef> annotions = DataManager::Instance()->GetAnnotationInfo().GetAnnotations(planeType);
+    for (auto anno : annotions){
+        AnnotationUtils::SetFontSize(anno.fontSize);
+        AnnotationUtils::Textout2Image(anno.strText, anno.x, anno.y, anno.annoFormat, anno.color, pData.get(), nWidth, nHeight);
+    }
 
     return true;
 }
 
 bool AnnotationLayer::GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, PlaneType planeType)
 {
-    return true;
+	if (!DataManager::Instance()->IsLayerEnable(GetLayerType())){
+		return false;
+	}
+    return false;
 }

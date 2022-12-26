@@ -27,7 +27,6 @@ using namespace MonkeyGL;
 
 ImageLayer::ImageLayer()
 {
-    m_enabled = true;
     m_layerType = LayerTypeImage;
 }
 

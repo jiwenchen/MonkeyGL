@@ -24,16 +24,9 @@
 #include <map>
 #include <string>
 #include <memory>
+#include "Defines.h"
 
 namespace MonkeyGL {
-
-    enum FontSize
-    {
-        FontSizeNotDefined = -1,
-        FontSizeSmall,
-        FontSizeMiddle,
-        FontSizeBig
-    };
 
     struct Mask
     {
@@ -62,7 +55,7 @@ namespace MonkeyGL {
     public:
         static bool Init();
         static void SetFontSize(FontSize fs);
-        static bool Textout2Image(std::string str, int x, int y, unsigned char* pImg, int nWidth, int nHeight);
+        static bool Textout2Image(std::string str, int x, int y, AnnotationFormat annoFormat, RGB clr, unsigned char* pImg, int nWidth, int nHeight);
         static void GetSize(std::string str, int& nWidth, int& nHeight);
 
     private:

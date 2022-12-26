@@ -54,11 +54,12 @@ void TestOnly::testcuda()
 			pData[i * nHeight * nWidth + j] = j + i;
 		}
 	}
-	// m_VolumeSize.width = nWidth;
-	// m_VolumeSize.height = nHeight;
-	// m_VolumeSize.depth = nDepth;
+	cudaExtent volumeSize;
+	volumeSize.width = nWidth;
+	volumeSize.height = nHeight;
+	volumeSize.depth = nDepth;
 
-	// cu_test_3d(pData, m_VolumeSize);
+	cu_test_3d(pData, volumeSize);
 
 	delete[] pData;
 #else

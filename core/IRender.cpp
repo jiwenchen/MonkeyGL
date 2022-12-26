@@ -339,3 +339,23 @@ void IRender::ShowPlaneInVR(bool bShow)
 {
 	return DataManager::Instance()->ShowPlaneInVR(bShow);
 }
+
+bool IRender::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr)
+{
+	return DataManager::Instance()->AddAnnotation(planeType, txt, x, y, fontSize, annoFormat, clr);
+}
+
+bool IRender::RemovePlaneAnnotations(PlaneType planeType)
+{
+	return DataManager::Instance()->RemovePlaneAnnotations(planeType);
+}
+
+bool IRender::RemoveAllAnnotations()
+{
+	return DataManager::Instance()->RemoveAllAnnotations();
+}
+
+bool IRender::EnableLayer(LayerType layerType, bool bEnable)
+{
+	return DataManager::Instance()->EnableLayer(layerType, bEnable);
+}

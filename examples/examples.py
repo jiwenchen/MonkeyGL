@@ -153,10 +153,10 @@ def test_load_nrrd():
     # hm.SaveVR2Png(f'{file_path}/a.png', 512, 512)
 
     # vr = hm.GetVRArray(768, 768)
-    # b64str = hm.GetVRData_pngString()
-    # print(b64str)
+    b64str = hm.GetVRData_pngString()
+    print(b64str)
 
-    hm.GetPlaneData_pngString(mk.PlaneAxial)
+    # hm.GetPlaneData_pngString(mk.PlaneAxial)
 
 
 def test_instance():
@@ -240,8 +240,8 @@ def test_png():
 if __name__ == "__main__":
     # test_png()
     # test_objs()
-    test_set_data()
-    # test_load_nrrd()
+    # test_set_data()
+    test_load_nrrd()
     # test_instance()
 
     # for i in range(100):

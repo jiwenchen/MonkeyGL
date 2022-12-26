@@ -78,6 +78,11 @@ CuDataManager& DataManager::GetCuDataManager()
 	return m_cuDataMan;
 }
 
+AnnotationInfo& DataManager::GetAnnotationInfo()
+{
+	return m_annotationInfo;
+}
+
 bool DataManager::TryToEnableGPU(bool enable)
 {
 	if (enable && DeviceInfo::Instance()->Initialized()){
@@ -804,4 +809,33 @@ void DataManager::ShowPlaneInVR(bool bShow)
 		ctrlPts[99] = RGBA(1, 1, 1, 1);
 		SetObjectAlpha(0.6, m_planeLabel);
 	}
+}
+
+bool DataManager::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr)
+{
+	return GetAnnotationInfo().AddAnnotation(PlaneVR, txt, x, y, fontSize, annoFormat, clr);
+}
+
+bool DataManager::RemovePlaneAnnotations(PlaneType planeType)
+{
+	return GetAnnotationInfo().RemovePlaneAnnotations(planeType);
+}
+
+bool DataManager::RemoveAllAnnotations()
+{
+	return GetAnnotationInfo().RemoveAllAnnotations();
+}
+
+bool DataManager::EnableLayer(LayerType layerType, bool bEnable)
+{
+	m_layerEnable[layerType] = bEnable;
+	return true;
+}
+
+bool DataManager::IsLayerEnable(LayerType layerType)
+{
+	if (m_layerEnable.find(layerType) != m_layerEnable.end()){
+		return m_layerEnable[layerType];
+	}
+	return true;
 }

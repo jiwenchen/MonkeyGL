@@ -30,7 +30,7 @@ VRProvider::VRProvider()
 : BaseDataProvider()
 {
     m_layers.push_back(std::shared_ptr<VRImageLayer>(new VRImageLayer()));
-    // m_layers.push_back(std::shared_ptr<AnnotationLayer>(new AnnotationLayer()));
+    m_layers.push_back(std::shared_ptr<AnnotationLayer>(new AnnotationLayer()));
 }
 
 VRProvider::~VRProvider()

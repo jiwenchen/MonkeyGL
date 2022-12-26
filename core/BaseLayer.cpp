@@ -26,22 +26,11 @@ using namespace MonkeyGL;
 
 BaseLayer::BaseLayer()
 {
-    m_enabled = false;
     m_layerType = LayerTypeNotDefined;
 }
 
 BaseLayer::~BaseLayer()
 {
-}
-
-void BaseLayer::Enable(bool enable)
-{
-    m_enabled = enable;
-}
-
-bool BaseLayer::IsEnabled()
-{
-    return m_enabled;
 }
 
 LayerType BaseLayer::GetLayerType()

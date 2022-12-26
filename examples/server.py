@@ -657,6 +657,30 @@ def show_plane_in_vr(
         'message': 'successful'
     }
 
+@app.get('/showannotation')
+def show_annotation(
+    uid: str,
+    show: bool
+):
+    hm = get_monkey_instance(uid)
+    if show:
+        hm.AddAnnotation(mk.PlaneVR, "hello monkey", 50, 100, mk.FontSizeSmall, mk.AnnotationFormatLeft, mk.RGB(1.0, 0.0, 0.0))
+        hm.AddAnnotation(mk.PlaneVR, "hello monkey", 50, 300, mk.FontSizeMiddle, mk.AnnotationFormatCenter, mk.RGB(0.0, 1.0, 0.0))
+        hm.AddAnnotation(mk.PlaneVR, "hello monkey", 250, 450, mk.FontSizeBig, mk.AnnotationFormatRight, mk.RGB(1.0, 0.0, 1.0))
+
+        # hm.RemovePlaneAnnotations(mk.PlaneVR)
+        # hm.RemoveAllAnnotations()
+    hm.EnableLayer(mk.LayerTypeAnnotation, show)
+
+    b64str = hm.GetVRData_pngString()
+
+    return {
+        'data': {
+            'image': b64str
+        },
+        'message': 'successful'
+    }
+
 
 if __name__ == "__main__":
     uvicorn.run(app='server:app', host="0.0.0.0",

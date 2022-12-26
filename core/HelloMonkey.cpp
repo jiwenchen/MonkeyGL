@@ -730,3 +730,32 @@ void HelloMonkey::ShowPlaneInVR(bool bShow)
 		return;
 	return m_pRender->ShowPlaneInVR(bShow);
 }
+
+bool HelloMonkey::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr)
+{
+	if (!m_pRender)
+		return false;
+	return m_pRender->AddAnnotation(planeType, txt, x, y, fontSize, annoFormat, clr);
+}
+
+bool HelloMonkey::RemovePlaneAnnotations(PlaneType planeType)
+{
+	if (!m_pRender)
+		return false;
+	return m_pRender->RemovePlaneAnnotations(planeType);
+}
+
+bool HelloMonkey::RemoveAllAnnotations()
+{
+	if (!m_pRender)
+		return false;
+	return m_pRender->RemoveAllAnnotations();
+
+}
+
+bool HelloMonkey::EnableLayer(LayerType layerType, bool bEnable)
+{
+	if (!m_pRender)
+		return false;
+	return m_pRender->EnableLayer(layerType, bEnable);
+}

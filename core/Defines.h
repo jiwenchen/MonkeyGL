@@ -253,6 +253,22 @@ namespace MonkeyGL{
         LogLevelError
     };
 
+    enum FontSize
+    {
+        FontSizeNotDefined = -1,
+        FontSizeSmall,
+        FontSizeMiddle,
+        FontSizeBig
+    };
+
+    enum AnnotationFormat
+    {
+        AnnotationFormatNotDefined = -1,
+        AnnotationFormatLeft,
+        AnnotationFormatRight,
+        AnnotationFormatCenter
+    };
+
     enum LayerType
     {
         LayerTypeNotDefined = -1,

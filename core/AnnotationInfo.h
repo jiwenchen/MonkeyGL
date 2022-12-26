@@ -20,36 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "BaseDataProvider.h"
-#include "DataManager.h"
+#pragma once
+#include <map>
+#include <vector>
+#include "Defines.h"
 
-using namespace MonkeyGL;
-
-BaseDataProvider::BaseDataProvider()
+namespace MonkeyGL
 {
-    m_layers.clear();
-}
+    struct AnnotationDef
+    {
+        FontSize fontSize;
+        AnnotationFormat annoFormat;
+        int x;
+        int y;
+        std::string strText;
+        RGB color;
+    };
 
-BaseDataProvider::~BaseDataProvider()
-{
-}
+    class AnnotationInfo
+    {
+    public:
+        AnnotationInfo();
+        ~AnnotationInfo();
 
-bool BaseDataProvider::GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth, int& nHeight, PlaneType planeType)
-{
-    for (auto layer : m_layers){
-        if (!layer->GetRGBData(pData, nWidth, nHeight, planeType)){
-            return false;
-        }
-    }
-    return true;
-}
+    public:
+        bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize=FontSizeSmall, AnnotationFormat annoFormat=AnnotationFormatLeft, RGB clr=RGB(1.0, 1.0, 1.0));
+        bool RemovePlaneAnnotations(PlaneType planeType);
+        bool RemoveAllAnnotations();
+        std::vector<AnnotationDef> GetAnnotations(PlaneType planeType);
 
-bool BaseDataProvider::GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, PlaneType planeType)
-{
-    for (auto layer : m_layers){
-        if (!layer->GetGrayscaleData(pData, nWidth, nHeight, planeType)){
-            return false;
-        }
-    }
-    return true;
+    private:
+        std::map<PlaneType, std::vector<AnnotationDef> > m_annotations;
+    };
+    
 }

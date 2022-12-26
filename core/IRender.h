@@ -110,6 +110,11 @@ namespace MonkeyGL{
         virtual bool LoadTransferFunction(const char* szFile);
         virtual bool SaveTransferFunction(const char* szFile);
 
+        virtual bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr);
+        virtual bool RemovePlaneAnnotations(PlaneType planeType);
+        virtual bool RemoveAllAnnotations();
+        virtual bool EnableLayer(LayerType layerType, bool bEnable);
+
         // cpr
         virtual bool SetCPRLinePatient(std::vector<Point3d> cprLine);
         virtual bool SetCPRLineVoxel(std::vector<Point3d> cprLine);

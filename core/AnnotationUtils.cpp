@@ -209,7 +209,7 @@ std::shared_ptr<unsigned char> AnnotationUtils::GetCharImage(std::string b64, in
     return pData;
 }
 
-bool AnnotationUtils::Textout2Image(std::string str, int x, int y, unsigned char* pImg, int nWidth, int nHeight)
+bool AnnotationUtils::Textout2Image(std::string str, int x, int y, AnnotationFormat annoFormat, RGB clr, unsigned char* pImg, int nWidth, int nHeight)
 {
     if(nullptr==pImg || nWidth<10 || nHeight<10){
         return false;
@@ -217,6 +217,22 @@ bool AnnotationUtils::Textout2Image(std::string str, int x, int y, unsigned char
 
     int xStart = x;
     int yStart = y;
+    if (annoFormat == AnnotationFormatNotDefined){
+        return false;
+    }
+    else if (annoFormat == AnnotationFormatCenter
+        || annoFormat == AnnotationFormatRight
+    ){
+        int w =-1, h = -1;
+        AnnotationUtils::GetSize(str, w, h);
+        if (annoFormat == AnnotationFormatCenter){
+            xStart -= w/2;
+        }
+        else if (annoFormat == AnnotationFormatRight){
+            xStart -= w;
+        }
+    }
+
     for (int i=0; i<str.length(); i++){
         Mask& mask = AnnotationUtils::GetCharMask(str.substr(i, 1));
         int w = mask.width, h=mask.height;
@@ -224,13 +240,13 @@ bool AnnotationUtils::Textout2Image(std::string str, int x, int y, unsigned char
         
         for (int yy=yStart; yy<yStart+h; yy++){
             for (int xx=xStart; xx<xStart+w; xx++){
-                if (xx>=nWidth || yy>=nHeight){
+                if (xx<0 || xx>=nWidth || yy<0 || yy>=nHeight){
                     continue;
                 }
                 if (pMask[(yy-yStart)*w+xx-xStart] > 0){
-                    pImg[(yy*nWidth+xx)*3] = pMask[(yy-yStart)*w+xx-xStart];
-                    pImg[(yy*nWidth+xx)*3+1] = pMask[(yy-yStart)*w+xx-xStart];
-                    pImg[(yy*nWidth+xx)*3+2] = pMask[(yy-yStart)*w+xx-xStart];
+                    pImg[(yy*nWidth+xx)*3] = pMask[(yy-yStart)*w+xx-xStart] * clr.red;
+                    pImg[(yy*nWidth+xx)*3+1] = pMask[(yy-yStart)*w+xx-xStart] * clr.green;
+                    pImg[(yy*nWidth+xx)*3+2] = pMask[(yy-yStart)*w+xx-xStart] * clr.blue;
                 }
             }
         }

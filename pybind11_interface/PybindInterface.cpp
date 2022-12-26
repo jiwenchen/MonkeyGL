@@ -230,9 +230,34 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .value("RenderTypeSurface", RenderType::RenderTypeSurface)
         .export_values();
 
+    py::enum_<LayerType>(m, "LayerType")
+        .value("LayerTypeNotDefined", LayerType::LayerTypeNotDefined)
+        .value("LayerTypeImage", LayerType::LayerTypeImage)
+        .value("LayerTypeAnnotation", LayerType::LayerTypeAnnotation)
+        .export_values();
+
+    py::enum_<FontSize>(m, "FontSize")
+        .value("FontSizeNotDefined", FontSize::FontSizeNotDefined)
+        .value("FontSizeSmall", FontSize::FontSizeSmall)
+        .value("FontSizeMiddle", FontSize::FontSizeMiddle)
+        .value("FontSizeBig", FontSize::FontSizeBig)
+        .export_values();
+
+    py::enum_<AnnotationFormat>(m, "AnnotationFormat")
+        .value("AnnotationFormatNotDefined", AnnotationFormat::AnnotationFormatNotDefined)
+        .value("AnnotationFormatLeft", AnnotationFormat::AnnotationFormatLeft)
+        .value("AnnotationFormatRight", AnnotationFormat::AnnotationFormatRight)
+        .value("AnnotationFormatCenter", AnnotationFormat::AnnotationFormatCenter)
+        .export_values();
+
     py::class_<DeviceInfo>(m, "DeviceInfo")
         .def(py::init<>())
         .def("GetCount", &DeviceInfo::GetCount);
+
+    py::class_<RGB>(m, "RGB")
+        .def(py::init<>())
+        .def(py::init<float, float, float>())
+        .def("Print", &RGB::Print);
     
     py::class_<RGBA>(m, "RGBA")
         .def(py::init<>())
@@ -309,6 +334,10 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("ShowPlaneInVR", &pyHelloMonkey::ShowPlaneInVR)
         .def("SetPlaneIndex", &pyHelloMonkey::SetPlaneIndex)
         .def("Transfer2Base64Array", &pyHelloMonkey::Transfer2Base64Array)
+        .def("AddAnnotation", &pyHelloMonkey::AddAnnotation)
+        .def("RemovePlaneAnnotations", &pyHelloMonkey::RemovePlaneAnnotations)
+        .def("RemoveAllAnnotations", &pyHelloMonkey::RemoveAllAnnotations)
+        .def("EnableLayer", &pyHelloMonkey::EnableLayer)
 
         .def("GetZoomRatio", &pyHelloMonkey::GetZoomRatio)
         .def("GetPlaneCurrentIndex", &pyHelloMonkey::GetPlaneCurrentIndex)

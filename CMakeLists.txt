@@ -52,6 +52,7 @@ link_libraries(ITKIOMeta-5.2)
 
 set(SRC_LIST
   ./core/fpng/fpng.cpp
+  ./core/AnnotationInfo.cpp
   ./core/AnnotationLayer.cpp
   ./core/AnnotationUtils.cpp
   ./core/Base64.hpp
