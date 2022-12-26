@@ -664,9 +664,9 @@ def show_annotation(
 ):
     hm = get_monkey_instance(uid)
     if show:
-        hm.AddAnnotation(mk.PlaneVR, "hello monkey", 50, 100, mk.FontSizeSmall, mk.AnnotationFormatLeft, mk.RGB(1.0, 0.0, 0.0))
-        hm.AddAnnotation(mk.PlaneVR, "hello monkey", 50, 300, mk.FontSizeMiddle, mk.AnnotationFormatCenter, mk.RGB(0.0, 1.0, 0.0))
-        hm.AddAnnotation(mk.PlaneVR, "hello monkey", 250, 450, mk.FontSizeBig, mk.AnnotationFormatRight, mk.RGB(1.0, 0.0, 1.0))
+        hm.AddAnnotation(mk.PlaneVR, "HelloMonkey", 250, 100, mk.FontSizeSmall, mk.AnnotationFormatLeft, mk.RGB(1.0, 0.0, 0.0))
+        hm.AddAnnotation(mk.PlaneVR, "HelloMonkey", 250, 300, mk.FontSizeMiddle, mk.AnnotationFormatCenter, mk.RGB(0.0, 1.0, 0.0))
+        hm.AddAnnotation(mk.PlaneVR, "HelloMonkey", 250, 470, mk.FontSizeBig, mk.AnnotationFormatRight, mk.RGB(1.0, 0.0, 1.0))
 
         # hm.RemovePlaneAnnotations(mk.PlaneVR)
         # hm.RemoveAllAnnotations()

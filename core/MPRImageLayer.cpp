@@ -83,6 +83,10 @@ MPRImageLayer::~MPRImageLayer()
 
 bool MPRImageLayer::GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, PlaneType planeType)
 {
+	if (!DataManager::Instance()->IsLayerEnable(GetLayerType())){
+		return false;
+	}
+	
     if (planeType < PlaneAxial || planeType > PlaneCoronalOblique){
         return false;
     }
