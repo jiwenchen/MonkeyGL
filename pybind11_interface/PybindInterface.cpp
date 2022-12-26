@@ -234,6 +234,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .value("LayerTypeNotDefined", LayerType::LayerTypeNotDefined)
         .value("LayerTypeImage", LayerType::LayerTypeImage)
         .value("LayerTypeAnnotation", LayerType::LayerTypeAnnotation)
+        .value("LayerTypeCPRLine", LayerType::LayerTypeCPRLine)
         .export_values();
 
     py::enum_<FontSize>(m, "FontSize")
@@ -329,7 +330,7 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
         .def("SetCPRLinePatientArray", &pyHelloMonkey::SetCPRLinePatientArray)
         .def("SetCPRLineVoxelArray", &pyHelloMonkey::SetCPRLineVoxelArray)
         .def("RotateCPR", &pyHelloMonkey::RotateCPR)
-        .def("ShowCPRLineInVR", &pyHelloMonkey::ShowCPRLineInVR)
+        .def("SetCPRLineColor", &pyHelloMonkey::SetCPRLineColor)
         .def("SetVRSize", &pyHelloMonkey::SetVRSize)
         .def("ShowPlaneInVR", &pyHelloMonkey::ShowPlaneInVR)
         .def("SetPlaneIndex", &pyHelloMonkey::SetPlaneIndex)

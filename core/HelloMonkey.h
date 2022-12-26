@@ -127,7 +127,7 @@ namespace MonkeyGL {
         virtual bool SetCPRLinePatient(std::vector<Point3d> cprLine);
         virtual bool SetCPRLineVoxel(std::vector<Point3d> cprLine);
         virtual bool RotateCPR(float angle, PlaneType planeType);
-        virtual void ShowCPRLineInVR(bool bShow);
+        virtual void SetCPRLineColor(RGB clr);
 
         // plane in VR
         virtual void ShowPlaneInVR(bool bShow);
@@ -135,7 +135,6 @@ namespace MonkeyGL {
         virtual void Transfer2Base64(unsigned char* pData, int nWidth, int nHeight);
 
     private:
-        bool m_bShowCPRLineInVR;
         std::shared_ptr<IRender> m_pRender;
     };
 }

@@ -47,7 +47,6 @@ HelloMonkey::HelloMonkey()
 	}
 
 	m_pRender.reset(new Render());
-	m_bShowCPRLineInVR = false;
 
 	AnnotationUtils::Init();
 }
@@ -343,22 +342,6 @@ std::vector<uint8_t> HelloMonkey::GetVRData_png(int nWidth, int nHeight)
 		StopWatch sw("GetVRData");
 		if (!m_pRender->GetVRData(pVR, nWidth, nHeight))
 			return out_buf;
-
-		if (m_bShowCPRLineInVR)
-		{
-			std::vector<Point3d> cprLine = m_pRender->GetCPRLineVoxel();
-			StopWatch sw("cpr line size: %d", cprLine.size());
-			if (cprLine.size() >= 2){
-				float x0, y0, x1, y1;
-				m_pRender->TransferVoxel2ImageInVR(x0, y0, nWidth, nHeight, cprLine[0]);
-				for (int i=1; i<cprLine.size(); i++){
-					m_pRender->TransferVoxel2ImageInVR(x1, y1, nWidth, nHeight, cprLine[i]);
-					Methods::DrawLineInImage24Bit(pVR.get(), nWidth, nHeight, x0, y0, x1, y1, 1);
-					x0 = x1;
-					y0 = y1;
-				}
-			}
-		}
 	}
 	{
 		StopWatch sw("fpng");
@@ -719,9 +702,11 @@ bool HelloMonkey::RotateCPR(float angle, PlaneType planeType)
 	return m_pRender->RotateCPR(angle, planeType);
 }
 
-void HelloMonkey::ShowCPRLineInVR(bool bShow)
+void HelloMonkey::SetCPRLineColor(RGB clr)
 {
-	m_bShowCPRLineInVR = bShow;
+	if (!m_pRender)
+		return;
+	m_pRender->SetCPRLineColor(clr);
 }
 
 void HelloMonkey::ShowPlaneInVR(bool bShow)

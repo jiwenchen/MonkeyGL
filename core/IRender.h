@@ -120,6 +120,7 @@ namespace MonkeyGL{
         virtual bool SetCPRLineVoxel(std::vector<Point3d> cprLine);
         virtual std::vector<Point3d> GetCPRLineVoxel();
         virtual bool RotateCPR(float angle, PlaneType planeType);
+        virtual void SetCPRLineColor(RGB clr);
 
         virtual void ShowPlaneInVR(bool bShow);
     };

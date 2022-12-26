@@ -20,21 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "VRProvider.h"
-#include "VRImageLayer.h"
-#include "AnnotationLayer.h"
-#include "CPRLineLayer.h"
+#pragma once
 
-using namespace MonkeyGL;
+namespace MonkeyGL{
+    class BaseLayer;
 
-VRProvider::VRProvider()
-: BaseDataProvider()
-{
-    m_layers.push_back(std::shared_ptr<VRImageLayer>(new VRImageLayer()));
-    m_layers.push_back(std::shared_ptr<AnnotationLayer>(new AnnotationLayer()));
-    m_layers.push_back(std::shared_ptr<CPRLineLayer>(new CPRLineLayer()));
-}
+    class CPRLineLayer : public BaseLayer
+    {
+    public:
+        CPRLineLayer();
+        ~CPRLineLayer();
 
-VRProvider::~VRProvider()
-{
+    public:
+        virtual bool GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth, int& nHeight, PlaneType planeType);
+        virtual bool GetGrayscaleData(std::shared_ptr<short>& pData, int& nWidth, int& nHeight, PlaneType planeType);
+    };
 }

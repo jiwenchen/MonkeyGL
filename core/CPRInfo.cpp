@@ -35,6 +35,7 @@ CPRInfo::CPRInfo()
 	m_minSpacing = 1.0;
 	m_StretchedRadius = 0.0;
 	m_StraightenedRadius = 50.0;
+	m_lineColor = RGB(1.0, 1.0, 1.0);
 }
 
 CPRInfo::~CPRInfo()
@@ -234,4 +235,14 @@ bool CPRInfo::UpdateCPRInfo()
 	m_angleStrechedCPR = 0;
 	m_angleStraightenedCPR = 0;
 	return true;
+}
+
+void CPRInfo::SetLineColor(RGB clr)
+{
+	m_lineColor = clr;
+}
+
+RGB CPRInfo::GetLineColor()
+{
+	return m_lineColor;
 }

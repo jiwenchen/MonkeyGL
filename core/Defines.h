@@ -273,7 +273,8 @@ namespace MonkeyGL{
     {
         LayerTypeNotDefined = -1,
         LayerTypeImage,
-        LayerTypeAnnotation
+        LayerTypeAnnotation,
+        LayerTypeCPRLine
     };
 
     struct Facet3D{

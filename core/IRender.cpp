@@ -359,3 +359,8 @@ bool IRender::EnableLayer(LayerType layerType, bool bEnable)
 {
 	return DataManager::Instance()->EnableLayer(layerType, bEnable);
 }
+
+void IRender::SetCPRLineColor(RGB clr)
+{
+	DataManager::Instance()->SetCPRLineColor(clr);
+}

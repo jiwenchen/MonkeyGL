@@ -38,7 +38,7 @@ bool BaseDataProvider::GetRGBData(std::shared_ptr<unsigned char>& pData, int& nW
 {
     for (auto layer : m_layers){
         if (!layer->GetRGBData(pData, nWidth, nHeight, planeType)){
-            return false;
+            continue;
         }
     }
     return true;
@@ -48,7 +48,7 @@ bool BaseDataProvider::GetGrayscaleData(std::shared_ptr<short>& pData, int& nWid
 {
     for (auto layer : m_layers){
         if (!layer->GetGrayscaleData(pData, nWidth, nHeight, planeType)){
-            return false;
+            continue;
         }
     }
     return true;

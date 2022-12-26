@@ -480,7 +480,8 @@ def vrenablecprline(
         enableCPR: bool
 ):
     hm = get_monkey_instance(uid)
-    hm.ShowCPRLineInVR(enableCPR)
+    hm.EnableLayer(mk.LayerTypeCPRLine, enableCPR)
+    hm.SetCPRLineColor(mk.RGB(1.0, 1.0, 0.0))
     b64str = hm.GetVRData_pngString()
 
     return {

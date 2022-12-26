@@ -839,3 +839,8 @@ bool DataManager::IsLayerEnable(LayerType layerType)
 	}
 	return true;
 }
+
+void DataManager::SetCPRLineColor(RGB clr)
+{
+	m_cprInfo.SetLineColor(clr);
+}

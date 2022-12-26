@@ -156,6 +156,7 @@ namespace MonkeyGL
         bool RemoveAllAnnotations();
         bool EnableLayer(LayerType layerType, bool bEnable);
         bool IsLayerEnable(LayerType layerType);
+        void SetCPRLineColor(RGB clr);
 
         // cpr
         bool SetCPRLinePatient(std::vector<Point3d> cprLine);

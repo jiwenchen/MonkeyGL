@@ -59,6 +59,7 @@ set(SRC_LIST
   ./core/BaseDataProvider.cpp
   ./core/BaseLayer.cpp
   ./core/BatchInfo.cpp
+  ./core/CPRLineLayer.cpp
   ./core/CPRImageLayer.cpp
   ./core/CPRInfo.cpp
   ./core/CPRProvider.cpp
