@@ -118,7 +118,7 @@ namespace MonkeyGL {
         virtual double GetThickness(PlaneType planeType);
         virtual void SetMPRType(MPRType type);
 
-        virtual bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr);
+        virtual bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGBA clr);
         virtual bool RemovePlaneAnnotations(PlaneType planeType);
         virtual bool RemoveAllAnnotations();
         virtual bool EnableLayer(LayerType layerType, bool bEnable);
@@ -127,7 +127,7 @@ namespace MonkeyGL {
         virtual bool SetCPRLinePatient(std::vector<Point3d> cprLine);
         virtual bool SetCPRLineVoxel(std::vector<Point3d> cprLine);
         virtual bool RotateCPR(float angle, PlaneType planeType);
-        virtual void SetCPRLineColor(RGB clr);
+        virtual void SetCPRLineColor(RGBA clr);
 
         // plane in VR
         virtual void ShowPlaneInVR(bool bShow);

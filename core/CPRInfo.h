@@ -42,8 +42,8 @@ namespace MonkeyGL {
         std::vector<Point3d> GetCPRLineVoxel();
         bool RotateCPR(float angle, PlaneType planeType);
         bool GetCPRInfo(Point3d*& pPoints, Direction3d*& pDirs, int& nWidth, int &nHeight, PlaneType planeType);
-        void SetLineColor(RGB clr);
-        RGB GetLineColor();
+        void SetLineColor(RGBA clr);
+        RGBA GetLineColor();
 
 
     private:
@@ -71,6 +71,6 @@ namespace MonkeyGL {
         double m_angleStraightenedCPR;
         Point3d m_spacing;
         double m_minSpacing;
-        RGB m_lineColor;
+        RGBA m_lineColor;
     };
 }

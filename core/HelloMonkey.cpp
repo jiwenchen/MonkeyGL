@@ -702,7 +702,7 @@ bool HelloMonkey::RotateCPR(float angle, PlaneType planeType)
 	return m_pRender->RotateCPR(angle, planeType);
 }
 
-void HelloMonkey::SetCPRLineColor(RGB clr)
+void HelloMonkey::SetCPRLineColor(RGBA clr)
 {
 	if (!m_pRender)
 		return;
@@ -716,7 +716,7 @@ void HelloMonkey::ShowPlaneInVR(bool bShow)
 	return m_pRender->ShowPlaneInVR(bShow);
 }
 
-bool HelloMonkey::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr)
+bool HelloMonkey::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGBA clr)
 {
 	if (!m_pRender)
 		return false;

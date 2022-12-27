@@ -151,12 +151,12 @@ namespace MonkeyGL
         void SetCrossHair(Point3d pt);
         Point3d GetCenterPoint();
 
-        bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr);
+        bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGBA clr);
         bool RemovePlaneAnnotations(PlaneType planeType);
         bool RemoveAllAnnotations();
         bool EnableLayer(LayerType layerType, bool bEnable);
         bool IsLayerEnable(LayerType layerType);
-        void SetCPRLineColor(RGB clr);
+        void SetCPRLineColor(RGBA clr);
 
         // cpr
         bool SetCPRLinePatient(std::vector<Point3d> cprLine);

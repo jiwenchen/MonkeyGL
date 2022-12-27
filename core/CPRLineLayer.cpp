@@ -49,7 +49,7 @@ bool CPRLineLayer::GetRGBData(std::shared_ptr<unsigned char>& pData, int& nWidth
     }
 
     std::vector<Point3d> cprLine = DataManager::Instance()->GetCPRLineVoxel();
-    RGB clr = DataManager::Instance()->GetCPRInfo().GetLineColor();
+    RGBA clr = DataManager::Instance()->GetCPRInfo().GetLineColor();
     if (cprLine.size() >= 2){
         float x0, y0, x1, y1;
         DataManager::Instance()->TransferVoxel2ImageInVR(x0, y0, nWidth, nHeight, cprLine[0]);

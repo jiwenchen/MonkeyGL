@@ -34,7 +34,7 @@ namespace MonkeyGL
         int x;
         int y;
         std::string strText;
-        RGB color;
+        RGBA color;
     };
 
     class AnnotationInfo
@@ -44,7 +44,7 @@ namespace MonkeyGL
         ~AnnotationInfo();
 
     public:
-        bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize=FontSizeSmall, AnnotationFormat annoFormat=AnnotationFormatLeft, RGB clr=RGB(1.0, 1.0, 1.0));
+        bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize=FontSizeSmall, AnnotationFormat annoFormat=AnnotationFormatLeft, RGBA clr=RGBA(1.0, 1.0, 1.0));
         bool RemovePlaneAnnotations(PlaneType planeType);
         bool RemoveAllAnnotations();
         std::vector<AnnotationDef> GetAnnotations(PlaneType planeType);

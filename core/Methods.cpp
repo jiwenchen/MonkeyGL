@@ -161,7 +161,7 @@ Point3d Methods::MatrixMul( float *fMatrix, Point3d pt )
 	return Point3d(x, y, z);
 }
 
-void Methods::DrawDotInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, int x, int y, RGB clr)
+void Methods::DrawDotInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, int x, int y, RGBA clr)
 {
 	if (x<0 || x>=nWidth || y<0 || y>=nHeight){
 		return;
@@ -181,7 +181,7 @@ void Methods::DrawDotInImage8Bit(unsigned char* pVR, int nWidth, int nHeight, in
 	pVR[y*nWidth+x] = brightness;
 }
 
-void Methods::DrawLineInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x0, float y0, float x1, float y1, int nLineWidth, RGB clr){
+void Methods::DrawLineInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x0, float y0, float x1, float y1, int nLineWidth, RGBA clr){
 	double len = sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
 	Direction2d dir = Direction2d(x1-x0, y1-y0);
 	Direction2d dirN = Direction2d(-dir.y(), dir.x());
@@ -219,7 +219,7 @@ void Methods::DrawLineInImage8Bit(unsigned char* pVR, int nWidth, int nHeight, f
 	}
 }
 
-void Methods::DrawCircleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x, float y, float r, int nLineWidth, RGB clr){
+void Methods::DrawCircleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x, float y, float r, int nLineWidth, RGBA clr){
 	double angDelta = PI/180.0;
 	double m[2][2] = {{cos(angDelta), -sin(angDelta)}, {sin(angDelta), cos(angDelta)}};
 
@@ -237,14 +237,14 @@ void Methods::DrawCircleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight
 }
 
 
-void Methods::DrawTriangleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, int nLineWidth, RGB clr)
+void Methods::DrawTriangleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, int nLineWidth, RGBA clr)
 {
 	Methods::DrawLineInImage24Bit(pVR, nWidth, nHeight, v1.x(), v1.y(), v2.x(), v2.y(), nLineWidth, clr);
 	Methods::DrawLineInImage24Bit(pVR, nWidth, nHeight, v2.x(), v2.y(), v3.x(), v3.y(), nLineWidth, clr);
 	Methods::DrawLineInImage24Bit(pVR, nWidth, nHeight, v3.x(), v3.y(), v1.x(), v1.y(), nLineWidth, clr);
 }
 
-void Methods::FillHoleInImage24Bit(unsigned char* pVR, float* pZBuffer, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, float zBuffer, RGB clr)
+void Methods::FillHoleInImage24Bit(unsigned char* pVR, float* pZBuffer, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, float zBuffer, RGBA clr)
 {
 	float fxmin = min(v1.x(), min(v2.x(), v3.x()));
 	float fymin = min(v1.y(), min(v2.y(), v3.y()));

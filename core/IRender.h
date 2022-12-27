@@ -110,7 +110,7 @@ namespace MonkeyGL{
         virtual bool LoadTransferFunction(const char* szFile);
         virtual bool SaveTransferFunction(const char* szFile);
 
-        virtual bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr);
+        virtual bool AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGBA clr);
         virtual bool RemovePlaneAnnotations(PlaneType planeType);
         virtual bool RemoveAllAnnotations();
         virtual bool EnableLayer(LayerType layerType, bool bEnable);
@@ -120,7 +120,7 @@ namespace MonkeyGL{
         virtual bool SetCPRLineVoxel(std::vector<Point3d> cprLine);
         virtual std::vector<Point3d> GetCPRLineVoxel();
         virtual bool RotateCPR(float angle, PlaneType planeType);
-        virtual void SetCPRLineColor(RGB clr);
+        virtual void SetCPRLineColor(RGBA clr);
 
         virtual void ShowPlaneInVR(bool bShow);
     };

@@ -209,7 +209,7 @@ std::shared_ptr<unsigned char> AnnotationUtils::GetCharImage(std::string b64, in
     return pData;
 }
 
-bool AnnotationUtils::Textout2Image(std::string str, int x, int y, AnnotationFormat annoFormat, RGB clr, unsigned char* pImg, int nWidth, int nHeight)
+bool AnnotationUtils::Textout2Image(std::string str, int x, int y, AnnotationFormat annoFormat, RGBA clr, unsigned char* pImg, int nWidth, int nHeight)
 {
     if(nullptr==pImg || nWidth<10 || nHeight<10){
         return false;

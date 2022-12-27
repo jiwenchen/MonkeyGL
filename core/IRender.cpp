@@ -340,7 +340,7 @@ void IRender::ShowPlaneInVR(bool bShow)
 	return DataManager::Instance()->ShowPlaneInVR(bShow);
 }
 
-bool IRender::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr)
+bool IRender::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGBA clr)
 {
 	return DataManager::Instance()->AddAnnotation(planeType, txt, x, y, fontSize, annoFormat, clr);
 }
@@ -360,7 +360,7 @@ bool IRender::EnableLayer(LayerType layerType, bool bEnable)
 	return DataManager::Instance()->EnableLayer(layerType, bEnable);
 }
 
-void IRender::SetCPRLineColor(RGB clr)
+void IRender::SetCPRLineColor(RGBA clr)
 {
 	DataManager::Instance()->SetCPRLineColor(clr);
 }

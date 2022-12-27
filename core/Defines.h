@@ -33,64 +33,6 @@ namespace MonkeyGL{
     #define PI 3.141592654
     #define MAXOBJECTCOUNT 64
 
-    struct RGB
-    {
-        float red;
-        float green;
-        float blue;
-
-        RGB(){
-            red = 0.0f;
-            green = 0.0f;
-            blue = 0.0f;
-        }
-        RGB(float r, float g, float b){
-            red = r;
-            green = g;
-            blue = b;
-            trim();
-        }
-        RGB operator*= (float r){
-            this->red *= r;
-            this->green *= r;
-            this->blue *= r;
-            this->trim();
-            return *this;
-        }
-        RGB operator* (float r){
-            RGB clr;
-            clr.red = red * r;
-            clr.green = green * r;
-            clr.blue = blue * r;
-            clr.trim();
-            return clr;
-        }
-
-        RGB operator+ (float d){
-            RGB clr;
-            clr.red = red + d;
-            clr.green = green + d;
-            clr.blue = blue + d;
-            clr.trim();
-            return clr;
-        }
-
-        void trim(){
-            red = red<0 ? 0 : red;
-            red = red>1 ? 1 : red;
-            green = green<0 ? 0 : green;
-            green = green>1 ? 1 : green;
-            blue = blue<0 ? 0 : blue;
-            blue = blue>1 ? 1 : blue;
-        }
-
-        void Print(){
-            cout << "red: " << red << endl; 
-            cout << "green: " << green << endl; 
-            cout << "blue: " << blue << endl;
-        }
-    };
-
     struct RGBA
     {
         float red;
@@ -104,11 +46,53 @@ namespace MonkeyGL{
             blue = 0.0f;
             alpha = 0.0f;
         }
+        RGBA(float r, float g, float b){
+            red = r;
+            green = g;
+            blue = b;
+            alpha = 1.0f;
+        }
         RGBA(float r, float g, float b, float a){
             red = r;
             green = g;
             blue = b;
             alpha = a;
+        }
+        RGBA operator*= (float r){
+            this->red *= r;
+            this->green *= r;
+            this->blue *= r;
+            this->alpha *= r;
+            this->trim();
+            return *this;
+        }
+        RGBA operator* (float r){
+            RGBA clr;
+            clr.red = red * r;
+            clr.green = green * r;
+            clr.blue = blue * r;
+            clr.alpha = alpha * r;
+            clr.trim();
+            return clr;
+        }
+        RGBA operator+ (float d){
+            RGBA clr;
+            clr.red = red + d;
+            clr.green = green + d;
+            clr.blue = blue + d;
+            clr.alpha = alpha + d;
+            clr.trim();
+            return clr;
+        }
+        void trim(){
+            red = red<0 ? 0 : red;
+            red = red>1 ? 1 : red;
+            green = green<0 ? 0 : green;
+            green = green>1 ? 1 : green;
+            blue = blue<0 ? 0 : blue;
+            blue = blue>1 ? 1 : blue;
+            alpha = alpha<0 ? 0 : alpha;
+            alpha = alpha>1 ? 1 : alpha;
         }
         void Print(){
             cout << "red: " << red << endl; 

@@ -55,7 +55,7 @@ namespace MonkeyGL {
     public:
         static bool Init();
         static void SetFontSize(FontSize fs);
-        static bool Textout2Image(std::string str, int x, int y, AnnotationFormat annoFormat, RGB clr, unsigned char* pImg, int nWidth, int nHeight);
+        static bool Textout2Image(std::string str, int x, int y, AnnotationFormat annoFormat, RGBA clr, unsigned char* pImg, int nWidth, int nHeight);
         static void GetSize(std::string str, int& nWidth, int& nHeight);
 
     private:

@@ -803,7 +803,7 @@ void DataManager::ShowPlaneInVR(bool bShow)
 		}
 
 		m_planeLabel = AddNewObjectMask(pData, nWidth, nHeight, nDepth);
-		SetVRWWWL(400, 40);
+		SetVRWWWL(1000, -40);
 		std::map<int, RGBA> ctrlPts;
 		ctrlPts[0] = RGBA(0, 0, 0, 1);
 		ctrlPts[99] = RGBA(1, 1, 1, 1);
@@ -811,7 +811,7 @@ void DataManager::ShowPlaneInVR(bool bShow)
 	}
 }
 
-bool DataManager::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr)
+bool DataManager::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGBA clr)
 {
 	return GetAnnotationInfo().AddAnnotation(PlaneVR, txt, x, y, fontSize, annoFormat, clr);
 }
@@ -840,7 +840,7 @@ bool DataManager::IsLayerEnable(LayerType layerType)
 	return true;
 }
 
-void DataManager::SetCPRLineColor(RGB clr)
+void DataManager::SetCPRLineColor(RGBA clr)
 {
 	m_cprInfo.SetLineColor(clr);
 }

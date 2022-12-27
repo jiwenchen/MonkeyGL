@@ -254,14 +254,10 @@ PYBIND11_MODULE(pyMonkeyGL, m) {
     py::class_<DeviceInfo>(m, "DeviceInfo")
         .def(py::init<>())
         .def("GetCount", &DeviceInfo::GetCount);
-
-    py::class_<RGB>(m, "RGB")
-        .def(py::init<>())
-        .def(py::init<float, float, float>())
-        .def("Print", &RGB::Print);
     
     py::class_<RGBA>(m, "RGBA")
         .def(py::init<>())
+        .def(py::init<float, float, float>())
         .def(py::init<float, float, float, float>())
         .def("Print", &RGBA::Print);
 

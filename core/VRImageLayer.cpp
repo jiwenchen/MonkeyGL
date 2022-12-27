@@ -130,7 +130,7 @@ void VRImageLayer::MergeOrientationBox(unsigned char *pVR, int nWidth, int nHeig
 			Methods::FillHoleInImage_Ch1(pImage.get(), pZBuffer.get(), w, h, facet2D.diffuse, zBuffer, v1, v2, v3);
 		}
 
-		RGB clr(0.902, 0.902, 0.302);
+		RGBA clr(0.902, 0.902, 0.302);
 		for (int y = nHeight - nH_Box; y < nHeight; y++)
 		{
 			int yIdx = (y + nH_Box - nHeight) * 8;
@@ -140,7 +140,7 @@ void VRImageLayer::MergeOrientationBox(unsigned char *pVR, int nWidth, int nHeig
 				float diffuse = pImage.get()[yIdx * w + xIdx];
 				if (diffuse > 0)
 				{
-					RGB clrTemp = clr * diffuse;
+					RGBA clrTemp = clr * diffuse;
 					clrTemp = clrTemp + 0.05;
 					int red = int(clrTemp.red * 255);
 					int green = int(clrTemp.green * 255);

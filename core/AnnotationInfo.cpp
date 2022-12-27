@@ -38,7 +38,7 @@ AnnotationInfo::~AnnotationInfo()
 }
 
 
-bool AnnotationInfo::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGB clr)
+bool AnnotationInfo::AddAnnotation(PlaneType planeType, std::string txt, int x, int y, FontSize fontSize, AnnotationFormat annoFormat, RGBA clr)
 {
     AnnotationDef anno;
     anno.annoFormat = annoFormat;
