@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{983202A8-8DC9-4C5F-82F0-E15B44611639}</ProjectGuid>
+    <RootNamespace>MonkeyGL</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.6.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./cuda_common;D:\ITK_build\include\ITK-5.2;D:\log4cplus\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>log4cplusUD.lib;itkv3p_netlib-5.2.lib;itkdouble-conversion-5.2.lib;itkvnl-5.2.lib;itkvnl_algo-5.2.lib;itkzlib-5.2.lib;ITKCommon-5.2.lib;itksys-5.2.lib;ITKIOImageBase-5.2.lib;ITKIONRRD-5.2.lib;ITKNrrdIO-5.2.lib;ITKniftiio-5.2.lib;ITKIONIFTI-5.2.lib;ITKIOMeta-5.2.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\ITK_build\lib;D:\log4cplus\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CudaCompile Include="core\CuDataManager.cu" />
+    <CudaCompile Include="core\kernel.cu" />
+    <CudaCompile Include="core\test.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="core\AnnotationInfo.cpp" />
+    <ClCompile Include="core\AnnotationLayer.cpp" />
+    <ClCompile Include="core\AnnotationUtils.cpp" />
+    <ClCompile Include="core\BaseDataProvider.cpp" />
+    <ClCompile Include="core\BaseLayer.cpp" />
+    <ClCompile Include="core\BatchInfo.cpp" />
+    <ClCompile Include="core\CPRImageLayer.cpp" />
+    <ClCompile Include="core\CPRInfo.cpp" />
+    <ClCompile Include="core\CPRLineLayer.cpp" />
+    <ClCompile Include="core\CPRProvider.cpp" />
+    <ClCompile Include="core\CuDataManager.cpp" />
+    <ClCompile Include="core\DataManager.cpp" />
+    <ClCompile Include="core\Defines.cpp" />
+    <ClCompile Include="core\DeviceInfo.cpp" />
+    <ClCompile Include="core\Direction.cpp" />
+    <ClCompile Include="core\fpng\fpng.cpp" />
+    <ClCompile Include="core\fpng\fpng_test.cpp" />
+    <ClCompile Include="core\fpng\lodepng.cpp" />
+    <ClCompile Include="core\fpng\wuffs-v0.3.c" />
+    <ClCompile Include="core\HelloMonkey.cpp" />
+    <ClCompile Include="core\ImageLayer.cpp" />
+    <ClCompile Include="core\ImageReader.cpp" />
+    <ClCompile Include="core\IRender.cpp" />
+    <ClCompile Include="core\Logger.cpp" />
+    <ClCompile Include="core\MarchingCube.cpp" />
+    <ClCompile Include="core\Methods.cpp" />
+    <ClCompile Include="core\MPRImageLayer.cpp" />
+    <ClCompile Include="core\MPRInfo.cpp" />
+    <ClCompile Include="core\MPRProvider.cpp" />
+    <ClCompile Include="core\ObjectInfo.cpp" />
+    <ClCompile Include="core\PlaneInfo.cpp" />
+    <ClCompile Include="core\Point.cpp" />
+    <ClCompile Include="core\Render.cpp" />
+    <ClCompile Include="core\RenderInfo.cpp" />
+    <ClCompile Include="core\StopWatch.cpp" />
+    <ClCompile Include="core\TestOnly.cpp" />
+    <ClCompile Include="core\TransferFunction.cpp" />
+    <ClCompile Include="core\VolumeInfo.cpp" />
+    <ClCompile Include="core\VRImageLayer.cpp" />
+    <ClCompile Include="core\VRProvider.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\AnnotationInfo.h" />
+    <ClInclude Include="core\AnnotationLayer.h" />
+    <ClInclude Include="core\AnnotationUtils.h" />
+    <ClInclude Include="core\Base64.hpp" />
+    <ClInclude Include="core\BaseDataProvider.h" />
+    <ClInclude Include="core\BaseLayer.h" />
+    <ClInclude Include="core\BatchInfo.h" />
+    <ClInclude Include="core\CPRImageLayer.h" />
+    <ClInclude Include="core\CPRInfo.h" />
+    <ClInclude Include="core\CPRLineLayer.h" />
+    <ClInclude Include="core\CPRProvider.h" />
+    <ClInclude Include="core\CuDataManager.h" />
+    <ClInclude Include="core\DataManager.h" />
+    <ClInclude Include="core\Defines.h" />
+    <ClInclude Include="core\DeviceInfo.h" />
+    <ClInclude Include="core\Direction.h" />
+    <ClInclude Include="core\fpng\fpng.h" />
+    <ClInclude Include="core\fpng\lodepng.h" />
+    <ClInclude Include="core\fpng\qoi.h" />
+    <ClInclude Include="core\fpng\stb_image.h" />
+    <ClInclude Include="core\fpng\stb_image_write.h" />
+    <ClInclude Include="core\HelloMonkey.h" />
+    <ClInclude Include="core\ImageLayer.h" />
+    <ClInclude Include="core\ImageReader.h" />
+    <ClInclude Include="core\IRender.h" />
+    <ClInclude Include="core\Logger.h" />
+    <ClInclude Include="core\MarchingCube.h" />
+    <ClInclude Include="core\Methods.h" />
+    <ClInclude Include="core\MPRImageLayer.h" />
+    <ClInclude Include="core\MPRInfo.h" />
+    <ClInclude Include="core\MPRProvider.h" />
+    <ClInclude Include="core\ObjectInfo.h" />
+    <ClInclude Include="core\PlaneInfo.h" />
+    <ClInclude Include="core\Point.h" />
+    <ClInclude Include="core\Render.h" />
+    <ClInclude Include="core\RenderInfo.h" />
+    <ClInclude Include="core\StopWatch.h" />
+    <ClInclude Include="core\TestOnly.h" />
+    <ClInclude Include="core\TransferFunction.h" />
+    <ClInclude Include="core\VolumeInfo.h" />
+    <ClInclude Include="core\VRImageLayer.h" />
+    <ClInclude Include="core\VRProvider.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.6.targets" />
+  </ImportGroup>
+</Project>

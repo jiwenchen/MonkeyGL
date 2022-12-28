@@ -22,10 +22,19 @@
 
 #include "StopWatch.h"
 #include "Logger.h"
+
 #if defined(WIN64) || defined(WIN32) 
 #include <time.h>
 #include <stdarg.h>
 #include <chrono>
+#else
+#include <sys/time.h>
+#include "log4cplus/log4cplus.h"
+#endif
+
+using namespace MonkeyGL;
+
+#if defined(WIN64) || defined(WIN32) 
 
 struct timeval
 {
@@ -33,9 +42,9 @@ struct timeval
 	__int64 tv_usec;
 };
 
-struct timezone{
-	int tz_minuteswest; /*和Greenwich 时间差了多少分钟*/
-	int tz_dsttime; /*日光节约时间的状态*/
+struct timezone {
+	int tz_minuteswest;
+	int tz_dsttime;
 };
 
 void gettimeofday(struct timeval* tv, struct timezone* tz)
@@ -47,13 +56,7 @@ void gettimeofday(struct timeval* tv, struct timezone* tz)
 	tv->tv_sec = duration_in_s;
 	tv->tv_usec = duration_in_us;
 };
-
-#else
-	#include <sys/time.h>
-    #include "log4cplus/log4cplus.h"
 #endif
-
-using namespace MonkeyGL;
 
 StopWatch::StopWatch(const char * format, ...)
 {
