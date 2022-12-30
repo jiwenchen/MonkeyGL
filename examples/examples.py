@@ -202,12 +202,12 @@ def test_instance():
 def test_png():
     import cv2
     import copy
-    folder = './data/charimgs'
+    folder = './data/charimgs/mipmap-xhdpi'
 
     chs = [
         "~", "`", "·", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "-", "+", "=", \
         "[", "]", "{", "}", "\\", "|", ";", "'", ":", "\"", ",", ".", "/", "<", ">", "?", \
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", \
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", " ", \
         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", \
         "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", \
         "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", \
@@ -215,33 +215,54 @@ def test_png():
     ];
 
     chs_name = [
-        "~", "`", "·", "！", "@", "#", "$", "%", "^", "&", "＊", "(", ")", "_", "-", "+", "=", \
-        "[", "]", "{", "}", "＼", "｜", "；", "‘", "：", "”", "，", "。", "／", "＜", "＞", "？", \
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", \
+        "~", "`", "·", "！", "@", "#", "$", "%", "^", "&", "＊", "（", "）", "_", "-", "+", "=", \
+        "[", "]", "{", "}", "＼", "｜", ";", "'", "：", "＂", ",", "。", "／", "＜", "＞", "？", \
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "空格", \
         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", \
         "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", \
-        "AA", "BB", "CC", "DD", "EE", "FF", "GG", "HH", "II", "JJ", "KK", "LL", "M M", "NN", \
-        "OO", "PP", "QQ", "RR", "SS", "TT", "UU", "V V", "WW", "XX", "YY", "ZZ"
+        "AA", "BB", "CC", "DD", "EE", "FF", "GG", "HH", "II", "JJ", "KK", "LL", "MM", "NN", \
+        "OO", "PP", "QQ", "RR", "SS", "TT", "UU", "VV", "WW", "XX", "YY", "ZZ"
     ]
 
-    for i in range(70, 95):
-        ch = chs_name[i]
-        img = cv2.imread(f"{folder}/{ch}.png", cv2.IMREAD_UNCHANGED)
-        # if img is None:
-        # print (ch)
 
-        hm = mk.HelloMonkey()
+    hm = mk.HelloMonkey()
+    for i in range(0, 96):
+        ch = chs_name[i]
+        # print (f"{i}: {ch}")
+        img = cv2.imread(f"{folder}/{ch}.png", cv2.IMREAD_UNCHANGED)
+        if img is None:
+            print (ch)
+
         img1 = copy.deepcopy(img[:,:,0])
+        if ch == 'q' or ch == 'p':
+            shp = img1.shape
+            img2 = np.zeros(shp)
+            n = 2
+            img2[n:,:] = img1[:shp[0]-n,:]
+            img1 = img2
+        elif ch == 'k':
+            shp = img1.shape
+            n = 2
+            img2 = np.zeros((shp[0], shp[1]-n))
+            img2[:,:] = img1[:,:shp[1]-n]
+            img1 = img2
+        elif ch in ['p', 'v', 'w', 'x']:
+            shp = img1.shape
+            n = 1
+            img2 = np.zeros((shp[0], shp[1]-n))
+            img2[:,:] = img1[:,:shp[1]-n]
+            img1 = img2
+
         npdatat = img1.swapaxes(1,0)
         
         hm.Transfer2Base64Array(npdatat)
     pass
 
 if __name__ == "__main__":
-    # test_png()
+    test_png()
     # test_objs()
     # test_set_data()
-    test_load_nrrd()
+    # test_load_nrrd()
     # test_instance()
 
     # for i in range(100):

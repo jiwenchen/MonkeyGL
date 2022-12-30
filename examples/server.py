@@ -667,9 +667,13 @@ def show_annotation(
 ):
     hm = get_monkey_instance(uid)
     if show:
-        hm.AddAnnotation(mk.PlaneVR, "HelloMonkey", 250, 100, mk.FontSizeSmall, mk.AnnotationFormatLeft, mk.RGBA(1.0, 0.0, 0.0))
-        hm.AddAnnotation(mk.PlaneVR, "HelloMonkey", 250, 300, mk.FontSizeMiddle, mk.AnnotationFormatCenter, mk.RGBA(0.0, 1.0, 0.0))
-        hm.AddAnnotation(mk.PlaneVR, "HelloMonkey", 250, 470, mk.FontSizeBig, mk.AnnotationFormatRight, mk.RGBA(1.0, 0.0, 1.0))
+        # hm.AddAnnotation(mk.PlaneVR, "Hello - Monkey@?iJ", 250, 100, mk.FontSizeSmall, mk.AnnotationFormatLeft, mk.RGBA(1.0, 0.0, 0.0))
+        # hm.AddAnnotation(mk.PlaneVR, "Hello - Monkey@?iJ", 250, 300, mk.FontSizeMiddle, mk.AnnotationFormatCenter, mk.RGBA(0.0, 1.0, 0.0))
+        hm.AddAnnotation(mk.PlaneVR, "abcdefghiljkl mnopqrstuvwxyz", 500, 120, mk.FontSizeBig, mk.AnnotationFormatRight, mk.RGBA(1.0, 0.0, 0.0))
+        hm.AddAnnotation(mk.PlaneVR, "ABCDEFGHIJK LMN", 500, 30, mk.FontSizeMiddle, mk.AnnotationFormatRight, mk.RGBA(1.0, 0.0, 1.0))
+        hm.AddAnnotation(mk.PlaneVR, "LMNOPQRSTUVWX YZ", 500, 80, mk.FontSizeBig, mk.AnnotationFormatRight, mk.RGBA(1.0, 1.0, 0.0))
+        hm.AddAnnotation(mk.PlaneVR, '''~`·!@#$%^&*()_-+=[]{}\\|;''', 500, 180, mk.FontSizeSmall, mk.AnnotationFormatRight, mk.RGBA(0.0, 1.0, 1.0))
+        hm.AddAnnotation(mk.PlaneVR, ''';\':",./<>? 1234567890''', 500, 220, mk.FontSizeBig, mk.AnnotationFormatRight, mk.RGBA(0.6, 0.0, 1.0))
 
         # hm.RemovePlaneAnnotations(mk.PlaneVR)
         # hm.RemoveAllAnnotations()

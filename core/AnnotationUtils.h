@@ -59,7 +59,7 @@ namespace MonkeyGL {
         static void GetSize(std::string str, int& nWidth, int& nHeight);
 
     private:
-        static std::shared_ptr<unsigned char> GetCharImage(std::string b64, int& nWidth, int& nHeight);
+        static std::shared_ptr<unsigned char> GetCharImage(std::string b64, int& nWidth, int nHeight);
         static Mask& GetCharMask(std::string c);
         static Mask DownSampling(const Mask& mask, int ratio);
 
