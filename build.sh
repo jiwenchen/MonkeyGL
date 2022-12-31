@@ -165,6 +165,7 @@ install() {
     cp ${build_path}"/log4cplus-2.0.7/build/install/usr/local/lib/liblog4cplus.so.3" ./
     cp ${build_path}"/libMonkeyGL.so.1.2.1" ./
     cp ${py_build_path}"/pyMonkeyGL.so" ./
+    cp -r ../../resources ./
 
     cd ..
     makesure_folder ${install_path}/"include"
