@@ -24,6 +24,8 @@
 #include "Point.h"
 #include "Defines.h"
 #include "Direction.h"
+#include <vector>
+#include <memory>
 
 namespace MonkeyGL {
 
@@ -63,8 +65,10 @@ namespace MonkeyGL {
         static void DrawCircleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, float x, float y, float r, int nLineWidth=2, RGBA clr=RGBA(1.0, 1.0, 1.0));
         static void DrawTriangleInImage24Bit(unsigned char* pVR, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, int nLineWidth=2, RGBA clr=RGBA(1.0, 1.0, 1.0));
         static void FillHoleInImage24Bit(unsigned char* pVR, float* pZBuffer, int nWidth, int nHeight, Point2f v1, Point2f v2, Point2f v3, float zBuffer, RGBA clr=RGBA(1.0, 1.0, 1.0));
-
         static void FillHoleInImage_Ch1(float* pImage, float* pZBuffer, int nWidth, int nHeight, float diffuese, float zBuffer, Point2f v1, Point2f v2, Point2f v3);
+        
+        static std::shared_ptr<unsigned char> Contour2dToMask(std::vector< Point2d > contour, int nWidth, int nHeight, bool withContour=true);
+        static std::shared_ptr<unsigned char> Contour2fToMask(std::vector< Point2f > contour, int nWidth, int nHeight, bool withContour=true);
 
         static double Distance_Point2Line(Point3d pt, Direction3d dir, Point3d ptLine);
         static double Length_VectorInLine(Point3d pt, Direction3d dir, Point3d ptLine);
@@ -84,6 +88,16 @@ namespace MonkeyGL {
 
         static Point3d GetTransferPoint(double m[3][3], Point3d pt);
         static Point3f GetTransferPointf(float m[9], Point3f pt);
+
+    private:
+        template <class T>
+        static std::vector< Point<T,2> > KeepClosed(std::vector< Point<T,2> > contour);
+        template <class T>
+        static std::vector< Point<T,2> > InterpAndInBox(std::vector< Point<T,2> > contour, int left, int up, int right, int down);
+        template <class T>
+        static bool InBox(Point<T,2> pt, int left, int up, int right, int down);
+        template <class T>
+        static std::shared_ptr<unsigned char> ContourToMask(std::vector< Point<T,2> > contour, int nWidth, int nHeight, bool withContour);
     };
 
 }

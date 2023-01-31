@@ -24,7 +24,6 @@
 #include "math.h"
 #include <iostream>
 #include <cstring>
-#include <memory>
 
 using namespace MonkeyGL;
 
@@ -367,6 +366,198 @@ void Methods::FillHoleInImage_Ch1(float* pImage, float* pZBuffer, int nWidth, in
 		}
 	}
 
+}
+
+template <class T>
+bool Methods::InBox(Point<T,2> pt, int left, int up, int right, int down)
+{
+	return (pt.x()>=left && pt.x()<=right && pt.y()>=up && pt.y()<=down);
+}
+
+template <class T>
+std::vector< Point<T,2> > Methods::KeepClosed(std::vector< Point<T,2> > contour)
+{
+	if (contour.size() <= 0){
+		return contour;
+	}
+	contour.push_back(contour[0]);
+	std::vector< Point<T,2> > contourClosed;
+	contourClosed.push_back(contour[0]);
+	for (size_t i=1; i<contour.size(); i++){
+		Point<T,2> ptBegin = contourClosed.back();
+		Point<T,2> ptEnd = contour[i];
+		double len = ptBegin.DistanceTo(ptEnd);
+		if (len <= 1.0f){
+			contourClosed.push_back(ptEnd);
+		}
+		else {
+			Direction<T,2> dir(ptBegin, ptEnd);
+			for (int l=1; l<len; l++){
+				contourClosed.push_back(ptBegin + dir*l);
+			}
+			contourClosed.push_back(ptEnd);
+		}
+	}
+
+	return contourClosed;
+}
+
+template <class T>
+std::vector< Point<T,2> > Methods::InterpAndInBox(std::vector< Point<T,2> > contour, int left, int up, int right, int down)
+{
+	if (contour.size() <= 0){
+		return contour;
+	}
+	contour.push_back(contour[0]);
+
+	std::vector< Point<T,2> > contourClosed;
+	if (contour[0].x()>=left && contour[0].x()<=right && contour[0].y()>=up && contour[0].y()<=down){
+		contourClosed.push_back(contour[0]);	
+	}
+	Point<T,2> ptBegin = contour[0];
+	Point<T,2> ptEnd;
+	for (size_t i=1; i<contour.size(); i++){
+		ptEnd = contour[i];
+		double len = ptBegin.DistanceTo(ptEnd);
+		Direction<T,2> dir(ptBegin, ptEnd);
+		for (int l=1; l<len; l++){
+			if (Methods::InBox(ptBegin + dir*l, left, up, right, down)){
+				contourClosed.push_back(ptBegin + dir*l);
+			}
+		}
+		if (Methods::InBox(ptEnd, left, up, right, down)){
+			contourClosed.push_back(ptEnd);
+		}
+		ptBegin = ptEnd;
+	}
+
+	return contourClosed;
+}
+
+std::shared_ptr<unsigned char> Methods::Contour2dToMask(std::vector< Point2d > contour, int nWidth, int nHeight, bool withContour/*=true*/){
+	return Methods::ContourToMask(contour, nWidth, nHeight, withContour);
+}
+
+std::shared_ptr<unsigned char> Methods::Contour2fToMask(std::vector< Point2f > contour, int nWidth, int nHeight, bool withContour/*=true*/){
+	return Methods::ContourToMask(contour, nWidth, nHeight, withContour);
+}
+
+template <class T>
+std::shared_ptr<unsigned char> Methods::ContourToMask(std::vector< Point<T,2> > contour, int nWidth, int nHeight, bool withContour)
+{
+	std::shared_ptr<unsigned char> pMask(new unsigned char[nWidth*nHeight]);
+	memset(pMask.get(), 0, nWidth*nHeight*sizeof(unsigned char));
+
+	//封闭曲线
+	std::vector< Point<T,2> > contourInterpBox = Methods::InterpAndInBox(contour, 0, 0, nWidth-1, nHeight-1);
+	std::vector< Point<T,2> > contourClosed = Methods::KeepClosed(contourInterpBox);
+
+	//边界二值化 & 边缘扩充
+	int nWidthExt = nWidth + 2;
+	int nHeightExt = nHeight + 2;
+	std::shared_ptr<unsigned char> pMaskExt(new unsigned char[nWidthExt*nHeightExt]);
+	memset(pMaskExt.get(), 0, nWidthExt*nHeightExt*sizeof(unsigned char));
+	int xMin=nWidthExt, xMax=-1, yMin=nHeightExt, yMax=-1;
+	for(size_t i=0; i<contourClosed.size(); i++){
+		int x = int(contourClosed[i].x() + 0.5);
+		int y = int(contourClosed[i].y() + 0.5);
+		x = x>=1 ? x:1;
+		x = x<=nWidthExt-2 ? x:nWidthExt-2;
+		y = y>=1 ? y:1;
+		y = y<=nHeightExt-2 ? y:nHeightExt-2;
+
+		xMin = xMin>x ? x:xMin;
+		xMax = xMax<x ? x:xMax;
+		yMin = yMin>y ? y:yMin;
+		yMax = yMax<y ? y:yMax;
+
+		pMaskExt.get()[(y+1)*nWidthExt+x+1] = 1;
+	}
+
+	std::vector< Point<int,2> > ptSeeds;
+	//上下左右向中间扫描
+	for (int y=0; y<nHeightExt; y++){
+		for (int x=0; x<nWidthExt; x++){
+			if (pMaskExt.get()[y*nWidthExt+x] > 0){
+				break;
+			}
+			if (x >= xMin && y>=yMin && y<=yMax){
+				ptSeeds.push_back(Point<int,2>(x, y));
+			}
+			pMaskExt.get()[y*nWidthExt+x] = 2;
+		}
+		for (int x=nWidthExt-1; x>=0; x--){
+			if (pMaskExt.get()[y*nWidthExt+x] > 0){
+				break;
+			}
+			if (x <= xMax && y>=yMin && y<=yMax){
+				ptSeeds.push_back(Point<int,2>(x, y));
+			}
+			pMaskExt.get()[y*nWidthExt+x] = 2;
+		}
+	}
+	for (int x=0; x<nWidthExt; x++){
+		for (int y=0; y<nHeightExt; y++){
+			if (pMaskExt.get()[y*nWidthExt+x] > 0){
+				break;
+			}
+			if (y >= yMin && x>=xMin && x<=xMax){
+				ptSeeds.push_back(Point<int,2>(x, y));
+			}
+			pMaskExt.get()[y*nWidthExt+x] = 2;
+		}
+		for (int y=nHeight-1; y>=0; y--){
+			if (pMaskExt.get()[y*nWidthExt+x] > 0){
+				break;
+			}
+			if (y <= yMax && x>=xMin && x<=xMax){
+				ptSeeds.push_back(Point<int,2>(x, y));
+			}
+			pMaskExt.get()[y*nWidthExt+x] = 2;
+		}
+	}
+
+	//根据种子点填充其它点
+	std::vector< Point<int,2> > ptSeedsNext;
+	while (ptSeeds.size() > 0)
+	{
+		ptSeedsNext.clear();
+		for (size_t i=0; i<ptSeeds.size(); i++){
+			int x = ptSeeds[i].x();
+			int y = ptSeeds[i].y();
+			if (pMaskExt.get()[y*nWidthExt+x-1] <= 0){
+				ptSeedsNext.push_back(Point<int,2>(x-1, y));
+				pMaskExt.get()[y*nWidthExt+x-1] = 2;
+			}
+			if (pMaskExt.get()[y*nWidthExt+x+1] <= 0){
+				ptSeedsNext.push_back(Point<int,2>(x+1, y));
+				pMaskExt.get()[y*nWidthExt+x+1] = 2;
+			}
+			if (pMaskExt.get()[(y-1)*nWidthExt+x] <= 0){
+				ptSeedsNext.push_back(Point<int,2>(x, y-1));
+				pMaskExt.get()[(y-1)*nWidthExt+x] = 2;
+			}
+			if (pMaskExt.get()[(y+1)*nWidthExt+x] <= 0){
+				ptSeedsNext.push_back(Point<int,2>(x, y+1));
+				pMaskExt.get()[(y+1)*nWidthExt+x] = 2;
+			}
+		}
+		ptSeeds = ptSeedsNext;
+	}
+
+	//截取
+	for (int y=0; y<nHeightExt; y++){
+		for (int x=0; x<nWidthExt; x++){
+			if (pMaskExt.get()[y*nWidthExt+x] == 0){
+				pMask.get()[(y-1)*nWidth+x-1] = 2;
+			}
+			else if (pMaskExt.get()[y*nWidthExt+x] == 1 && withContour){
+				pMask.get()[(y-1)*nWidth+x-1] = 1;
+			}
+		}
+	}
+
+	return pMask;
 }
 
 double Methods::Distance_Point2Line(Point3d pt, Direction3d dir, Point3d ptLine)
